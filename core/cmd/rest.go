@@ -9,9 +9,6 @@ import (
 	"attempt4/core/platform/postgres"
 	"attempt4/core/platform/postgres/repository"
 	"attempt4/core/platform/validation"
-	"github.com/go-playground/locales/tr"
-	"github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"log"
 )
@@ -32,32 +29,34 @@ func Setup() {
 		log.Println(err)
 	}
 
-	validate := validator.New()
-	tr := tr.New()
-	uni := ut.New(tr, tr)
-	validationEntity := validation.NewValidation(validate, uni)
-	validationEntity.ValidatorCustomMessages()
+	validation.ValidatorCustomMessages()
 
 	db := postgres.InitializeDatabase(config.DBURL)
 
 	userRepository := repository.NewUserRepository(db)
 	productRepository := repository.NewProductRepository(db)
 	orderRepository := repository.NewOrderRepository(db)
+	keyRepository := repository.NewKeyRepository(db)
 
-	userService := service.NewUserService(userRepository, config.Secret)
+	userService := service.NewUserService(userRepository, keyRepository, config.Secret)
 	productService := service.NewProductService(productRepository)
 	orderService := service.NewOrderService(orderRepository, productRepository, userRepository, config.Secret)
 	authenticationService := service.NewAuthentication(userService, config.Secret, config.Secret2)
 
 	authenticationMiddleware := middleware.NewAuthenticationMiddleware(authenticationService)
 
-	//Todo: Validation static olacak
-	authenticationServerHandler := handler.NewAuthenticationServerHandler(authenticationService, validationEntity)
-	userServerHandler := handler.NewUserServerHandler(userService, validationEntity)
-	productServerHandler := handler.NewProductServerHandler(productService, validationEntity)
-	orderServerHandler := handler.NewOrderServerHandler(orderService, validationEntity)
+	authenticationServerHandler := handler.NewAuthenticationServerHandler(authenticationService)
+	profileServerHandler := handler.NewProfileServerHandler(userService)
+	productServerHandler := handler.NewProductServerHandler(productService)
+	orderServerHandler := handler.NewOrderServerHandler(orderService)
 
-	webServer := server.NewWebServer(productServerHandler, userServerHandler, orderServerHandler, authenticationServerHandler, authenticationMiddleware)
+	webServer := server.NewWebServer(
+		productServerHandler,
+		profileServerHandler,
+		orderServerHandler,
+		authenticationServerHandler,
+		authenticationMiddleware,
+	)
 
 	webServer.SetupRoot()
 }

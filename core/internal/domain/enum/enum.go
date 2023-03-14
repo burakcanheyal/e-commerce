@@ -6,8 +6,4 @@ const (
 	UserDeletedStatus = 9
 
 	PaginationLimit = 1
-
-	RoleUser    = 1
-	RoleManager = 2
-	RoleAdmin   = 3
 )

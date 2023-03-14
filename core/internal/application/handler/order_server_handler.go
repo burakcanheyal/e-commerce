@@ -11,11 +11,10 @@ import (
 
 type OrderServerHandler struct {
 	orderService service.OrderService
-	validation   validation.Validation
 }
 
-func NewOrderServerHandler(orderService service.OrderService, validation validation.Validation) OrderServerHandler {
-	o := OrderServerHandler{orderService, validation}
+func NewOrderServerHandler(orderService service.OrderService) OrderServerHandler {
+	o := OrderServerHandler{orderService}
 	return o
 }
 
@@ -32,7 +31,7 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	err := o.validation.ValidateStruct(order)
+	err := validation.ValidateStruct(order)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
@@ -72,7 +71,7 @@ func (o *OrderServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	err := o.validation.ValidateStruct(order)
+	err := validation.ValidateStruct(order)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return

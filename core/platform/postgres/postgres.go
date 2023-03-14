@@ -10,13 +10,14 @@ import (
 
 func InitializeDatabase(dsn string) *gorm.DB {
 	db := ConnectToDb(dsn)
-	err := db.AutoMigrate(&entity.Product{}, &entity.User{}, &entity.Order{})
+	err := db.AutoMigrate(&entity.Product{}, &entity.User{}, &entity.Order{}, &entity.Key{})
 	if err != nil {
 		return nil
 	}
-	//Todo: Server Site a taşı Paginate de buraya gelebilir
+	
 	seed.ProductSeed(db)
 	seed.UserSeed(db)
+	seed.RolSeed(db)
 
 	return db
 }

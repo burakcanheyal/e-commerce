@@ -7,10 +7,10 @@ import (
 
 func ProductSeed(db *gorm.DB) {
 	products := []entity.Product{
-		{0, "Domates", 8, 13.2},
-		{0, "Patates", 13, 33.2},
-		{0, "Soğan", 7, 22.2},
-		{0, "Sarımsak", 26, 11.1},
+		{0, "Domates", 8, 13.2, 1},
+		{0, "Patates", 13, 33.2, 1},
+		{0, "Soğan", 7, 22.2, 1},
+		{0, "Sarımsak", 26, 11.1, 1},
 	}
 	var size int64
 	db.Model(&products).Count(&size)

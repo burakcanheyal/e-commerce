@@ -17,10 +17,13 @@ var (
 
 	InvalidPassword = errors.New("Hatalı şifre")
 
-	UserExist    = errors.New("Kayıtlı kullanıcı")
-	UserNotFound = errors.New("Kullanıcı bulunamadı")
-	DeletedUser  = errors.New("Silinmiş kullanıcı")
-	PassiveUser  = errors.New("Pasif kullanıcı")
+	UserNotCreated   = errors.New("Kayıtlı kullanıcı")
+	UserExist        = errors.New("Kayıtlı kullanıcı")
+	UserNotFound     = errors.New("Kullanıcı bulunamadı")
+	DeletedUser      = errors.New("Silinmiş kullanıcı")
+	PassiveUser      = errors.New("Pasif kullanıcı")
+	UserUnactivated  = errors.New("Aktive edilmemiş kullanıcı")
+	UserUnauthorized = errors.New("Bunun işlem için yetkili değilsiniz")
 
 	FailInVerify     = errors.New("Aktivasyon kodu yanlış")
 	ExceedVerifyCode = errors.New("Aktivasyon kodunun süresi dolmuş. Yeni kod gönderildi")
@@ -30,4 +33,6 @@ var (
 
 	OrderNotFound = errors.New("Sipariş bulunamadı")
 	OrderExist    = errors.New("Kayıtlı sipariş")
+
+	KeyNotCreated = errors.New("Rol yaratılamadı")
 )

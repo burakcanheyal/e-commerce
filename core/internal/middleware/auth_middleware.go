@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"attempt4/core/internal"
 	"attempt4/core/internal/application/handler"
 	"attempt4/core/internal/domain/enum"
 	"attempt4/core/internal/domain/service"
@@ -58,6 +59,32 @@ func (a *AuthenticationMiddleware) Auth() gin.HandlerFunc {
 				return
 			}
 			context.JSON(200, tokenString)
+		}
+
+		context.Next()
+	}
+}
+func (a *AuthenticationMiddleware) Permission(permissionType int) gin.HandlerFunc {
+	return func(context *gin.Context) {
+		tokenString := context.GetHeader("Authentication")
+		if tokenString == "" {
+			context.JSON(401, handler.TokenError())
+			context.Abort()
+			return
+		}
+
+		rol, err := a.authenticationService.UserService.GetUserRoleByTokenString(tokenString)
+		if err != nil {
+			context.JSON(401, handler.NewHttpError(err))
+			context.Abort()
+			return
+		}
+
+		if permissionType != 0 {
+			if rol != permissionType {
+				context.AbortWithStatusJSON(401, internal.UserUnauthorized)
+				return
+			}
 		}
 
 		context.Next()

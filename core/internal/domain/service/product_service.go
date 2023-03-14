@@ -4,6 +4,7 @@ import (
 	"attempt4/core/internal"
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/entity"
+	"attempt4/core/internal/domain/enum"
 	"attempt4/core/platform/postgres/repository"
 )
 
@@ -42,7 +43,9 @@ func (p *ProductService) DeleteProduct(name string) error {
 		return internal.ProductNotFound
 	}
 
-	err := p.productRepos.Delete(product.Id)
+	product.Status = enum.DeletedProduct
+
+	err := p.productRepos.Delete(product)
 
 	if err != nil {
 		return err

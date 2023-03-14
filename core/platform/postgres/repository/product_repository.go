@@ -4,6 +4,7 @@ import (
 	"attempt4/core/internal"
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/entity"
+	"attempt4/core/internal/domain/enum"
 	"gorm.io/gorm"
 )
 
@@ -20,12 +21,11 @@ func (p *ProductRepository) Create(product entity.Product) (entity.Product, erro
 	if err := p.db.Create(&product).Error; err != nil {
 		return product, internal.DBNotCreated
 	}
-	
+
 	return product, nil
 }
-func (p *ProductRepository) Delete(id int32) error {
-	var product entity.Product
-	if err := p.db.Where("id = ?", id).Delete(&product).Error; err != nil {
+func (p *ProductRepository) Delete(product entity.Product) error {
+	if err := p.db.Where("status != ?", enum.DeletedProduct).Where("id = ?", product.Id).Updates(product).Error; err != nil {
 		return internal.DBNotDeleted
 	}
 
@@ -33,7 +33,7 @@ func (p *ProductRepository) Delete(id int32) error {
 }
 func (p *ProductRepository) GetByName(name string) (entity.Product, error) {
 	var product entity.Product
-	if err := p.db.Model(&product).Where("name=?", name).Scan(&product).Error; err != nil {
+	if err := p.db.Model(&product).Where("status != ?", enum.DeletedProduct).Where("name=?", name).Scan(&product).Error; err != nil {
 		return product, internal.DBNotFound
 	}
 
@@ -41,7 +41,7 @@ func (p *ProductRepository) GetByName(name string) (entity.Product, error) {
 }
 func (p *ProductRepository) GetById(id int32) (entity.Product, error) {
 	var product entity.Product
-	if err := p.db.Model(&product).Where("id=?", id).Scan(&product).Error; err != nil {
+	if err := p.db.Model(&product).Where("status != ?", enum.DeletedProduct).Where("id=?", id).Scan(&product).Error; err != nil {
 		return product, internal.DBNotFound
 	}
 
@@ -52,7 +52,7 @@ func (p *ProductRepository) GetAllProducts(filter dto.Filter, pagination dto.Pag
 	var productList []entity.Product
 	var total int64
 	var order string
-	listQuery := p.db.Find(&productList).Count(&total)
+	listQuery := p.db.Find(&productList).Where("status != ?", enum.DeletedProduct)
 
 	if filter.Name != "" {
 		listQuery = listQuery.Where("name ilike ?", "%"+filter.Name+"%")

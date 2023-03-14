@@ -5,4 +5,5 @@ type Product struct {
 	Name     string  `json:"name" gorm:"unique;not null"`
 	Quantity int32   `json:"quantity"`
 	Price    float32 `json:"price"`
+	Status   int8    `json:"status"`
 }

@@ -11,7 +11,6 @@ type User struct {
 	Email         string    `json:"email"`
 	Name          string    `json:"name"`
 	Surname       string    `json:"surname"`
-	Role          int8      `json:"role"`
 	Status        int8      `json:"status"`
 	Code          string    `json:"code"`
 	CodeExpiredAt time.Time `gorm:"not null"`

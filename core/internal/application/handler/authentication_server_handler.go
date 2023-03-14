@@ -10,11 +10,10 @@ import (
 
 type AuthenticationServerHandler struct {
 	authenticationService service.Authentication
-	validation            validation.Validation
 }
 
-func NewAuthenticationServerHandler(authenticationService service.Authentication, validation validation.Validation) AuthenticationServerHandler {
-	a := AuthenticationServerHandler{authenticationService, validation}
+func NewAuthenticationServerHandler(authenticationService service.Authentication) AuthenticationServerHandler {
+	a := AuthenticationServerHandler{authenticationService}
 	return a
 }
 func (u *AuthenticationServerHandler) Login(context *gin.Context) {
@@ -24,7 +23,7 @@ func (u *AuthenticationServerHandler) Login(context *gin.Context) {
 		return
 	}
 
-	err := u.validation.ValidateStruct(user)
+	err := validation.ValidateStruct(user)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return

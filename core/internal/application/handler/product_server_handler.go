@@ -10,11 +10,10 @@ import (
 
 type ProductServerHandler struct {
 	productService service.ProductService
-	validation     validation.Validation
 }
 
-func NewProductServerHandler(productService service.ProductService, validation validation.Validation) ProductServerHandler {
-	p := ProductServerHandler{productService, validation}
+func NewProductServerHandler(productService service.ProductService) ProductServerHandler {
+	p := ProductServerHandler{productService}
 	return p
 }
 
@@ -24,7 +23,7 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
-	err := p.validation.ValidateStruct(product)
+	err := validation.ValidateStruct(product)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
@@ -56,7 +55,7 @@ func (p *ProductServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	err := p.validation.ValidateStruct(product)
+	err := validation.ValidateStruct(product)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
