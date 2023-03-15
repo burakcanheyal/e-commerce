@@ -4,6 +4,7 @@ import (
 	"attempt4/core/internal"
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/entity"
+	"attempt4/core/internal/domain/enum"
 	"attempt4/core/platform/jwt"
 	"attempt4/core/platform/postgres/repository"
 )
@@ -48,6 +49,7 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, tokenString string) (d
 		UserId:    user.Id,
 		ProductId: orderDto.ProductId,
 		Quantity:  orderDto.Quantity,
+		Status:    enum.OrderActive,
 	}
 
 	order, err = o.orderRepos.Create(order)
@@ -60,6 +62,10 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, tokenString string) (d
 	}
 
 	product.Quantity = product.Quantity - orderDto.Quantity
+	if product.Quantity == 0 {
+		product.Status = enum.UnAvailableProduct
+	}
+
 	err = o.productRepos.Update(product)
 	if err != nil {
 		return orderDescription, err
@@ -84,7 +90,9 @@ func (o *OrderService) DeleteOrder(id int32) error {
 		return internal.OrderNotFound
 	}
 
-	err := o.orderRepos.Delete(order.OrderId)
+	order.Status = enum.OrderCancel
+
+	err := o.orderRepos.Delete(order)
 
 	if err != nil {
 		return err

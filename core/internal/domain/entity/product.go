@@ -6,4 +6,6 @@ type Product struct {
 	Quantity int32   `json:"quantity"`
 	Price    float32 `json:"price"`
 	Status   int8    `json:"status"`
+	UserId   int32   `json:"user_id" gorm:"foreign_key"`
+	User     User    `gorm:"foreign_key:UserId"`
 }

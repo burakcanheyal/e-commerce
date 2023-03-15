@@ -5,22 +5,39 @@ import (
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
+	"attempt4/core/platform/jwt"
 	"attempt4/core/platform/postgres/repository"
 )
 
 type ProductService struct {
 	productRepos repository.ProductRepository
+	UserRepos    repository.UserRepository
+	Secret       string
 }
 
-func NewProductService(productRepository repository.ProductRepository) ProductService {
-	p := ProductService{productRepository}
+func NewProductService(productRepository repository.ProductRepository, userRepos repository.UserRepository, secret string) ProductService {
+	p := ProductService{
+		productRepository,
+		userRepos,
+		secret,
+	}
 	return p
 }
 
-func (p *ProductService) CreateProduct(productDto dto.ProductDto) (dto.ProductDto, error) {
+func (p *ProductService) CreateProduct(productDto dto.ProductDto, tokenString string) (dto.ProductDto, error) {
 	product, err := p.productRepos.GetByName(productDto.Name)
 	if product.Id != 0 {
 		return productDto, internal.ProductExist
+	}
+
+	username, err := jwt.ExtractUsernameFromToken(tokenString, p.Secret)
+	if err != nil {
+		return productDto, err
+	}
+
+	user, err := p.UserRepos.GetByName(username)
+	if err != nil {
+		return productDto, err
 	}
 
 	product = entity.Product{
@@ -28,6 +45,8 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto) (dto.ProductDt
 		Name:     productDto.Name,
 		Quantity: productDto.Quantity,
 		Price:    productDto.Price,
+		Status:   enum.AvailableProduct,
+		UserId:   user.Id,
 	}
 
 	product, err = p.productRepos.Create(product)
@@ -64,6 +83,14 @@ func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
 	if product.Id == 0 {
 		return productDto, internal.ProductNotFound
 	}
+
+	if product.Status == enum.DeletedProduct {
+		return productDto, internal.ProductDeleted
+	}
+	if product.Status == enum.UnAvailableProduct {
+		return productDto, internal.ProductUnavailable
+	}
+
 	return productDto, nil
 }
 func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDto, error) {
@@ -78,6 +105,14 @@ func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDt
 	if product.Id == 0 {
 		return productDto, internal.ProductNotFound
 	}
+
+	if product.Status == enum.DeletedProduct {
+		return productDto, internal.ProductDeleted
+	}
+	if product.Status == enum.UnAvailableProduct {
+		return productDto, internal.ProductUnavailable
+	}
+
 	return productDto, nil
 }
 func (p *ProductService) UpdateProduct(productDto dto.ProductUpdateDto) error {

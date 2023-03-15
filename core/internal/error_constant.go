@@ -28,8 +28,10 @@ var (
 	FailInVerify     = errors.New("Aktivasyon kodu yanlış")
 	ExceedVerifyCode = errors.New("Aktivasyon kodunun süresi dolmuş. Yeni kod gönderildi")
 
-	ProductNotFound = errors.New("Ürün bulunamadı")
-	ProductExist    = errors.New("Kayıtlı ürün")
+	ProductNotFound    = errors.New("Ürün bulunamadı")
+	ProductExist       = errors.New("Kayıtlı ürün")
+	ProductDeleted     = errors.New("Silinmiş ürün")
+	ProductUnavailable = errors.New("Stokta kalmayan ürün")
 
 	OrderNotFound = errors.New("Sipariş bulunamadı")
 	OrderExist    = errors.New("Kayıtlı sipariş")

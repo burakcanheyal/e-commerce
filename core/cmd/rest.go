@@ -39,7 +39,7 @@ func Setup() {
 	keyRepository := repository.NewKeyRepository(db)
 
 	userService := service.NewUserService(userRepository, keyRepository, config.Secret)
-	productService := service.NewProductService(productRepository)
+	productService := service.NewProductService(productRepository, userRepository, config.Secret)
 	orderService := service.NewOrderService(orderRepository, productRepository, userRepository, config.Secret)
 	authenticationService := service.NewAuthentication(userService, config.Secret, config.Secret2)
 

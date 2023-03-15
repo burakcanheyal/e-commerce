@@ -14,9 +14,9 @@ func InitializeDatabase(dsn string) *gorm.DB {
 	if err != nil {
 		return nil
 	}
-	
-	seed.ProductSeed(db)
+
 	seed.UserSeed(db)
+	seed.ProductSeed(db)
 	seed.RolSeed(db)
 
 	return db
@@ -24,7 +24,7 @@ func InitializeDatabase(dsn string) *gorm.DB {
 func ConnectToDb(dsn string) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to connect to database")
+		log.Fatal("Failed to connect the database")
 	}
 	return db
 }

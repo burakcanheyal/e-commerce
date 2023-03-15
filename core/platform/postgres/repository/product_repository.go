@@ -33,7 +33,7 @@ func (p *ProductRepository) Delete(product entity.Product) error {
 }
 func (p *ProductRepository) GetByName(name string) (entity.Product, error) {
 	var product entity.Product
-	if err := p.db.Model(&product).Where("status != ?", enum.DeletedProduct).Where("name=?", name).Scan(&product).Error; err != nil {
+	if err := p.db.Model(&product).Where("name=?", name).Scan(&product).Error; err != nil {
 		return product, internal.DBNotFound
 	}
 
@@ -41,7 +41,7 @@ func (p *ProductRepository) GetByName(name string) (entity.Product, error) {
 }
 func (p *ProductRepository) GetById(id int32) (entity.Product, error) {
 	var product entity.Product
-	if err := p.db.Model(&product).Where("status != ?", enum.DeletedProduct).Where("id=?", id).Scan(&product).Error; err != nil {
+	if err := p.db.Model(&product).Where("id=?", id).Scan(&product).Error; err != nil {
 		return product, internal.DBNotFound
 	}
 

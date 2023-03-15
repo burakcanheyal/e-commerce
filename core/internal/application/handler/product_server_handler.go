@@ -23,13 +23,20 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
+
 	err := validation.ValidateStruct(product)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
 	}
 
-	product, err = p.productService.CreateProduct(product)
+	tokenString := context.GetHeader("Authentication")
+	if tokenString == "" {
+		context.JSON(401, TokenError())
+		return
+	}
+
+	product, err = p.productService.CreateProduct(product, tokenString)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, ItemNotAdded())
 		return
@@ -41,7 +48,7 @@ func (p *ProductServerHandler) GetByName(context *gin.Context) {
 	name := context.Param("name")
 	pro, err := p.productService.GetProductByName(name)
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
 	}
 
