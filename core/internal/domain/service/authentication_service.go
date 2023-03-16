@@ -6,21 +6,25 @@ import (
 	"attempt4/core/internal/domain/enum"
 	"attempt4/core/platform/hash"
 	"attempt4/core/platform/jwt"
+	"attempt4/core/platform/postgres/repository"
 )
 
 type Authentication struct {
-	UserService UserService
-	Secret      string
-	Secret2     string
+	UserRepository repository.UserRepository
+	Secret         string
+	Secret2        string
 }
 
-func NewAuthentication(userService UserService, secret string, secret2 string) Authentication {
-	a := Authentication{userService, secret, secret2}
+func NewAuthentication(userRepos repository.UserRepository, secret string, secret2 string) Authentication {
+	a := Authentication{userRepos, secret, secret2}
 	return a
 }
 func (p *Authentication) Login(userDto dto.AuthDto) error {
-	user, err := p.UserService.userRepository.GetByName(userDto.Username)
+	user, err := p.UserRepository.GetByName(userDto.Username)
 	if user.Id == 0 {
+		if err != nil {
+			return err
+		}
 		return internal.UserNotFound
 	}
 
@@ -37,6 +41,36 @@ func (p *Authentication) Login(userDto dto.AuthDto) error {
 	}
 
 	return nil
+}
+func (p *Authentication) GetUserByTokenString(tokenString string) (dto.UserDto, error) {
+	userDto := dto.UserDto{}
+	username, err := jwt.ExtractUsernameFromToken(tokenString, p.Secret)
+	if err != nil {
+		return userDto, err
+	}
+
+	user, err := p.UserRepository.GetByName(username)
+	if user.Id == 0 {
+		if err != nil {
+			return userDto, err
+		}
+		return userDto, internal.UserNotFound
+	}
+
+	userDto = dto.UserDto{
+		Username:  user.Username,
+		Email:     user.Email,
+		Name:      user.Name,
+		Surname:   user.Surname,
+		Status:    user.Status,
+		BirthDate: user.BirthDate,
+	}
+
+	if user.Id == 0 {
+		return userDto, internal.UserNotFound
+	}
+
+	return userDto, nil
 }
 func (p *Authentication) GenerateAccessToken(Username string) (string, error) {
 	accessToken, err := jwt.GenerateAccessToken(Username, p.Secret)

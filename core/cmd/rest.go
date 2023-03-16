@@ -29,6 +29,13 @@ func Setup() {
 		log.Println(err)
 	}
 
+	/*
+		hd := hashids2.NewData()
+		hd.Salt = "Tahmin edilmesi çok güç bir salt"
+		hd.MinLength = 30
+		hid, _ := hashids2.NewWithData(hd)
+		hId := hashids.NewHashId(hid)
+	*/
 	validation.ValidatorCustomMessages()
 
 	db := postgres.InitializeDatabase(config.DBURL)
@@ -38,12 +45,12 @@ func Setup() {
 	orderRepository := repository.NewOrderRepository(db)
 	keyRepository := repository.NewKeyRepository(db)
 
-	userService := service.NewUserService(userRepository, keyRepository, config.Secret)
-	productService := service.NewProductService(productRepository, userRepository, config.Secret)
-	orderService := service.NewOrderService(orderRepository, productRepository, userRepository, config.Secret)
-	authenticationService := service.NewAuthentication(userService, config.Secret, config.Secret2)
+	userService := service.NewUserService(userRepository, keyRepository)
+	productService := service.NewProductService(productRepository, userRepository)
+	orderService := service.NewOrderService(orderRepository, productRepository, userRepository)
+	authenticationService := service.NewAuthentication(userRepository, config.Secret, config.Secret2)
 
-	authenticationMiddleware := middleware.NewAuthenticationMiddleware(authenticationService)
+	authenticationMiddleware := middleware.NewMiddleware(authenticationService, userService)
 
 	authenticationServerHandler := handler.NewAuthenticationServerHandler(authenticationService)
 	profileServerHandler := handler.NewProfileServerHandler(userService)

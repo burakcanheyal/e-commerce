@@ -6,7 +6,6 @@ import (
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
 	"attempt4/core/platform/hash"
-	"attempt4/core/platform/jwt"
 	"attempt4/core/platform/postgres/repository"
 	"fmt"
 	"time"
@@ -15,21 +14,25 @@ import (
 type UserService struct {
 	userRepository repository.UserRepository
 	keyRepository  repository.KeyRepository
-	secret         string
 }
 
-func NewUserService(userRepository repository.UserRepository, keyRepository repository.KeyRepository, secret string) UserService {
-	u := UserService{userRepository, keyRepository, secret}
+func NewUserService(userRepository repository.UserRepository, keyRepository repository.KeyRepository) UserService {
+	u := UserService{
+		userRepository,
+		keyRepository,
+	}
 	return u
 }
 
-func (u *UserService) DeleteUser(tokenString string) error {
-	username, err := jwt.ExtractUsernameFromToken(tokenString, u.secret)
-	if err != nil {
-		return err
+func (u *UserService) DeleteUser(username string) error {
+	user, err := u.userRepository.GetByName(username)
+	if user.Id == 0 {
+		if err != nil {
+			return err
+		}
+		return internal.UserNotFound
 	}
 
-	user, _ := u.userRepository.GetByName(username)
 	user.Status = enum.UserDeletedStatus
 
 	err = u.userRepository.Delete(user)
@@ -39,14 +42,15 @@ func (u *UserService) DeleteUser(tokenString string) error {
 
 	return nil
 }
-func (u *UserService) GetUserByTokenString(tokenString string) (dto.UserDto, error) {
+func (u *UserService) GetUserByUsername(username string) (dto.UserDto, error) {
 	userDto := dto.UserDto{}
-	username, err := jwt.ExtractUsernameFromToken(tokenString, u.secret)
-
-	if err != nil {
-		return userDto, err
+	user, err := u.userRepository.GetByName(username)
+	if user.Id == 0 {
+		if err != nil {
+			return userDto, err
+		}
+		return userDto, internal.UserNotFound
 	}
-	user, _ := u.userRepository.GetByName(username)
 
 	userDto = dto.UserDto{
 		Username:  user.Username,
@@ -57,33 +61,19 @@ func (u *UserService) GetUserByTokenString(tokenString string) (dto.UserDto, err
 		BirthDate: user.BirthDate,
 	}
 
-	if user.Id == 0 {
-		return userDto, internal.UserNotFound
-	}
-
-	return userDto, nil
-}
-func (u *UserService) GetUserByUsername(username string) (dto.UserDto, error) {
-	user, _ := u.userRepository.GetByName(username)
-	userDto := dto.UserDto{
-		Username:  user.Username,
-		Password:  user.Password,
-		Email:     user.Email,
-		Name:      user.Name,
-		Surname:   user.Surname,
-		Status:    user.Status,
-		BirthDate: user.BirthDate,
-	}
-
-	if user.Id == 0 {
-		return userDto, internal.UserNotFound
-	}
 	return userDto, nil
 }
 func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
-	user, _ := u.userRepository.GetById(id)
+	userDto := dto.UserDto{}
+	user, err := u.userRepository.GetById(id)
+	if user.Id == 0 {
+		if err != nil {
+			return userDto, err
+		}
+		return userDto, internal.UserNotFound
+	}
 
-	userDto := dto.UserDto{
+	userDto = dto.UserDto{
 		Username:  user.Username,
 		Password:  user.Password,
 		Email:     user.Email,
@@ -93,15 +83,15 @@ func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 		BirthDate: user.BirthDate,
 	}
 
-	if user.Id == 0 {
-		return userDto, internal.UserNotFound
-	}
 	return userDto, nil
 }
 func (u *UserService) UpdateUser(userDto dto.UserDto) error {
 	user, err := u.userRepository.GetByName(userDto.Username)
 	if user.Id == 0 {
-		return internal.DBNotFound
+		if err != nil {
+			return err
+		}
+		return internal.UserNotFound
 	}
 
 	user = entity.User{
@@ -126,6 +116,9 @@ func (u *UserService) UpdateUser(userDto dto.UserDto) error {
 func (u *UserService) UpdateUserPassword(userDto dto.UserUpdatePasswordDto) error {
 	user, err := u.userRepository.GetByName(userDto.UserName)
 	if user.Id == 0 {
+		if err != nil {
+			return err
+		}
 		return internal.UserNotFound
 	}
 
@@ -157,6 +150,9 @@ func (u *UserService) UpdateUserPassword(userDto dto.UserUpdatePasswordDto) erro
 func (u *UserService) CreateUser(userDto dto.UserDto) error {
 	user, err := u.userRepository.GetByName(userDto.Username)
 	if user.Id != 0 {
+		if err != nil {
+			return err
+		}
 		return internal.UserExist
 	}
 
@@ -197,6 +193,9 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 func (u *UserService) ActivateUser(codeDto dto.UserUpdateCodeDto) error {
 	user, err := u.userRepository.GetByName(codeDto.Username)
 	if user.Id == 0 {
+		if err != nil {
+			return err
+		}
 		return internal.UserNotFound
 	}
 
@@ -223,15 +222,13 @@ func (u *UserService) ActivateUser(codeDto dto.UserUpdateCodeDto) error {
 
 	return nil
 }
-func (u *UserService) GetUserRoleByTokenString(tokenString string) (int, error) {
-	username, err := jwt.ExtractUsernameFromToken(tokenString, u.secret)
-	if err != nil {
-		return 0, err
-	}
-
+func (u *UserService) GetUserRoleByUsername(username string) (int, error) {
 	user, err := u.userRepository.GetByName(username)
-	if err != nil {
-		return 0, err
+	if user.Id == 0 {
+		if err != nil {
+			return 0, err
+		}
+		return 0, internal.UserNotFound
 	}
 
 	if user.Status != enum.UserActiveStatus {

@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"attempt4/core/internal"
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/service"
 	"attempt4/core/platform/validation"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -30,13 +32,13 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	tokenString := context.GetHeader("Authentication")
-	if tokenString == "" {
-		context.JSON(401, TokenError())
+	username, exist := context.Get("username")
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	product, err = p.productService.CreateProduct(product, tokenString)
+	product, err = p.productService.CreateProduct(product, fmt.Sprintf("%v", username))
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, ItemNotAdded())
 		return

@@ -5,39 +5,37 @@ import (
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
-	"attempt4/core/platform/jwt"
 	"attempt4/core/platform/postgres/repository"
 )
 
 type ProductService struct {
 	productRepos repository.ProductRepository
 	UserRepos    repository.UserRepository
-	Secret       string
 }
 
-func NewProductService(productRepository repository.ProductRepository, userRepos repository.UserRepository, secret string) ProductService {
+func NewProductService(productRepository repository.ProductRepository, userRepos repository.UserRepository) ProductService {
 	p := ProductService{
 		productRepository,
 		userRepos,
-		secret,
 	}
 	return p
 }
 
-func (p *ProductService) CreateProduct(productDto dto.ProductDto, tokenString string) (dto.ProductDto, error) {
+func (p *ProductService) CreateProduct(productDto dto.ProductDto, username string) (dto.ProductDto, error) {
 	product, err := p.productRepos.GetByName(productDto.Name)
 	if product.Id != 0 {
+		if err != nil {
+			return productDto, err
+		}
 		return productDto, internal.ProductExist
 	}
 
-	username, err := jwt.ExtractUsernameFromToken(tokenString, p.Secret)
-	if err != nil {
-		return productDto, err
-	}
-
 	user, err := p.UserRepos.GetByName(username)
-	if err != nil {
-		return productDto, err
+	if user.Id == 0 {
+		if err != nil {
+			return productDto, err
+		}
+		return productDto, internal.UserNotFound
 	}
 
 	product = entity.Product{
@@ -57,14 +55,17 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto, tokenString st
 	return productDto, nil
 }
 func (p *ProductService) DeleteProduct(name string) error {
-	product, _ := p.productRepos.GetByName(name)
+	product, err := p.productRepos.GetByName(name)
 	if product.Id == 0 {
+		if err != nil {
+			return err
+		}
 		return internal.ProductNotFound
 	}
 
 	product.Status = enum.DeletedProduct
 
-	err := p.productRepos.Delete(product)
+	err = p.productRepos.Delete(product)
 
 	if err != nil {
 		return err
@@ -72,16 +73,19 @@ func (p *ProductService) DeleteProduct(name string) error {
 	return nil
 }
 func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
-	product, _ := p.productRepos.GetByName(name)
+	productDto := dto.ProductDto{}
+	product, err := p.productRepos.GetByName(name)
+	if product.Id == 0 {
+		if err != nil {
+			return productDto, err
+		}
+		return productDto, internal.ProductNotFound
+	}
 
-	productDto := dto.ProductDto{
+	productDto = dto.ProductDto{
 		Name:     product.Name,
 		Quantity: product.Quantity,
 		Price:    product.Price,
-	}
-
-	if product.Id == 0 {
-		return productDto, internal.ProductNotFound
 	}
 
 	if product.Status == enum.DeletedProduct {
@@ -94,16 +98,19 @@ func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
 	return productDto, nil
 }
 func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDto, error) {
-	product, _ := p.productRepos.GetById(id)
+	productDto := dto.ProductDto{}
+	product, err := p.productRepos.GetById(id)
+	if product.Id == 0 {
+		if err != nil {
+			return productDto, err
+		}
+		return productDto, internal.ProductNotFound
+	}
 
-	productDto := dto.ProductDto{
+	productDto = dto.ProductDto{
 		Name:     product.Name,
 		Quantity: quantity,
 		Price:    product.Price,
-	}
-
-	if product.Id == 0 {
-		return productDto, internal.ProductNotFound
 	}
 
 	if product.Status == enum.DeletedProduct {
@@ -116,9 +123,11 @@ func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDt
 	return productDto, nil
 }
 func (p *ProductService) UpdateProduct(productDto dto.ProductUpdateDto) error {
-	product, _ := p.productRepos.GetByName(productDto.Name)
-
+	product, err := p.productRepos.GetByName(productDto.Name)
 	if product.Id == 0 {
+		if err != nil {
+			return err
+		}
 		return internal.ProductNotFound
 	}
 
@@ -128,7 +137,7 @@ func (p *ProductService) UpdateProduct(productDto dto.ProductUpdateDto) error {
 		Quantity: productDto.Quantity,
 		Price:    productDto.Price,
 	}
-	err := p.productRepos.Update(entityProduct)
+	err = p.productRepos.Update(entityProduct)
 	if err != nil {
 		return err
 	}

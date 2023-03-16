@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"attempt4/core/internal"
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/service"
 	"attempt4/core/platform/validation"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -24,10 +26,10 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
-	tokenString := context.GetHeader("Authentication")
 
-	if tokenString == "" {
-		context.JSON(401, TokenError())
+	username, exist := context.Get("username")
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
@@ -37,7 +39,7 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	orderDescription, err := o.orderService.CreateOrder(order, tokenString)
+	orderDescription, err := o.orderService.CreateOrder(order, fmt.Sprintf("%v", username))
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -64,10 +66,10 @@ func (o *OrderServerHandler) Update(context *gin.Context) {
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}
-	tokenString := context.GetHeader("Authentication")
 
-	if tokenString == "" {
-		context.JSON(401, TokenError())
+	username, exist := context.Get("username")
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
@@ -77,7 +79,7 @@ func (o *OrderServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	err = o.orderService.UpdateOrder(order, tokenString)
+	err = o.orderService.UpdateOrder(order, fmt.Sprintf("%v", username))
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -113,13 +115,13 @@ func (o *OrderServerHandler) GetAllOrders(context *gin.Context) {
 		return
 	}
 
-	tokenString := context.GetHeader("Authentication")
-
-	if tokenString == "" {
-		context.JSON(401, TokenError())
+	username, exist := context.Get("username")
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
 		return
 	}
-	orderDto, totalNumber, err := o.orderService.GetAllOrders(tokenString, filter, pagination)
+
+	orderDto, totalNumber, err := o.orderService.GetAllOrders(fmt.Sprintf("%v", username), filter, pagination)
 	if err != nil {
 		context.JSON(http.StatusNotFound, NonExistItem())
 		return

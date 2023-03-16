@@ -5,7 +5,6 @@ import (
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
-	"attempt4/core/platform/jwt"
 	"attempt4/core/platform/postgres/repository"
 )
 
@@ -13,36 +12,50 @@ type OrderService struct {
 	orderRepos   repository.OrderRepository
 	productRepos repository.ProductRepository
 	userRepos    repository.UserRepository
-	Secret       string
 }
 
-func NewOrderService(orderRepos repository.OrderRepository, productRepos repository.ProductRepository,
-	userRepos repository.UserRepository, secret string) OrderService {
-	o := OrderService{orderRepos, productRepos, userRepos, secret}
+func NewOrderService(
+	orderRepos repository.OrderRepository,
+	productRepos repository.ProductRepository,
+	userRepos repository.UserRepository) OrderService {
+
+	o := OrderService{
+		orderRepos,
+		productRepos,
+		userRepos,
+	}
 	return o
 }
 
-func (o *OrderService) CreateOrder(orderDto dto.OrderDto, tokenString string) (dto.OrderDescriptionDto, error) {
+func (o *OrderService) CreateOrder(orderDto dto.OrderDto, username string) (dto.OrderDescriptionDto, error) {
 	orderDescription := dto.OrderDescriptionDto{}
 
 	order, err := o.orderRepos.GetById(orderDto.Id)
 	if order.OrderId != 0 {
-		return orderDescription, err
-	}
-
-	username, err := jwt.ExtractUsernameFromToken(tokenString, o.Secret)
-	if err != nil {
-		return orderDescription, err
+		if err != nil {
+			return orderDescription, err
+		}
+		return orderDescription, internal.OrderExist
 	}
 
 	user, err := o.userRepos.GetByName(username)
-	if err != nil {
-		return orderDescription, err
+	if user.Id == 0 {
+		if err != nil {
+			return orderDescription, err
+		}
+		return orderDescription, internal.UserNotFound
 	}
 
 	product, err := o.productRepos.GetById(orderDto.ProductId)
 	if product.Id == 0 {
-		return orderDescription, err
+		if err != nil {
+			return orderDescription, err
+		}
+		return orderDescription, internal.ProductNotFound
+	}
+
+	if orderDto.Quantity > product.Quantity {
+		return orderDescription, internal.ExceedOrder
 	}
 
 	order = entity.Order{
@@ -55,10 +68,6 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, tokenString string) (d
 	order, err = o.orderRepos.Create(order)
 	if err != nil {
 		return orderDescription, err
-	}
-
-	if orderDto.Quantity > product.Quantity {
-		return orderDescription, internal.ExceedOrder
 	}
 
 	product.Quantity = product.Quantity - orderDto.Quantity
@@ -85,14 +94,17 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, tokenString string) (d
 	return orderDescription, nil
 }
 func (o *OrderService) DeleteOrder(id int32) error {
-	order, _ := o.orderRepos.GetById(id)
+	order, err := o.orderRepos.GetById(id)
 	if order.OrderId == 0 {
+		if err != nil {
+			return err
+		}
 		return internal.OrderNotFound
 	}
 
 	order.Status = enum.OrderCancel
 
-	err := o.orderRepos.Delete(order)
+	err = o.orderRepos.Delete(order)
 
 	if err != nil {
 		return err
@@ -100,29 +112,30 @@ func (o *OrderService) DeleteOrder(id int32) error {
 	return nil
 }
 func (o *OrderService) GetOrderById(id int32) (dto.OrderDto, error) {
-	order, _ := o.orderRepos.GetById(id)
+	orderDto := dto.OrderDto{}
+	order, err := o.orderRepos.GetById(id)
+	if order.OrderId == 0 {
+		if err != nil {
+			return orderDto, err
+		}
+		return orderDto, internal.OrderNotFound
+	}
 
-	OrderDto := dto.OrderDto{
+	orderDto = dto.OrderDto{
 		Id:        0,
 		ProductId: order.ProductId,
 		Quantity:  order.Quantity,
 	}
 
-	if order.OrderId == 0 {
-		return OrderDto, internal.OrderNotFound
-	}
-
-	return OrderDto, nil
+	return orderDto, nil
 }
-func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, tokenString string) error {
-	order, _ := o.orderRepos.GetById(orderDto.Id)
+func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, username string) error {
+	order, err := o.orderRepos.GetById(orderDto.Id)
 	if order.OrderId == 0 {
+		if err != nil {
+			return err
+		}
 		return internal.OrderNotFound
-	}
-
-	username, err := jwt.ExtractUsernameFromToken(tokenString, o.Secret)
-	if err != nil {
-		return err
 	}
 
 	user, err := o.userRepos.GetByName(username)
@@ -144,20 +157,18 @@ func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, tokenString string) er
 
 	return nil
 }
-func (o *OrderService) GetAllOrders(tokenString string, filter dto.Filter, pagination dto.Pagination) ([]dto.ProductDto, int64, error) {
+func (o *OrderService) GetAllOrders(username string, filter dto.Filter, pagination dto.Pagination) ([]dto.ProductDto, int64, error) {
 	var productDto []dto.ProductDto
 	var order []entity.Order
 	var totalNumber int64
 	var err error
 
-	username, err := jwt.ExtractUsernameFromToken(tokenString, o.Secret)
-	if err != nil {
-		return productDto, totalNumber, err
-	}
-
 	user, err := o.userRepos.GetByName(username)
-	if err != nil {
-		return productDto, totalNumber, err
+	if user.Id == 0 {
+		if err != nil {
+			return productDto, totalNumber, err
+		}
+		return productDto, totalNumber, internal.UserNotFound
 	}
 
 	order, totalNumber, err = o.orderRepos.GetAllOrders(filter, pagination, user.Id)
