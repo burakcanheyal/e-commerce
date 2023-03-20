@@ -8,20 +8,30 @@ type HashId struct {
 	hd *hashids.HashID
 }
 
+var hId HashId
+
+func init() {
+	hd := hashids.NewData()
+	hd.Salt = "Tahmin edilmesi çok güç bir salt"
+	hd.MinLength = 30
+	hid, _ := hashids.NewWithData(hd)
+	hId = NewHashId(hid)
+}
+
 func NewHashId(hd *hashids.HashID) HashId {
 	h := HashId{hd}
 	return h
 }
-func (h *HashId) EncodeId(id int) (string, error) {
+func EncodeId(id int) (string, error) {
 
-	hashedIds, err := h.hd.Encode([]int{id})
+	hashedIds, err := hId.hd.Encode([]int{id})
 	if err != nil {
 		return "", err
 	}
 	return hashedIds, nil
 }
-func (h *HashId) DecodeId(id string) ([]int, error) {
-	numbers, err := h.hd.DecodeWithError(id)
+func DecodeId(id string) ([]int, error) {
+	numbers, err := hId.hd.DecodeWithError(id)
 	if err != nil {
 		return nil, err
 	}

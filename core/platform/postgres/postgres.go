@@ -10,7 +10,7 @@ import (
 
 func InitializeDatabase(dsn string) *gorm.DB {
 	db := ConnectToDb(dsn)
-	err := db.AutoMigrate(&entity.Product{}, &entity.User{}, &entity.Order{}, &entity.Key{})
+	err := db.AutoMigrate(&entity.Product{}, &entity.User{}, &entity.Order{}, &entity.Key{}, &entity.Wallet{})
 	if err != nil {
 		return nil
 	}
@@ -18,6 +18,7 @@ func InitializeDatabase(dsn string) *gorm.DB {
 	seed.UserSeed(db)
 	seed.ProductSeed(db)
 	seed.RolSeed(db)
+	seed.WalletSeed(db)
 
 	return db
 }

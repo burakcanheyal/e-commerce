@@ -27,8 +27,10 @@ func NewOrderService(
 	return o
 }
 
-func (o *OrderService) CreateOrder(orderDto dto.OrderDto, username string) (dto.OrderDescriptionDto, error) {
+func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDescriptionDto, error) {
 	orderDescription := dto.OrderDescriptionDto{}
+
+	start := o.orderRepos.Db.Begin()
 
 	order, err := o.orderRepos.GetById(orderDto.Id)
 	if order.OrderId != 0 {
@@ -38,7 +40,7 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, username string) (dto.
 		return orderDescription, internal.OrderExist
 	}
 
-	user, err := o.userRepos.GetByName(username)
+	user, err := o.userRepos.GetById(id)
 	if user.Id == 0 {
 		if err != nil {
 			return orderDescription, err
@@ -77,8 +79,11 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, username string) (dto.
 
 	err = o.productRepos.Update(product)
 	if err != nil {
+		start.Rollback()
 		return orderDescription, err
 	}
+
+	start.Commit()
 
 	productDto := dto.ProductDto{
 		Name:     product.Name,
@@ -93,6 +98,7 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, username string) (dto.
 
 	return orderDescription, nil
 }
+
 func (o *OrderService) DeleteOrder(id int32) error {
 	order, err := o.orderRepos.GetById(id)
 	if order.OrderId == 0 {
@@ -111,6 +117,7 @@ func (o *OrderService) DeleteOrder(id int32) error {
 	}
 	return nil
 }
+
 func (o *OrderService) GetOrderById(id int32) (dto.OrderDto, error) {
 	orderDto := dto.OrderDto{}
 	order, err := o.orderRepos.GetById(id)
@@ -129,7 +136,8 @@ func (o *OrderService) GetOrderById(id int32) (dto.OrderDto, error) {
 
 	return orderDto, nil
 }
-func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, username string) error {
+
+func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, id int32) error {
 	order, err := o.orderRepos.GetById(orderDto.Id)
 	if order.OrderId == 0 {
 		if err != nil {
@@ -138,7 +146,7 @@ func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, username string) error
 		return internal.OrderNotFound
 	}
 
-	user, err := o.userRepos.GetByName(username)
+	user, err := o.userRepos.GetById(id)
 	if err != nil {
 		return err
 	}
@@ -157,13 +165,14 @@ func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, username string) error
 
 	return nil
 }
-func (o *OrderService) GetAllOrders(username string, filter dto.Filter, pagination dto.Pagination) ([]dto.ProductDto, int64, error) {
+
+func (o *OrderService) GetAllOrders(id int32, filter dto.Filter, pagination dto.Pagination) ([]dto.ProductDto, int64, error) {
 	var productDto []dto.ProductDto
 	var order []entity.Order
 	var totalNumber int64
 	var err error
 
-	user, err := o.userRepos.GetByName(username)
+	user, err := o.userRepos.GetById(id)
 	if user.Id == 0 {
 		if err != nil {
 			return productDto, totalNumber, err

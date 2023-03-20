@@ -28,6 +28,7 @@ func (u *AuthenticationServerHandler) Login(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
 	}
+
 	err = u.authenticationService.Login(user)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))

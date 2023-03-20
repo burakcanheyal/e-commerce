@@ -5,7 +5,6 @@ import (
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/service"
 	"attempt4/core/platform/validation"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -39,6 +38,7 @@ func (p *ProfileServerHandler) Create(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInCreate())
 }
+
 func (p *ProfileServerHandler) Update(context *gin.Context) {
 	user := dto.UserDto{}
 	if err := context.BindJSON(&user); err != nil {
@@ -60,14 +60,15 @@ func (p *ProfileServerHandler) Update(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
+
 func (p *ProfileServerHandler) Delete(context *gin.Context) {
-	username, exist := context.Get("username")
+	id, exist := context.Get("id")
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	err := p.UserService.DeleteUser(fmt.Sprintf("%v", username))
+	err := p.UserService.DeleteUser(id.(int32))
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -75,14 +76,15 @@ func (p *ProfileServerHandler) Delete(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInDelete())
 }
+
 func (p *ProfileServerHandler) GetByUsername(context *gin.Context) {
-	username, exist := context.Get("username")
+	id, exist := context.Get("id")
 	if exist != true {
 		context.JSON(http.StatusBadRequest, internal.UserNotFound)
 		return
 	}
 
-	user, err := p.UserService.GetUserByUsername(fmt.Sprintf("%v", username))
+	user, err := p.UserService.GetUserById(id.(int32))
 	if err != nil {
 		context.JSON(http.StatusNotFound, NonExistItem())
 		return
@@ -90,6 +92,7 @@ func (p *ProfileServerHandler) GetByUsername(context *gin.Context) {
 
 	context.JSON(http.StatusOK, user)
 }
+
 func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
 	user := dto.UserUpdatePasswordDto{}
 	if err := context.BindJSON(&user); err != nil {
@@ -111,6 +114,7 @@ func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
+
 func (p *ProfileServerHandler) ActivateUser(context *gin.Context) {
 	code := dto.UserUpdateCodeDto{}
 	if err := context.BindJSON(&code); err != nil {

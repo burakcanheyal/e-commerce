@@ -12,20 +12,25 @@ import (
 )
 
 type UserService struct {
-	userRepository repository.UserRepository
-	keyRepository  repository.KeyRepository
+	userRepository   repository.UserRepository
+	keyRepository    repository.KeyRepository
+	walletRepository repository.WalletRepository
 }
 
-func NewUserService(userRepository repository.UserRepository, keyRepository repository.KeyRepository) UserService {
+func NewUserService(
+	userRepository repository.UserRepository,
+	keyRepository repository.KeyRepository,
+	walletRepository repository.WalletRepository) UserService {
 	u := UserService{
 		userRepository,
 		keyRepository,
+		walletRepository,
 	}
 	return u
 }
 
-func (u *UserService) DeleteUser(username string) error {
-	user, err := u.userRepository.GetByName(username)
+func (u *UserService) DeleteUser(id int32) error {
+	user, err := u.userRepository.GetById(id)
 	if user.Id == 0 {
 		if err != nil {
 			return err
@@ -42,6 +47,7 @@ func (u *UserService) DeleteUser(username string) error {
 
 	return nil
 }
+
 func (u *UserService) GetUserByUsername(username string) (dto.UserDto, error) {
 	userDto := dto.UserDto{}
 	user, err := u.userRepository.GetByName(username)
@@ -63,6 +69,7 @@ func (u *UserService) GetUserByUsername(username string) (dto.UserDto, error) {
 
 	return userDto, nil
 }
+
 func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 	userDto := dto.UserDto{}
 	user, err := u.userRepository.GetById(id)
@@ -85,6 +92,7 @@ func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 
 	return userDto, nil
 }
+
 func (u *UserService) UpdateUser(userDto dto.UserDto) error {
 	user, err := u.userRepository.GetByName(userDto.Username)
 	if user.Id == 0 {
@@ -113,6 +121,7 @@ func (u *UserService) UpdateUser(userDto dto.UserDto) error {
 	}
 	return nil
 }
+
 func (u *UserService) UpdateUserPassword(userDto dto.UserUpdatePasswordDto) error {
 	user, err := u.userRepository.GetByName(userDto.UserName)
 	if user.Id == 0 {
@@ -147,6 +156,7 @@ func (u *UserService) UpdateUserPassword(userDto dto.UserUpdatePasswordDto) erro
 
 	return nil
 }
+
 func (u *UserService) CreateUser(userDto dto.UserDto) error {
 	user, err := u.userRepository.GetByName(userDto.Username)
 	if user.Id != 0 {
@@ -188,8 +198,19 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 		return internal.KeyNotCreated
 	}
 
+	wallet := entity.Wallet{
+		UserId:  user.Id,
+		Balance: 0,
+		Status:  enum.WalletPassive,
+	}
+
+	wallet, err = u.walletRepository.Create(wallet)
+	if wallet.Id == 0 {
+		return internal.WalletNotCreated
+	}
 	return nil
 }
+
 func (u *UserService) ActivateUser(codeDto dto.UserUpdateCodeDto) error {
 	user, err := u.userRepository.GetByName(codeDto.Username)
 	if user.Id == 0 {
@@ -222,8 +243,9 @@ func (u *UserService) ActivateUser(codeDto dto.UserUpdateCodeDto) error {
 
 	return nil
 }
-func (u *UserService) GetUserRoleByUsername(username string) (int, error) {
-	user, err := u.userRepository.GetByName(username)
+
+func (u *UserService) GetUserRoleById(id int32) (int, error) {
+	user, err := u.userRepository.GetById(id)
 	if user.Id == 0 {
 		if err != nil {
 			return 0, err
@@ -241,6 +263,7 @@ func (u *UserService) GetUserRoleByUsername(username string) (int, error) {
 
 	return rol.Rol, nil
 }
+
 func generateCode() string {
 	return fmt.Sprint(time.Now().Nanosecond())[:6]
 }

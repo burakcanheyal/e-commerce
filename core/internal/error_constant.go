@@ -37,4 +37,7 @@ var (
 	OrderExist    = errors.New("Kayıtlı sipariş")
 
 	KeyNotCreated = errors.New("Rol yaratılamadı")
+
+	WalletNotCreated = errors.New("Cüzdan yaratılamadı")
+	WalletNotFound   = errors.New("Cüzdan bulunamadı")
 )

@@ -11,6 +11,9 @@ var v = validator.New()
 var language = tr.New()
 var uni = ut.New(language, language)
 
+func init() {
+	ValidatorCustomMessages()
+}
 func ValidateStruct(s interface{}) error {
 	trans, _ := uni.GetTranslator("tr")
 

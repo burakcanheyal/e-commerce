@@ -5,7 +5,6 @@ import (
 	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/service"
 	"attempt4/core/platform/validation"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -32,13 +31,13 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	username, exist := context.Get("username")
+	id, exist := context.Get("id")
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	product, err = p.productService.CreateProduct(product, fmt.Sprintf("%v", username))
+	product, err = p.productService.CreateProduct(product, id.(int32))
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, ItemNotAdded())
 		return
@@ -46,6 +45,7 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 
 	context.JSON(http.StatusOK, product)
 }
+
 func (p *ProductServerHandler) GetByName(context *gin.Context) {
 	name := context.Param("name")
 	pro, err := p.productService.GetProductByName(name)
@@ -78,6 +78,7 @@ func (p *ProductServerHandler) Update(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
+
 func (p *ProductServerHandler) Delete(context *gin.Context) {
 	product := dto.ProductDto{}
 	if err := context.BindJSON(&product); err != nil {
@@ -93,6 +94,7 @@ func (p *ProductServerHandler) Delete(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInDelete())
 }
+
 func (p *ProductServerHandler) GetAllProducts(context *gin.Context) {
 	filter := dto.Filter{}
 	if err := context.ShouldBind(&filter); err != nil {

@@ -42,6 +42,7 @@ func (p *Authentication) Login(userDto dto.AuthDto) error {
 
 	return nil
 }
+
 func (p *Authentication) GetUserByTokenString(tokenString string) (dto.UserDto, error) {
 	userDto := dto.UserDto{}
 	username, err := jwt.ExtractUsernameFromToken(tokenString, p.Secret)
@@ -58,6 +59,7 @@ func (p *Authentication) GetUserByTokenString(tokenString string) (dto.UserDto, 
 	}
 
 	userDto = dto.UserDto{
+		Id:        user.Id,
 		Username:  user.Username,
 		Email:     user.Email,
 		Name:      user.Name,
@@ -72,6 +74,7 @@ func (p *Authentication) GetUserByTokenString(tokenString string) (dto.UserDto, 
 
 	return userDto, nil
 }
+
 func (p *Authentication) GenerateAccessToken(Username string) (string, error) {
 	accessToken, err := jwt.GenerateAccessToken(Username, p.Secret)
 	if err != nil {
@@ -79,6 +82,7 @@ func (p *Authentication) GenerateAccessToken(Username string) (string, error) {
 	}
 	return accessToken, nil
 }
+
 func (p *Authentication) GenerateRefreshToken(Username string) (string, error) {
 	refreshToken, err := jwt.GenerateRefreshToken(Username, p.Secret2)
 	if err != nil {
@@ -86,6 +90,7 @@ func (p *Authentication) GenerateRefreshToken(Username string) (string, error) {
 	}
 	return refreshToken, nil
 }
+
 func (p *Authentication) ValidateAccessToken(tokenString string) error {
 	err := jwt.ValidateToken(tokenString, p.Secret)
 	if err != nil {
@@ -93,6 +98,7 @@ func (p *Authentication) ValidateAccessToken(tokenString string) error {
 	}
 	return nil
 }
+
 func (p *Authentication) ValidateRefreshToken(tokenString string) error {
 	err := jwt.ValidateToken(tokenString, p.Secret2)
 	if err != nil {

@@ -3,6 +3,7 @@ package dto
 import "time"
 
 type UserDto struct {
+	Id        int32
 	Username  string `json:"username" validate:"required,gte=1,lte=32"`
 	Password  string `json:"password" validate:"required,gte=8,lte=16"`
 	Email     string `json:"email" validate:"required,email"`

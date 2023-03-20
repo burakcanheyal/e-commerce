@@ -5,7 +5,6 @@ import (
 	"attempt4/core/internal/application/handler"
 	"attempt4/core/internal/domain/enum"
 	"attempt4/core/internal/domain/service"
-	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -56,19 +55,20 @@ func (a *Middleware) Auth() gin.HandlerFunc {
 			}
 			context.JSON(200, tokenString)
 		}
-		context.Set("username", user.Username)
+		//Todo: id ye çevir
+		context.Set("id", user.Id)
 		context.Next()
 	}
 }
 func (a *Middleware) Permission(permissionType []int) gin.HandlerFunc {
 	return func(context *gin.Context) {
-		username, exist := context.Get("username")
+		id, exist := context.Get("id")
 		if exist != true {
 			context.AbortWithStatusJSON(401, internal.UserNotFound)
 			return
 		}
 
-		rol, err := a.userService.GetUserRoleByUsername(fmt.Sprintf("%v", username))
+		rol, err := a.userService.GetUserRoleById(id.(int32))
 		if err != nil {
 			context.JSON(401, handler.NewHttpError(err))
 			context.Abort()

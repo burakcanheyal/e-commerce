@@ -26,15 +26,21 @@ func (p *ProductRepository) Create(product entity.Product) (entity.Product, erro
 }
 func (p *ProductRepository) Delete(product entity.Product) error {
 	if err := p.db.Where("status != ?", enum.DeletedProduct).Where("id = ?", product.Id).Updates(product).Error; err != nil {
-		return internal.DBNotDeleted
+		if err == gorm.ErrRecordNotFound {
+			return internal.DBNotFound
+		}
+		return err
 	}
 
 	return nil
 }
 func (p *ProductRepository) GetByName(name string) (entity.Product, error) {
 	var product entity.Product
-	if err := p.db.Model(&product).Where("name=?", name).Scan(&product).Error; err != nil {
-		return product, internal.DBNotFound
+	if err := p.db.Model(&product).Where("name=?", name).First(&product).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return product, nil
+		}
+		return product, err
 	}
 
 	return product, nil
@@ -42,7 +48,10 @@ func (p *ProductRepository) GetByName(name string) (entity.Product, error) {
 func (p *ProductRepository) GetById(id int32) (entity.Product, error) {
 	var product entity.Product
 	if err := p.db.Model(&product).Where("id=?", id).Scan(&product).Error; err != nil {
-		return product, internal.DBNotFound
+		if err == gorm.ErrRecordNotFound {
+			return product, nil
+		}
+		return product, err
 	}
 
 	return product, nil
@@ -80,6 +89,9 @@ func (p *ProductRepository) GetAllProducts(filter dto.Filter, pagination dto.Pag
 }
 func (p *ProductRepository) Update(product entity.Product) error {
 	if err := p.db.Model(&product).Where("id=?", product.Id).Updates(product).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return internal.DBNotFound
+		}
 		return internal.DBNotUpdated
 	}
 
@@ -88,7 +100,10 @@ func (p *ProductRepository) Update(product entity.Product) error {
 func (p *ProductRepository) GetIdByName(name string) (int32, error) {
 	var product entity.Product
 	if err := p.db.Model(&product).Where("name=?", name).Scan(&product).Error; err != nil {
-		return 0, internal.DBNotFound
+		if err == gorm.ErrRecordNotFound {
+			return 0, internal.DBNotFound
+		}
+		return 0, err
 	}
 
 	return product.Id, nil

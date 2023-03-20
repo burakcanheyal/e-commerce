@@ -12,6 +12,7 @@ type WebServer struct {
 	profileServerHandler handler.ProfileServerHandler
 	orderServerHandler   handler.OrderServerHandler
 	authentication       handler.AuthenticationServerHandler
+	walletServerHandler  handler.WalletServerHandler
 	middleware           middleware.Middleware
 }
 
@@ -20,6 +21,7 @@ func NewWebServer(
 	profileServerHandler handler.ProfileServerHandler,
 	orderServerHandler handler.OrderServerHandler,
 	authentication handler.AuthenticationServerHandler,
+	walletServerHandler handler.WalletServerHandler,
 	middleware middleware.Middleware,
 ) WebServer {
 	s := WebServer{
@@ -27,6 +29,7 @@ func NewWebServer(
 		profileServerHandler,
 		orderServerHandler,
 		authentication,
+		walletServerHandler,
 		middleware,
 	}
 	return s
@@ -57,6 +60,9 @@ func (s *WebServer) SetupRoot() {
 	product.POST("/", s.productServerHandler.Create)
 	product.DELETE("/", s.productServerHandler.Delete)
 	product.PUT("/", s.productServerHandler.Update)
+
+	wallet := router.Group("/wallet", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
+	wallet.PUT("/", s.walletServerHandler.Update)
 
 	router.Run("localhost:8000")
 }

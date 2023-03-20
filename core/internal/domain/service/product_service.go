@@ -13,7 +13,9 @@ type ProductService struct {
 	UserRepos    repository.UserRepository
 }
 
-func NewProductService(productRepository repository.ProductRepository, userRepos repository.UserRepository) ProductService {
+func NewProductService(
+	productRepository repository.ProductRepository,
+	userRepos repository.UserRepository) ProductService {
 	p := ProductService{
 		productRepository,
 		userRepos,
@@ -21,7 +23,7 @@ func NewProductService(productRepository repository.ProductRepository, userRepos
 	return p
 }
 
-func (p *ProductService) CreateProduct(productDto dto.ProductDto, username string) (dto.ProductDto, error) {
+func (p *ProductService) CreateProduct(productDto dto.ProductDto, id int32) (dto.ProductDto, error) {
 	product, err := p.productRepos.GetByName(productDto.Name)
 	if product.Id != 0 {
 		if err != nil {
@@ -30,7 +32,7 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto, username strin
 		return productDto, internal.ProductExist
 	}
 
-	user, err := p.UserRepos.GetByName(username)
+	user, err := p.UserRepos.GetById(id)
 	if user.Id == 0 {
 		if err != nil {
 			return productDto, err
@@ -54,6 +56,7 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto, username strin
 
 	return productDto, nil
 }
+
 func (p *ProductService) DeleteProduct(name string) error {
 	product, err := p.productRepos.GetByName(name)
 	if product.Id == 0 {
@@ -72,6 +75,7 @@ func (p *ProductService) DeleteProduct(name string) error {
 	}
 	return nil
 }
+
 func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
 	productDto := dto.ProductDto{}
 	product, err := p.productRepos.GetByName(name)
@@ -97,6 +101,7 @@ func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
 
 	return productDto, nil
 }
+
 func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDto, error) {
 	productDto := dto.ProductDto{}
 	product, err := p.productRepos.GetById(id)
@@ -122,6 +127,7 @@ func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDt
 
 	return productDto, nil
 }
+
 func (p *ProductService) UpdateProduct(productDto dto.ProductUpdateDto) error {
 	product, err := p.productRepos.GetByName(productDto.Name)
 	if product.Id == 0 {

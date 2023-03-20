@@ -8,7 +8,6 @@ import (
 	"attempt4/core/internal/server"
 	"attempt4/core/platform/postgres"
 	"attempt4/core/platform/postgres/repository"
-	"attempt4/core/platform/validation"
 	"github.com/spf13/viper"
 	"log"
 )
@@ -29,26 +28,19 @@ func Setup() {
 		log.Println(err)
 	}
 
-	/*
-		hd := hashids2.NewData()
-		hd.Salt = "Tahmin edilmesi çok güç bir salt"
-		hd.MinLength = 30
-		hid, _ := hashids2.NewWithData(hd)
-		hId := hashids.NewHashId(hid)
-	*/
-	validation.ValidatorCustomMessages()
-
 	db := postgres.InitializeDatabase(config.DBURL)
 
 	userRepository := repository.NewUserRepository(db)
 	productRepository := repository.NewProductRepository(db)
 	orderRepository := repository.NewOrderRepository(db)
 	keyRepository := repository.NewKeyRepository(db)
+	walletRepository := repository.NewWalletRepository(db)
 
-	userService := service.NewUserService(userRepository, keyRepository)
+	userService := service.NewUserService(userRepository, keyRepository, walletRepository)
 	productService := service.NewProductService(productRepository, userRepository)
 	orderService := service.NewOrderService(orderRepository, productRepository, userRepository)
 	authenticationService := service.NewAuthentication(userRepository, config.Secret, config.Secret2)
+	walletService := service.NewWalletService(userRepository, walletRepository)
 
 	authenticationMiddleware := middleware.NewMiddleware(authenticationService, userService)
 
@@ -56,12 +48,14 @@ func Setup() {
 	profileServerHandler := handler.NewProfileServerHandler(userService)
 	productServerHandler := handler.NewProductServerHandler(productService)
 	orderServerHandler := handler.NewOrderServerHandler(orderService)
+	walletServerHandler := handler.NewWalletServerHandler(walletService)
 
 	webServer := server.NewWebServer(
 		productServerHandler,
 		profileServerHandler,
 		orderServerHandler,
 		authenticationServerHandler,
+		walletServerHandler,
 		authenticationMiddleware,
 	)
 
