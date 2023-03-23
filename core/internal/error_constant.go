@@ -36,8 +36,13 @@ var (
 	OrderNotFound = errors.New("Sipariş bulunamadı")
 	OrderExist    = errors.New("Kayıtlı sipariş")
 
-	KeyNotCreated = errors.New("Rol yaratılamadı")
+	KeyNotCreated  = errors.New("Rol yaratılamadı")
+	KeyNotFound    = errors.New("Rol bulunamadı")
+	KeyWaiting     = errors.New("Mevcut tür değiştirme talebiniz bulunmaktadır")
+	KeyNonApproved = errors.New("Tür değiştirme talebiniz reddedilmiştir")
+	KeyResponded   = errors.New("Mevcut tür değiştirme talebiniz bulunmamaktadır")
 
-	WalletNotCreated = errors.New("Cüzdan yaratılamadı")
-	WalletNotFound   = errors.New("Cüzdan bulunamadı")
+	WalletNotCreated      = errors.New("Cüzdan yaratılamadı")
+	WalletNotFound        = errors.New("Cüzdan bulunamadı")
+	WalletManagerMinValue = errors.New("Satıcı için minimum para tutarının altında bakiye")
 )

@@ -31,13 +31,13 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Get("id")
+	id, exist := context.Keys["id"].(dto.IdDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	product, err = p.productService.CreateProduct(product, id.(int32))
+	product, err = p.productService.CreateProduct(product, id.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, ItemNotAdded())
 		return

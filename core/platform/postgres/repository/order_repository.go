@@ -25,7 +25,7 @@ func (o *OrderRepository) Create(order entity.Order) (entity.Order, error) {
 
 func (o *OrderRepository) Delete(order entity.Order) error {
 
-	if err := o.Db.Where("order_id = ?", order.OrderId).Updates(order).Error; err != nil {
+	if err := o.Db.Where("order_id = ?", order.OrderId).Update("status", enum.OrderCancel).Error; err != nil {
 		return internal.DBNotDeleted
 	}
 	return nil
@@ -38,7 +38,11 @@ func (o *OrderRepository) GetById(id int32) (entity.Order, error) {
 	return order, nil
 }
 func (o *OrderRepository) Update(order entity.Order) error {
-	if err := o.Db.Model(&order).Where("status != ", enum.OrderCancel).Where("order_id=?", order.OrderId).Updates(order).Error; err != nil {
+	if err := o.Db.Model(&order).Where("status != ", enum.OrderCancel).Where("order_id=?", order.OrderId).Updates(
+		entity.Order{
+			ProductId: order.ProductId,
+			Quantity:  order.Quantity,
+		}).Error; err != nil {
 		return internal.DBNotUpdated
 	}
 	return nil

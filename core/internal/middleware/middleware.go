@@ -3,6 +3,7 @@ package middleware
 import (
 	"attempt4/core/internal"
 	"attempt4/core/internal/application/handler"
+	"attempt4/core/internal/domain/dto"
 	"attempt4/core/internal/domain/enum"
 	"attempt4/core/internal/domain/service"
 	"github.com/gin-gonic/gin"
@@ -55,23 +56,22 @@ func (a *Middleware) Auth() gin.HandlerFunc {
 			}
 			context.JSON(200, tokenString)
 		}
-		//Todo: id ye çevir
-		context.Set("id", user.Id)
+
+		context.Set("id", dto.IdDto{Id: user.Id})
 		context.Next()
 	}
 }
 func (a *Middleware) Permission(permissionType []int) gin.HandlerFunc {
 	return func(context *gin.Context) {
-		id, exist := context.Get("id")
+		id, exist := context.Keys["id"].(dto.IdDto)
 		if exist != true {
 			context.AbortWithStatusJSON(401, internal.UserNotFound)
 			return
 		}
 
-		rol, err := a.userService.GetUserRoleById(id.(int32))
+		rol, err := a.userService.GetUserRoleById(id.Id)
 		if err != nil {
-			context.JSON(401, handler.NewHttpError(err))
-			context.Abort()
+			context.AbortWithStatusJSON(401, handler.NewHttpError(err))
 			return
 		}
 

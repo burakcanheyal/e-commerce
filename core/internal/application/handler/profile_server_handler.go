@@ -40,6 +40,11 @@ func (p *ProfileServerHandler) Create(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) Update(context *gin.Context) {
+	id, exist := context.Keys["id"].(dto.IdDto)
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
 	user := dto.UserDto{}
 	if err := context.BindJSON(&user); err != nil {
 		context.JSON(http.StatusBadRequest, ErrorInJson())
@@ -52,7 +57,7 @@ func (p *ProfileServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	err = p.UserService.UpdateUser(user)
+	err = p.UserService.UpdateUser(id.Id, user)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -62,13 +67,13 @@ func (p *ProfileServerHandler) Update(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) Delete(context *gin.Context) {
-	id, exist := context.Get("id")
+	id, exist := context.Keys["id"].(dto.IdDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	err := p.UserService.DeleteUser(id.(int32))
+	err := p.UserService.DeleteUser(id.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -78,13 +83,13 @@ func (p *ProfileServerHandler) Delete(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) GetByUsername(context *gin.Context) {
-	id, exist := context.Get("id")
+	id, exist := context.Keys["id"].(dto.IdDto)
 	if exist != true {
 		context.JSON(http.StatusBadRequest, internal.UserNotFound)
 		return
 	}
 
-	user, err := p.UserService.GetUserById(id.(int32))
+	user, err := p.UserService.GetUserById(id.Id)
 	if err != nil {
 		context.JSON(http.StatusNotFound, NonExistItem())
 		return
@@ -94,6 +99,12 @@ func (p *ProfileServerHandler) GetByUsername(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
+	id, exist := context.Keys["id"].(dto.IdDto)
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
 	user := dto.UserUpdatePasswordDto{}
 	if err := context.BindJSON(&user); err != nil {
 		context.JSON(http.StatusBadRequest, ErrorInJson())
@@ -106,7 +117,7 @@ func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
 		return
 	}
 
-	err = p.UserService.UpdateUserPassword(user)
+	err = p.UserService.UpdateUserPassword(id.Id, user)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return

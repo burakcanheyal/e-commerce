@@ -1,7 +1,7 @@
 package enum
 
 const (
-	AvailableProduct   = 1
-	UnAvailableProduct = 2
-	DeletedProduct     = 3
+	ProductAvailable   = 1
+	ProductUnAvailable = 2
+	ProductDeleted     = 3
 )

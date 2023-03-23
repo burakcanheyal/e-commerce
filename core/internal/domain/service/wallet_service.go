@@ -43,7 +43,7 @@ func (w *WalletService) UpdateBalance(walletDto dto.WalletDto, id int32) error {
 	wallet = entity.Wallet{
 		Id:      wallet.Id,
 		UserId:  user.Id,
-		Balance: walletDto.Balance,
+		Balance: wallet.Balance + walletDto.Balance,
 		Status:  enum.WalletActive,
 	}
 

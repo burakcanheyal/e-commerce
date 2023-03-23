@@ -3,6 +3,7 @@ package repository
 import (
 	"attempt4/core/internal"
 	"attempt4/core/internal/domain/entity"
+	"attempt4/core/internal/domain/enum"
 	"gorm.io/gorm"
 )
 
@@ -22,8 +23,7 @@ func (w *WalletRepository) Create(wallet entity.Wallet) (entity.Wallet, error) {
 }
 
 func (w *WalletRepository) Delete(wallet entity.Wallet) error {
-
-	if err := w.Db.Where("id = ?", wallet.Id).Updates(wallet).Error; err != nil {
+	if err := w.Db.Where("id = ?", wallet.Id).Update("status", enum.WalletDeleted).Error; err != nil {
 		return internal.DBNotDeleted
 	}
 	return nil
@@ -43,7 +43,10 @@ func (w *WalletRepository) GetByUserId(id int32) (entity.Wallet, error) {
 	return wallet, nil
 }
 func (w *WalletRepository) Update(wallet entity.Wallet) error {
-	if err := w.Db.Model(&wallet).Where("id=?", wallet.Id).Updates(wallet).Error; err != nil {
+	if err := w.Db.Model(&wallet).Where("id=?", wallet.Id).Updates(
+		entity.Wallet{
+			Balance: wallet.Balance,
+		}).Error; err != nil {
 		return internal.DBNotUpdated
 	}
 	return nil

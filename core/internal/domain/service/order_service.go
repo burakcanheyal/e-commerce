@@ -74,7 +74,7 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 
 	product.Quantity = product.Quantity - orderDto.Quantity
 	if product.Quantity == 0 {
-		product.Status = enum.UnAvailableProduct
+		product.Status = enum.ProductUnAvailable
 	}
 
 	err = o.productRepos.Update(product)

@@ -45,6 +45,32 @@ func (u *UserService) DeleteUser(id int32) error {
 		return err
 	}
 
+	wallet, err := u.walletRepository.GetByUserId(user.Id)
+	if wallet.Id == 0 {
+		if err != nil {
+			return err
+		}
+		return internal.WalletNotFound
+	}
+
+	err = u.walletRepository.Delete(wallet)
+	if err != nil {
+		return err
+	}
+
+	key, err := u.keyRepository.GetByUserId(user.Id)
+	if key.KeyId == 0 {
+		if err != nil {
+			return err
+		}
+		return internal.KeyNotFound
+	}
+
+	err = u.keyRepository.Delete(key)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -93,8 +119,8 @@ func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 	return userDto, nil
 }
 
-func (u *UserService) UpdateUser(userDto dto.UserDto) error {
-	user, err := u.userRepository.GetByName(userDto.Username)
+func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
+	user, err := u.userRepository.GetById(id)
 	if user.Id == 0 {
 		if err != nil {
 			return err
@@ -109,7 +135,7 @@ func (u *UserService) UpdateUser(userDto dto.UserDto) error {
 		Email:         userDto.Email,
 		Name:          userDto.Name,
 		Surname:       userDto.Surname,
-		Status:        1,
+		Status:        userDto.Status,
 		Code:          user.Code,
 		CodeExpiredAt: user.CodeExpiredAt,
 		BirthDate:     userDto.BirthDate,
@@ -122,8 +148,8 @@ func (u *UserService) UpdateUser(userDto dto.UserDto) error {
 	return nil
 }
 
-func (u *UserService) UpdateUserPassword(userDto dto.UserUpdatePasswordDto) error {
-	user, err := u.userRepository.GetByName(userDto.UserName)
+func (u *UserService) UpdateUserPassword(id int32, userDto dto.UserUpdatePasswordDto) error {
+	user, err := u.userRepository.GetById(id)
 	if user.Id == 0 {
 		if err != nil {
 			return err
@@ -253,9 +279,6 @@ func (u *UserService) GetUserRoleById(id int32) (int, error) {
 		return 0, internal.UserNotFound
 	}
 
-	if user.Status != enum.UserActiveStatus {
-		return 0, internal.UserUnactivated
-	}
 	rol, err := u.keyRepository.GetByUserId(user.Id)
 	if err != nil {
 		return 0, err

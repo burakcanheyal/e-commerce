@@ -8,8 +8,8 @@ import (
 
 func RolSeed(db *gorm.DB) {
 	rol := []entity.Key{
-		{0, 1, enum.RoleAdmin, entity.User{}},
-		{0, 2, enum.RoleManager, entity.User{}},
+		{0, 1, enum.RoleAdmin, enum.ApprovedKeyStatus, entity.User{}},
+		{0, 2, enum.RoleManager, enum.ApprovedKeyStatus, entity.User{}},
 	}
 	var size int64
 	db.Model(&rol).Count(&size)

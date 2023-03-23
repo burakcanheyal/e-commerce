@@ -24,7 +24,7 @@ func (w *WalletServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Get("id")
+	id, exist := context.Keys["id"].(dto.IdDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
@@ -36,7 +36,7 @@ func (w *WalletServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	err = w.walletService.UpdateBalance(wallet, id.(int32))
+	err = w.walletService.UpdateBalance(wallet, id.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return

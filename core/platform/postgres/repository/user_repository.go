@@ -23,7 +23,7 @@ func (p *UserRepository) Create(user entity.User) (entity.User, error) {
 }
 
 func (p *UserRepository) Delete(user entity.User) error {
-	if err := p.db.Model(&user).Where("status != ?", enum.UserDeletedStatus).Where("id=?", user.Id).Updates(user).Error; err != nil {
+	if err := p.db.Model(&user).Where("id=?", user.Id).Update("status", enum.UserDeletedStatus).Error; err != nil {
 		return internal.DBNotDeleted
 	}
 	return nil
@@ -43,7 +43,15 @@ func (p *UserRepository) GetByName(userName string) (entity.User, error) {
 	return user, nil
 }
 func (p *UserRepository) Update(user entity.User) error {
-	if err := p.db.Model(&user).Where("status != ?", enum.UserDeletedStatus).Where("id=?", user.Id).Updates(user).Error; err != nil {
+	if err := p.db.Model(&user).Where("status != ?", enum.UserDeletedStatus).Where("id=?", user.Id).Updates(
+		entity.User{
+			Password:  user.Password,
+			Email:     user.Email,
+			Name:      user.Name,
+			Surname:   user.Surname,
+			Status:    user.Status,
+			BirthDate: user.BirthDate,
+		}).Error; err != nil {
 		return internal.DBNotUpdated
 	}
 	return nil

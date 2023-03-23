@@ -26,7 +26,7 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Get("id")
+	id, exist := context.Keys["id"].(dto.IdDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
@@ -38,7 +38,7 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	orderDescription, err := o.orderService.CreateOrder(order, id.(int32))
+	orderDescription, err := o.orderService.CreateOrder(order, id.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -68,7 +68,7 @@ func (o *OrderServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Get("id")
+	id, exist := context.Keys["id"].(dto.IdDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
@@ -80,7 +80,7 @@ func (o *OrderServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	err = o.orderService.UpdateOrder(order, id.(int32))
+	err = o.orderService.UpdateOrder(order, id.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -118,13 +118,13 @@ func (o *OrderServerHandler) GetAllOrders(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Get("if")
+	id, exist := context.Keys["id"].(dto.IdDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	orderDto, totalNumber, err := o.orderService.GetAllOrders(id.(int32), filter, pagination)
+	orderDto, totalNumber, err := o.orderService.GetAllOrders(id.Id, filter, pagination)
 	if err != nil {
 		context.JSON(http.StatusNotFound, NonExistItem())
 		return

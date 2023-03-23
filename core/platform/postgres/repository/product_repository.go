@@ -25,7 +25,7 @@ func (p *ProductRepository) Create(product entity.Product) (entity.Product, erro
 	return product, nil
 }
 func (p *ProductRepository) Delete(product entity.Product) error {
-	if err := p.db.Where("status != ?", enum.DeletedProduct).Where("id = ?", product.Id).Updates(product).Error; err != nil {
+	if err := p.db.Where("id = ?", product.Id).Update("status", enum.ProductDeleted).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return internal.DBNotFound
 		}
@@ -61,7 +61,7 @@ func (p *ProductRepository) GetAllProducts(filter dto.Filter, pagination dto.Pag
 	var productList []entity.Product
 	var total int64
 	var order string
-	listQuery := p.db.Find(&productList).Where("status != ?", enum.DeletedProduct)
+	listQuery := p.db.Find(&productList).Where("status != ?", enum.ProductDeleted)
 
 	if filter.Name != "" {
 		listQuery = listQuery.Where("name ilike ?", "%"+filter.Name+"%")
@@ -88,7 +88,12 @@ func (p *ProductRepository) GetAllProducts(filter dto.Filter, pagination dto.Pag
 	return productList, total, nil
 }
 func (p *ProductRepository) Update(product entity.Product) error {
-	if err := p.db.Model(&product).Where("id=?", product.Id).Updates(product).Error; err != nil {
+	if err := p.db.Model(&product).Where("id=?", product.Id).Updates(
+		entity.Product{
+			Name:     product.Name,
+			Quantity: product.Quantity,
+			Price:    product.Price,
+		}).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return internal.DBNotFound
 		}

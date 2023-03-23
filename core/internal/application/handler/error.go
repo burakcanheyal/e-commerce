@@ -32,6 +32,12 @@ func SuccessInCreate() ApplicationError {
 func SuccessInActivate() ApplicationError {
 	return ApplicationError{Result: "Başarılı", Message: "Kullanıcı aktif edildi"}
 }
+func SuccessInSendRequest() ApplicationError {
+	return ApplicationError{Result: "Başarılı", Message: "İstek gönderildi"}
+}
+func SuccessInResponseRequest() ApplicationError {
+	return ApplicationError{Result: "Başarılı", Message: "Rol isteği cevaplandı"}
+}
 func NewHttpError(err error) ApplicationError {
 	return ApplicationError{Result: "Hata", Message: err.Error()}
 }

@@ -45,7 +45,7 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto, id int32) (dto
 		Name:     productDto.Name,
 		Quantity: productDto.Quantity,
 		Price:    productDto.Price,
-		Status:   enum.AvailableProduct,
+		Status:   enum.ProductAvailable,
 		UserId:   user.Id,
 	}
 
@@ -66,7 +66,7 @@ func (p *ProductService) DeleteProduct(name string) error {
 		return internal.ProductNotFound
 	}
 
-	product.Status = enum.DeletedProduct
+	product.Status = enum.ProductDeleted
 
 	err = p.productRepos.Delete(product)
 
@@ -92,10 +92,10 @@ func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
 		Price:    product.Price,
 	}
 
-	if product.Status == enum.DeletedProduct {
+	if product.Status == enum.ProductDeleted {
 		return productDto, internal.ProductDeleted
 	}
-	if product.Status == enum.UnAvailableProduct {
+	if product.Status == enum.ProductUnAvailable {
 		return productDto, internal.ProductUnavailable
 	}
 
@@ -118,10 +118,10 @@ func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDt
 		Price:    product.Price,
 	}
 
-	if product.Status == enum.DeletedProduct {
+	if product.Status == enum.ProductDeleted {
 		return productDto, internal.ProductDeleted
 	}
-	if product.Status == enum.UnAvailableProduct {
+	if product.Status == enum.ProductUnAvailable {
 		return productDto, internal.ProductUnavailable
 	}
 

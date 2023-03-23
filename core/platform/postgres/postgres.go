@@ -10,7 +10,14 @@ import (
 
 func InitializeDatabase(dsn string) *gorm.DB {
 	db := ConnectToDb(dsn)
-	err := db.AutoMigrate(&entity.Product{}, &entity.User{}, &entity.Order{}, &entity.Key{}, &entity.Wallet{})
+	err := db.AutoMigrate(
+		&entity.Product{},
+		&entity.User{},
+		&entity.Order{},
+		&entity.Key{},
+		&entity.Wallet{},
+		&entity.Panel{},
+	)
 	if err != nil {
 		return nil
 	}
