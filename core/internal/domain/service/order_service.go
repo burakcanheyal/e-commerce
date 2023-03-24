@@ -65,6 +65,7 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 		ProductId: orderDto.ProductId,
 		Quantity:  orderDto.Quantity,
 		Status:    enum.OrderActive,
+		Price:     float64(orderDto.Quantity) * float64(product.Price),
 	}
 
 	order, err = o.orderRepos.Create(order)
@@ -151,11 +152,20 @@ func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, id int32) error {
 		return err
 	}
 
+	product, err := o.productRepos.GetById(orderDto.ProductId)
+	if product.Id == 0 {
+		if err != nil {
+			return err
+		}
+		return internal.ProductNotFound
+	}
+
 	order = entity.Order{
 		OrderId:   order.OrderId,
 		UserId:    user.Id,
 		ProductId: orderDto.ProductId,
 		Quantity:  orderDto.Quantity,
+		Price:     float64(orderDto.Quantity) * float64(product.Price),
 	}
 
 	err = o.orderRepos.Update(order)

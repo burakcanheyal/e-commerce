@@ -23,6 +23,7 @@ func (r *KeyRepository) Create(key entity.Key) (entity.Key, error) {
 }
 
 func (r *KeyRepository) Delete(key entity.Key) error {
+	//Todo:Silinmişlerde arama
 	if err := r.db.Model(&key).Where("key_id=?", key.KeyId).Update("status", enum.KeyDeleted).Error; err != nil {
 		return internal.DBNotDeleted
 	}
@@ -43,11 +44,9 @@ func (r *KeyRepository) GetByUserId(id int32) (entity.Key, error) {
 	return key, nil
 }
 func (r *KeyRepository) Update(key entity.Key) error {
-	if err := r.db.Model(&key).Where("key_id=?", key.KeyId).Updates(
-		entity.Key{
-			Rol:    key.Rol,
-			Status: key.Status,
-		}).Error; err != nil {
+	if err := r.db.Model(&key).Where("key_id=?", key.KeyId).Updates(entity.Key{
+		Rol: key.Rol,
+	}).Error; err != nil {
 		return internal.DBNotUpdated
 	}
 	return nil

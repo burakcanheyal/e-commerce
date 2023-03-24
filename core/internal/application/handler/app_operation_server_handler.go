@@ -8,22 +8,22 @@ import (
 	"net/http"
 )
 
-type KeyServerHandler struct {
-	KeyService service.KeyService
+type AppOperationServerHandler struct {
+	KeyService service.RolService
 }
 
-func NewKeyServerHandler(keyService service.KeyService) KeyServerHandler {
-	k := KeyServerHandler{keyService}
+func NewAppOperationServerHandler(keyService service.RolService) AppOperationServerHandler {
+	k := AppOperationServerHandler{keyService}
 	return k
 }
-func (k *KeyServerHandler) UpdateUserRole(context *gin.Context) {
+func (a *AppOperationServerHandler) UpdateUserRole(context *gin.Context) {
 	id, exist := context.Keys["id"].(dto.IdDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	err := k.KeyService.SendRequestToUpdateUserRole(id.Id)
+	err := a.KeyService.AppOperationToUpdateUserRole(id.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -31,14 +31,20 @@ func (k *KeyServerHandler) UpdateUserRole(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInSendRequest())
 }
-func (k *KeyServerHandler) ResponseToChangeUserRole(context *gin.Context) {
-	response := dto.PanelDto{}
+func (a *AppOperationServerHandler) ResponseToChangeUserRole(context *gin.Context) {
+	id, exist := context.Keys["id"].(dto.IdDto)
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	response := dto.AppOperationDto{}
 	if err := context.BindJSON(&response); err != nil {
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}
 
-	err := k.KeyService.ResponseToUpdateUserRole(response)
+	err := a.KeyService.ResultOfUpdateUserRole(response, id.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return

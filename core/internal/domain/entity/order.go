@@ -6,6 +6,7 @@ type Order struct {
 	ProductId int32 `json:"product_id" gorm:"foreign_key"`
 	Quantity  int32 `json:"quantity"`
 	Status    int8
+	Price     float64
 	Product   Product `gorm:"foreign_key:ProductId"`
 	User      User    `gorm:"foreign_key:UserId"`
 }

@@ -13,7 +13,7 @@ type WebServer struct {
 	orderServerHandler   handler.OrderServerHandler
 	authentication       handler.AuthenticationServerHandler
 	walletServerHandler  handler.WalletServerHandler
-	keyServerHandler     handler.KeyServerHandler
+	keyServerHandler     handler.AppOperationServerHandler
 	middleware           middleware.Middleware
 }
 
@@ -23,7 +23,7 @@ func NewWebServer(
 	orderServerHandler handler.OrderServerHandler,
 	authentication handler.AuthenticationServerHandler,
 	walletServerHandler handler.WalletServerHandler,
-	keyServerHandler handler.KeyServerHandler,
+	keyServerHandler handler.AppOperationServerHandler,
 	middleware middleware.Middleware,
 ) WebServer {
 	s := WebServer{
@@ -50,7 +50,7 @@ func (s *WebServer) SetupRoot() {
 	user.DELETE("/", s.profileServerHandler.Delete)
 	user.GET("/", s.profileServerHandler.GetByUsername)
 
-	changeUserRole := router.Group("/profil/rol", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser}))
+	changeUserRole := router.Group("/rol", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser}))
 	changeUserRole.GET("/", s.keyServerHandler.UpdateUserRole)
 
 	order := router.Group("/order", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))

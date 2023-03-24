@@ -8,6 +8,7 @@ import (
 )
 
 func UserSeed(db *gorm.DB) {
+	//Todo:Phone number ekle
 	users := []entity.User{
 		{0,
 			"burak12570",

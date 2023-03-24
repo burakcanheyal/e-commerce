@@ -42,6 +42,8 @@ func (o *OrderRepository) Update(order entity.Order) error {
 		entity.Order{
 			ProductId: order.ProductId,
 			Quantity:  order.Quantity,
+			Status:    order.Status,
+			Price:     order.Price,
 		}).Error; err != nil {
 		return internal.DBNotUpdated
 	}

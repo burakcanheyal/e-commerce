@@ -44,3 +44,6 @@ func (w *WalletServerHandler) Update(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
+func (w *WalletServerHandler) CompletePurchase(context *gin.Context) {
+
+}

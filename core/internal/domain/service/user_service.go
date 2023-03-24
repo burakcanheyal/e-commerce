@@ -127,7 +127,7 @@ func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 		}
 		return internal.UserNotFound
 	}
-
+	//Todo:Unique'liği kontrol et
 	user = entity.User{
 		Id:            user.Id,
 		Username:      user.Username,

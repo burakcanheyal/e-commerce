@@ -63,6 +63,8 @@ func (a *Middleware) Auth() gin.HandlerFunc {
 }
 func (a *Middleware) Permission(permissionType []int) gin.HandlerFunc {
 	return func(context *gin.Context) {
+		//Todo:Boş olma durumunu denetle, TokenDto, TokenUser
+
 		id, exist := context.Keys["id"].(dto.IdDto)
 		if exist != true {
 			context.AbortWithStatusJSON(401, internal.UserNotFound)
