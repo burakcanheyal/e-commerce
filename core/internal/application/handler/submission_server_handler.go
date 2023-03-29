@@ -8,22 +8,23 @@ import (
 	"net/http"
 )
 
-type AppOperationServerHandler struct {
+type SubmissionServerHandler struct {
 	KeyService service.RolService
 }
 
-func NewAppOperationServerHandler(keyService service.RolService) AppOperationServerHandler {
-	k := AppOperationServerHandler{keyService}
+func NewSubmissionServerHandler(keyService service.RolService) SubmissionServerHandler {
+	k := SubmissionServerHandler{keyService}
 	return k
 }
-func (a *AppOperationServerHandler) UpdateUserRole(context *gin.Context) {
-	id, exist := context.Keys["id"].(dto.IdDto)
+
+func (a *SubmissionServerHandler) UpdateUserRole(context *gin.Context) {
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	err := a.KeyService.AppOperationToUpdateUserRole(id.Id)
+	err := a.KeyService.SubmissionUserRole(id.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -31,8 +32,9 @@ func (a *AppOperationServerHandler) UpdateUserRole(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInSendRequest())
 }
-func (a *AppOperationServerHandler) ResponseToChangeUserRole(context *gin.Context) {
-	id, exist := context.Keys["id"].(dto.IdDto)
+
+func (a *SubmissionServerHandler) ResponseToChangeUserRole(context *gin.Context) {
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return

@@ -8,7 +8,6 @@ import (
 )
 
 func UserSeed(db *gorm.DB) {
-	//Todo:Phone number ekle
 	users := []entity.User{
 		{0,
 			"burak12570",
@@ -16,10 +15,12 @@ func UserSeed(db *gorm.DB) {
 			"burakcanheyal@gmail.com ",
 			"Burak Can",
 			"Heyal",
+			"+905316519484",
 			1,
 			"412563",
 			time.Now(),
-			time.Date(2000, time.Month(9), 18, 0, 0, 0, 0, time.UTC)},
+			time.Date(2000, time.Month(9), 18, 0, 0, 0, 0, time.UTC),
+			time.Now(), time.Now(), time.Now()},
 
 		{0,
 			"Fanahey",
@@ -27,10 +28,12 @@ func UserSeed(db *gorm.DB) {
 			"fatihmeral@outlook.com",
 			"Fatih",
 			"Meral",
+			"+905316519424",
 			1,
 			"947628",
 			time.Now(),
-			time.Date(1999, time.Month(5), 24, 0, 0, 0, 0, time.UTC)},
+			time.Date(1999, time.Month(5), 24, 0, 0, 0, 0, time.UTC),
+			time.Now(), time.Now(), time.Now()},
 	}
 
 	var size int64

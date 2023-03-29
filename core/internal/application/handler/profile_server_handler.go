@@ -17,6 +17,7 @@ func NewProfileServerHandler(userService service.UserService) ProfileServerHandl
 	u := ProfileServerHandler{userService}
 	return u
 }
+
 func (p *ProfileServerHandler) Create(context *gin.Context) {
 	user := dto.UserDto{}
 	if err := context.BindJSON(&user); err != nil {
@@ -40,7 +41,7 @@ func (p *ProfileServerHandler) Create(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) Update(context *gin.Context) {
-	id, exist := context.Keys["id"].(dto.IdDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
@@ -67,7 +68,7 @@ func (p *ProfileServerHandler) Update(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) Delete(context *gin.Context) {
-	id, exist := context.Keys["id"].(dto.IdDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
@@ -82,8 +83,8 @@ func (p *ProfileServerHandler) Delete(context *gin.Context) {
 	context.JSON(http.StatusOK, SuccessInDelete())
 }
 
-func (p *ProfileServerHandler) GetByUsername(context *gin.Context) {
-	id, exist := context.Keys["id"].(dto.IdDto)
+func (p *ProfileServerHandler) GetUser(context *gin.Context) {
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(http.StatusBadRequest, internal.UserNotFound)
 		return
@@ -99,7 +100,7 @@ func (p *ProfileServerHandler) GetByUsername(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
-	id, exist := context.Keys["id"].(dto.IdDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return

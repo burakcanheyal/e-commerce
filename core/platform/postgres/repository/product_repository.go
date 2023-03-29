@@ -6,6 +6,7 @@ import (
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
 	"gorm.io/gorm"
+	"time"
 )
 
 type ProductRepository struct {
@@ -24,6 +25,7 @@ func (p *ProductRepository) Create(product entity.Product) (entity.Product, erro
 
 	return product, nil
 }
+
 func (p *ProductRepository) Delete(product entity.Product) error {
 	if err := p.db.Where("id = ?", product.Id).Update("status", enum.ProductDeleted).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -32,8 +34,16 @@ func (p *ProductRepository) Delete(product entity.Product) error {
 		return err
 	}
 
+	if err := p.db.Where("id = ?", product.Id).Update("deleted_at", time.Now()).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return internal.DBNotFound
+		}
+		return err
+	}
+
 	return nil
 }
+
 func (p *ProductRepository) GetByName(name string) (entity.Product, error) {
 	var product entity.Product
 	if err := p.db.Model(&product).Where("name=?", name).First(&product).Error; err != nil {
@@ -45,6 +55,7 @@ func (p *ProductRepository) GetByName(name string) (entity.Product, error) {
 
 	return product, nil
 }
+
 func (p *ProductRepository) GetById(id int32) (entity.Product, error) {
 	var product entity.Product
 	if err := p.db.Model(&product).Where("id=?", id).Scan(&product).Error; err != nil {
@@ -87,12 +98,14 @@ func (p *ProductRepository) GetAllProducts(filter dto.Filter, pagination dto.Pag
 	}
 	return productList, total, nil
 }
+
 func (p *ProductRepository) Update(product entity.Product) error {
 	if err := p.db.Model(&product).Where("id=?", product.Id).Updates(
 		entity.Product{
-			Name:     product.Name,
-			Quantity: product.Quantity,
-			Price:    product.Price,
+			Name:      product.Name,
+			Quantity:  product.Quantity,
+			Price:     product.Price,
+			UpdatedAt: time.Now(),
 		}).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return internal.DBNotFound
@@ -102,6 +115,7 @@ func (p *ProductRepository) Update(product entity.Product) error {
 
 	return nil
 }
+
 func (p *ProductRepository) GetIdByName(name string) (int32, error) {
 	var product entity.Product
 	if err := p.db.Model(&product).Where("name=?", name).Scan(&product).Error; err != nil {

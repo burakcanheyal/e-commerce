@@ -31,7 +31,7 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Keys["id"].(dto.IdDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return

@@ -12,14 +12,14 @@ import (
 
 type RolService struct {
 	userRepository  repository.UserRepository
-	keyRepository   repository.KeyRepository
-	panelRepository repository.AppOperationRepository
+	keyRepository   repository.RoleRepository
+	panelRepository repository.SubmissionRepository
 }
 
 func NewRolService(
 	userRepository repository.UserRepository,
-	keyRepository repository.KeyRepository,
-	panelRepository repository.AppOperationRepository) RolService {
+	keyRepository repository.RoleRepository,
+	panelRepository repository.SubmissionRepository) RolService {
 	k := RolService{
 		userRepository,
 		keyRepository,
@@ -28,23 +28,23 @@ func NewRolService(
 	return k
 }
 
-func (k *RolService) AppOperationToUpdateUserRole(id int32) error {
+func (k *RolService) SubmissionUserRole(id int32) error {
 	operation, err := k.panelRepository.GetByUserId(id)
 	if operation.Id != 0 {
 		return internal.OperationWaiting
 	}
 
-	if operation.Status != enum.OperationWaiting {
+	if operation.Status != enum.SubmissionWaiting {
 		return internal.OperationResponded
 	}
 
-	operation = entity.AppOperation{
-		OperationNumber: randomString(15),
-		OperationId:     enum.OperationRoleChange,
-		Status:          enum.OperationWaiting,
-		AppliedUserId:   id,
-		ReceiverUserId:  1,
-		OperationDate:   time.Now(),
+	operation = entity.Submission{
+		SubmissionNumber: RandomString(15),
+		SubmissionType:   enum.SubmissionRolChange,
+		Status:           enum.SubmissionWaiting,
+		AppliedUserId:    id,
+		ReceiverUserId:   1,
+		OperationDate:    time.Now(),
 	}
 
 	operation, err = k.panelRepository.Create(operation)
@@ -67,25 +67,25 @@ func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id 
 		return internal.OperationNotFound
 	}
 
-	if operation.OperationNumber != ResponseDto.OperationNumber {
+	if operation.SubmissionNumber != ResponseDto.OperationNumber {
 		return internal.OperationFailInNumber
 	}
 
 	operation.Status = ResponseDto.Response
 
 	key, err := k.keyRepository.GetByUserId(ResponseDto.UserId)
-	if key.KeyId == 0 {
+	if key.Id == 0 {
 		if err != nil {
 			return err
 		}
-		return internal.KeyNotFound
+		return internal.RoleNotFound
 	}
 
-	if ResponseDto.Response == enum.OperationApproved {
+	if ResponseDto.Response == enum.SubmissionApproved {
 		key.Rol = enum.RoleManager
-		operation.Status = enum.OperationApproved
+		operation.Status = enum.SubmissionApproved
 	} else {
-		operation.Status = enum.OperationReject
+		operation.Status = enum.SubmissionRejected
 	}
 
 	operation.OperationResultDate = time.Now()
@@ -102,7 +102,7 @@ func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id 
 
 	return nil
 }
-func randomString(len int) string {
+func RandomString(len int) string {
 
 	bytes := make([]byte, len)
 

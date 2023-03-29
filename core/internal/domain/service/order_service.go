@@ -6,6 +6,7 @@ import (
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
 	"attempt4/core/platform/postgres/repository"
+	"time"
 )
 
 type OrderService struct {
@@ -33,7 +34,7 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 	start := o.orderRepos.Db.Begin()
 
 	order, err := o.orderRepos.GetById(orderDto.Id)
-	if order.OrderId != 0 {
+	if order.Id != 0 {
 		if err != nil {
 			return orderDescription, err
 		}
@@ -66,6 +67,9 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 		Quantity:  orderDto.Quantity,
 		Status:    enum.OrderActive,
 		Price:     float64(orderDto.Quantity) * float64(product.Price),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		DeletedAt: time.Now(),
 	}
 
 	order, err = o.orderRepos.Create(order)
@@ -102,7 +106,7 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 
 func (o *OrderService) DeleteOrder(id int32) error {
 	order, err := o.orderRepos.GetById(id)
-	if order.OrderId == 0 {
+	if order.Id == 0 {
 		if err != nil {
 			return err
 		}
@@ -112,7 +116,6 @@ func (o *OrderService) DeleteOrder(id int32) error {
 	order.Status = enum.OrderCancel
 
 	err = o.orderRepos.Delete(order)
-
 	if err != nil {
 		return err
 	}
@@ -122,7 +125,7 @@ func (o *OrderService) DeleteOrder(id int32) error {
 func (o *OrderService) GetOrderById(id int32) (dto.OrderDto, error) {
 	orderDto := dto.OrderDto{}
 	order, err := o.orderRepos.GetById(id)
-	if order.OrderId == 0 {
+	if order.Id == 0 {
 		if err != nil {
 			return orderDto, err
 		}
@@ -140,7 +143,7 @@ func (o *OrderService) GetOrderById(id int32) (dto.OrderDto, error) {
 
 func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, id int32) error {
 	order, err := o.orderRepos.GetById(orderDto.Id)
-	if order.OrderId == 0 {
+	if order.Id == 0 {
 		if err != nil {
 			return err
 		}
@@ -161,7 +164,7 @@ func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, id int32) error {
 	}
 
 	order = entity.Order{
-		OrderId:   order.OrderId,
+		Id:        order.Id,
 		UserId:    user.Id,
 		ProductId: orderDto.ProductId,
 		Quantity:  orderDto.Quantity,

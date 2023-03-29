@@ -17,6 +17,7 @@ func NewWalletServerHandler(walletService service.WalletService) WalletServerHan
 	w := WalletServerHandler{walletService}
 	return w
 }
+
 func (w *WalletServerHandler) Update(context *gin.Context) {
 	wallet := dto.WalletDto{}
 	if err := context.BindJSON(&wallet); err != nil {
@@ -24,7 +25,7 @@ func (w *WalletServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Keys["id"].(dto.IdDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
@@ -44,6 +45,37 @@ func (w *WalletServerHandler) Update(context *gin.Context) {
 
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
+
 func (w *WalletServerHandler) CompletePurchase(context *gin.Context) {
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	err := w.walletService.Purchase(id.Id)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, NewHttpError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, SuccessInPurchase())
+
+}
+
+func (w *WalletServerHandler) GetAllTransactions(context *gin.Context) {
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	err, items := w.walletService.GetAllTransactions(id.Id)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, NewHttpError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, items)
 
 }

@@ -33,17 +33,18 @@ func Setup() {
 	userRepository := repository.NewUserRepository(db)
 	productRepository := repository.NewProductRepository(db)
 	orderRepository := repository.NewOrderRepository(db)
-	keyRepository := repository.NewKeyRepository(db)
+	roleRepository := repository.NewRoleRepository(db)
 	walletRepository := repository.NewWalletRepository(db)
-	panelRepository := repository.NewAppOperationRepository(db)
+	panelRepository := repository.NewSubmissionRepository(db)
 	walletOperation := repository.NewWalletOperationRepository(db)
 
-	userService := service.NewUserService(userRepository, keyRepository, walletRepository)
+	userService := service.NewUserService(userRepository, roleRepository, walletRepository)
 	productService := service.NewProductService(productRepository, userRepository)
 	orderService := service.NewOrderService(orderRepository, productRepository, userRepository)
 	authenticationService := service.NewAuthentication(userRepository, config.Secret, config.Secret2)
-	walletService := service.NewWalletService(userRepository, walletRepository, productRepository, orderRepository, walletOperation)
-	keyService := service.NewRolService(userRepository, keyRepository, panelRepository)
+	walletService := service.NewWalletService(userRepository, walletRepository, productRepository,
+		orderRepository, walletOperation, roleRepository)
+	keyService := service.NewRolService(userRepository, roleRepository, panelRepository)
 
 	authenticationMiddleware := middleware.NewMiddleware(authenticationService, userService)
 
@@ -52,7 +53,7 @@ func Setup() {
 	productServerHandler := handler.NewProductServerHandler(productService)
 	orderServerHandler := handler.NewOrderServerHandler(orderService)
 	walletServerHandler := handler.NewWalletServerHandler(walletService)
-	keyServerHandler := handler.NewAppOperationServerHandler(keyService)
+	keyServerHandler := handler.NewSubmissionServerHandler(keyService)
 
 	webServer := server.NewWebServer(
 		productServerHandler,

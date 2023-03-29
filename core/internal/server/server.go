@@ -13,7 +13,7 @@ type WebServer struct {
 	orderServerHandler   handler.OrderServerHandler
 	authentication       handler.AuthenticationServerHandler
 	walletServerHandler  handler.WalletServerHandler
-	keyServerHandler     handler.AppOperationServerHandler
+	keyServerHandler     handler.SubmissionServerHandler
 	middleware           middleware.Middleware
 }
 
@@ -23,7 +23,7 @@ func NewWebServer(
 	orderServerHandler handler.OrderServerHandler,
 	authentication handler.AuthenticationServerHandler,
 	walletServerHandler handler.WalletServerHandler,
-	keyServerHandler handler.AppOperationServerHandler,
+	keyServerHandler handler.SubmissionServerHandler,
 	middleware middleware.Middleware,
 ) WebServer {
 	s := WebServer{
@@ -48,7 +48,7 @@ func (s *WebServer) SetupRoot() {
 	user.PUT("/", s.profileServerHandler.Update)
 	user.PUT("/pass/", s.profileServerHandler.UpdatePassword)
 	user.DELETE("/", s.profileServerHandler.Delete)
-	user.GET("/", s.profileServerHandler.GetByUsername)
+	user.GET("/", s.profileServerHandler.GetUser)
 
 	changeUserRole := router.Group("/rol", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser}))
 	changeUserRole.GET("/", s.keyServerHandler.UpdateUserRole)
@@ -69,6 +69,8 @@ func (s *WebServer) SetupRoot() {
 
 	wallet := router.Group("/wallet", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
 	wallet.PUT("/", s.walletServerHandler.Update)
+	wallet.GET("/complete", s.walletServerHandler.CompletePurchase)
+	wallet.GET("/", s.walletServerHandler.GetAllTransactions)
 
 	panel := router.Group("/panel", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleAdmin}))
 	panel.POST("/", s.keyServerHandler.ResponseToChangeUserRole)

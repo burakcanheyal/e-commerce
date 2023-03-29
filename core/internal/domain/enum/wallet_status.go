@@ -6,4 +6,7 @@ const (
 	WalletDeleted = 3
 
 	WalletManagerMinValue = 10000
+
+	WalletBuyType  = 1
+	WalletSellType = 2
 )

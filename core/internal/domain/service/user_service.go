@@ -13,13 +13,13 @@ import (
 
 type UserService struct {
 	userRepository   repository.UserRepository
-	keyRepository    repository.KeyRepository
+	keyRepository    repository.RoleRepository
 	walletRepository repository.WalletRepository
 }
 
 func NewUserService(
 	userRepository repository.UserRepository,
-	keyRepository repository.KeyRepository,
+	keyRepository repository.RoleRepository,
 	walletRepository repository.WalletRepository) UserService {
 	u := UserService{
 		userRepository,
@@ -59,11 +59,11 @@ func (u *UserService) DeleteUser(id int32) error {
 	}
 
 	key, err := u.keyRepository.GetByUserId(user.Id)
-	if key.KeyId == 0 {
+	if key.Id == 0 {
 		if err != nil {
 			return err
 		}
-		return internal.KeyNotFound
+		return internal.RoleNotFound
 	}
 
 	err = u.keyRepository.Delete(key)
@@ -127,7 +127,6 @@ func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 		}
 		return internal.UserNotFound
 	}
-	//Todo:Unique'liği kontrol et
 	user = entity.User{
 		Id:            user.Id,
 		Username:      user.Username,
@@ -207,6 +206,9 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 		Code:          generateCode(),
 		CodeExpiredAt: time.Now().Add(time.Second * 300),
 		BirthDate:     userDto.BirthDate,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
+		DeletedAt:     time.Now(),
 	}
 
 	user, err = u.userRepository.Create(user)
@@ -220,14 +222,17 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 	}
 
 	key, err = u.keyRepository.Create(key)
-	if key.KeyId == 0 {
-		return internal.KeyNotCreated
+	if key.Id == 0 {
+		return internal.RoleNotCreated
 	}
 
 	wallet := entity.Wallet{
-		UserId:  user.Id,
-		Balance: 0,
-		Status:  enum.WalletPassive,
+		UserId:    user.Id,
+		Balance:   0,
+		Status:    enum.WalletPassive,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		DeletedAt: time.Now(),
 	}
 
 	wallet, err = u.walletRepository.Create(wallet)

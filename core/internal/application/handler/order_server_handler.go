@@ -26,7 +26,7 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Keys["id"].(dto.IdDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
@@ -68,7 +68,7 @@ func (o *OrderServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Keys["id"].(dto.IdDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
@@ -118,7 +118,7 @@ func (o *OrderServerHandler) GetAllOrders(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Keys["id"].(dto.IdDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return

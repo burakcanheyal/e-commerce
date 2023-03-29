@@ -57,21 +57,22 @@ func (a *Middleware) Auth() gin.HandlerFunc {
 			context.JSON(200, tokenString)
 		}
 
-		context.Set("id", dto.IdDto{Id: user.Id})
+		context.Set("user", dto.TokenUserDto{Id: user.Id})
 		context.Next()
 	}
 }
 func (a *Middleware) Permission(permissionType []int) gin.HandlerFunc {
 	return func(context *gin.Context) {
-		//Todo:Boş olma durumunu denetle, TokenDto, TokenUser
-
-		id, exist := context.Keys["id"].(dto.IdDto)
+		user, exist := context.Keys["user"].(dto.TokenUserDto)
 		if exist != true {
+			if user.Id == 0 {
+				context.AbortWithStatusJSON(401, internal.FailInToken)
+			}
 			context.AbortWithStatusJSON(401, internal.UserNotFound)
 			return
 		}
 
-		rol, err := a.userService.GetUserRoleById(id.Id)
+		rol, err := a.userService.GetUserRoleById(user.Id)
 		if err != nil {
 			context.AbortWithStatusJSON(401, handler.NewHttpError(err))
 			return
@@ -80,11 +81,10 @@ func (a *Middleware) Permission(permissionType []int) gin.HandlerFunc {
 		for i := range permissionType {
 			if permissionType[i] == rol {
 				context.Next()
-				break
+				return
 			}
 		}
 		context.AbortWithStatusJSON(401, internal.UserUnauthorized)
 		return
-
 	}
 }

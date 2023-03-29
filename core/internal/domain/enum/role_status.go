@@ -5,5 +5,5 @@ const (
 	RoleManager = 2
 	RoleAdmin   = 3
 
-	KeyDeleted = 9
+	RoleDeleted = 9
 )

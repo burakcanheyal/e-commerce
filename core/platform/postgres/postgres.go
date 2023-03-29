@@ -16,7 +16,7 @@ func InitializeDatabase(dsn string) *gorm.DB {
 		&entity.Order{},
 		&entity.Key{},
 		&entity.Wallet{},
-		&entity.AppOperation{},
+		&entity.Submission{},
 		&entity.WalletOperation{},
 	)
 	if err != nil {

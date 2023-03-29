@@ -38,6 +38,9 @@ func SuccessInSendRequest() ApplicationError {
 func SuccessInResponseRequest() ApplicationError {
 	return ApplicationError{Result: "Başarılı", Message: "Rol isteği cevaplandı"}
 }
+func SuccessInPurchase() ApplicationError {
+	return ApplicationError{Result: "Başarılı", Message: "Ödeme başarıyla tamamlandı"}
+}
 func NewHttpError(err error) ApplicationError {
 	return ApplicationError{Result: "Hata", Message: err.Error()}
 }

@@ -6,6 +6,7 @@ import (
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
 	"attempt4/core/platform/postgres/repository"
+	"time"
 )
 
 type ProductService struct {
@@ -41,12 +42,15 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto, id int32) (dto
 	}
 
 	product = entity.Product{
-		Id:       product.Id,
-		Name:     productDto.Name,
-		Quantity: productDto.Quantity,
-		Price:    productDto.Price,
-		Status:   enum.ProductAvailable,
-		UserId:   user.Id,
+		Id:        product.Id,
+		Name:      productDto.Name,
+		Quantity:  productDto.Quantity,
+		Price:     productDto.Price,
+		Status:    enum.ProductAvailable,
+		CreatedAt: time.Now(),
+		DeletedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserId:    user.Id,
 	}
 
 	product, err = p.productRepos.Create(product)
