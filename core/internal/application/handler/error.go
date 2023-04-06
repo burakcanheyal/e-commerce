@@ -41,6 +41,9 @@ func SuccessInResponseRequest() ApplicationError {
 func SuccessInPurchase() ApplicationError {
 	return ApplicationError{Result: "Başarılı", Message: "Ödeme başarıyla tamamlandı"}
 }
+func SuccessInCreatingPdf() ApplicationError {
+	return ApplicationError{Result: "Başarılı", Message: "İstatistik Pdf'i başarıyla yaratıldı"}
+}
 func NewHttpError(err error) ApplicationError {
 	return ApplicationError{Result: "Hata", Message: err.Error()}
 }

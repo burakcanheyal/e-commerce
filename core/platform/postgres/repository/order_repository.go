@@ -6,7 +6,6 @@ import (
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
 	"gorm.io/gorm"
-	"time"
 )
 
 type OrderRepository struct {
@@ -26,10 +25,10 @@ func (o *OrderRepository) Create(order entity.Order) (entity.Order, error) {
 }
 
 func (o *OrderRepository) Delete(order entity.Order) error {
-	if err := o.Db.Where("id = ?", order.Id).Update("status", enum.OrderCancel).Error; err != nil {
+	if err := o.Db.Model(&order).Where("id = ?", order.Id).Update("status", enum.OrderCancel).Error; err != nil {
 		return internal.DBNotDeleted
 	}
-	if err := o.Db.Where("id = ?", order.Id).Update("deleted_at", time.Now()).Error; err != nil {
+	if err := o.Db.Model(&order).Where("id = ?", order.Id).Update("deleted_at", order.DeletedAt).Error; err != nil {
 		return internal.DBNotDeleted
 	}
 	return nil
@@ -50,7 +49,7 @@ func (o *OrderRepository) Update(order entity.Order) error {
 			Quantity:  order.Quantity,
 			Status:    order.Status,
 			Price:     order.Price,
-			UpdatedAt: time.Now(),
+			UpdatedAt: order.UpdatedAt,
 		}).Error; err != nil {
 		return internal.DBNotUpdated
 	}
@@ -61,7 +60,7 @@ func (o *OrderRepository) GetAllOrders(filter dto.Filter, pagination dto.Paginat
 	var orderList []entity.Order
 	var total int64
 
-	listQuery := o.Db.Find(&orderList).Where("status = ?", enum.OrderActive)
+	listQuery := o.Db.Find(&orderList).Where("status = ?", enum.OrderActive).Where("user_id = ?", userId)
 
 	if filter.Quantity != 0 {
 		listQuery = listQuery.Where("quantity > ?", filter.Quantity)

@@ -3,6 +3,7 @@ package handler
 import (
 	"attempt4/core/internal"
 	"attempt4/core/internal/domain/dto"
+	"attempt4/core/internal/domain/enum"
 	"attempt4/core/internal/domain/service"
 	"attempt4/core/platform/validation"
 	"github.com/gin-gonic/gin"
@@ -63,19 +64,35 @@ func (w *WalletServerHandler) CompletePurchase(context *gin.Context) {
 
 }
 
-func (w *WalletServerHandler) GetAllTransactions(context *gin.Context) {
+func (w *WalletServerHandler) GetAllBuyTransactions(context *gin.Context) {
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	err, items := w.walletService.GetAllTransactions(id.Id)
+	items, total, err := w.walletService.GetAllTransactions(id.Id, enum.WalletBuyType)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
 	}
 
-	context.JSON(http.StatusOK, items)
+	context.JSON(http.StatusOK, gin.H{"Toplam sipariş sayısı ": total, "Siparişler: ": items})
 
+}
+
+func (w *WalletServerHandler) GetAllSellTransactions(context *gin.Context) {
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	err := w.walletService.ShowStatistics(user.Id)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, NewHttpError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, SuccessInCreatingPdf())
 }

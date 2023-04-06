@@ -4,7 +4,7 @@ import "time"
 
 type SellStaticsDto struct {
 	OperationNumber string
-	Balance         float64
+	Balance         float32
 	OrderId         int32
 	ProductName     string
 	OrderQuantity   int32

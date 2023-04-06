@@ -21,10 +21,10 @@ func NewAuthentication(userRepos repository.UserRepository, secret string, secre
 }
 func (p *Authentication) Login(userDto dto.AuthDto) error {
 	user, err := p.UserRepository.GetByName(userDto.Username)
+	if err != nil {
+		return err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.UserNotFound
 	}
 
@@ -51,10 +51,10 @@ func (p *Authentication) GetUserByTokenString(tokenString string) (dto.UserDto, 
 	}
 
 	user, err := p.UserRepository.GetByName(username)
+	if err != nil {
+		return userDto, err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return userDto, err
-		}
 		return userDto, internal.UserNotFound
 	}
 
@@ -65,11 +65,7 @@ func (p *Authentication) GetUserByTokenString(tokenString string) (dto.UserDto, 
 		Name:      user.Name,
 		Surname:   user.Surname,
 		Status:    user.Status,
-		BirthDate: user.BirthDate,
-	}
-
-	if user.Id == 0 {
-		return userDto, internal.UserNotFound
+		BirthDate: *user.BirthDate,
 	}
 
 	return userDto, nil

@@ -6,6 +6,10 @@ import (
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
 	"attempt4/core/platform/postgres/repository"
+	"fmt"
+	"github.com/hoisie/mustache"
+	"github.com/pdfcrowd/pdfcrowd-go"
+	"os"
 	"time"
 )
 
@@ -38,26 +42,31 @@ func NewWalletService(
 }
 func (w *WalletService) UpdateBalance(walletDto dto.WalletDto, id int32) error {
 	wallet, err := w.walletRepository.GetByUserId(id)
+	if err != nil {
+		return err
+	}
 	if wallet.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.WalletNotFound
 	}
 
 	user, err := w.userRepository.GetById(id)
+	if err != nil {
+		return err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.UserNotFound
 	}
 
+	balance := wallet.Balance + walletDto.Balance
+
+	updatedTime := time.Now()
+
 	wallet = entity.Wallet{
-		Id:      wallet.Id,
-		UserId:  user.Id,
-		Balance: wallet.Balance + walletDto.Balance,
-		Status:  enum.WalletActive,
+		Id:        wallet.Id,
+		UserId:    user.Id,
+		Balance:   balance,
+		Status:    enum.WalletActive,
+		UpdatedAt: &updatedTime,
 	}
 
 	err = w.walletRepository.Update(wallet)
@@ -70,14 +79,14 @@ func (w *WalletService) UpdateBalance(walletDto dto.WalletDto, id int32) error {
 
 func (w *WalletService) Purchase(id int32) error {
 	wallet, err := w.walletRepository.GetByUserId(id)
+	if err != nil {
+		return err
+	}
 	if wallet.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.WalletNotFound
 	}
 
-	price := float64(0)
+	price := float32(0)
 
 	orders, count, err := w.orderRepository.GetAllOrders(dto.Filter{}, dto.Pagination{}, id)
 	if count == 0 {
@@ -114,16 +123,19 @@ func (w *WalletService) Purchase(id int32) error {
 			return err
 		}
 
-		sellerWallet.Balance = sellerWallet.Balance + orders[i].Price
+		balance := sellerWallet.Balance + orders[i].Price
+		sellerWallet.Balance = balance
+
+		currentTime := time.Now()
 
 		walletOperation := entity.WalletOperation{
 			OperationNumber: RandomString(8),
 			Type:            enum.WalletSellType,
 			Balance:         orders[i].Price,
-			UserId:          product.UserId,
-			OrderId:         orders[i].Id,
-			ProductId:       product.Id,
-			OperationDate:   time.Now(),
+			UserId:          &product.UserId,
+			OrderId:         &orders[i].Id,
+			ProductId:       &product.Id,
+			OperationDate:   currentTime,
 		}
 
 		walletOperation, err = w.walletOperationRepository.Create(walletOperation)
@@ -155,7 +167,8 @@ func (w *WalletService) Purchase(id int32) error {
 		return internal.WalletInadequate
 	}
 
-	wallet.Balance = wallet.Balance - price
+	balance := wallet.Balance - price
+	wallet.Balance = balance
 
 	err = w.walletRepository.Update(wallet)
 	if err != nil {
@@ -164,15 +177,16 @@ func (w *WalletService) Purchase(id int32) error {
 		return err
 	}
 
-	//Todo: Satıcı ve alıcı için ayrı entityler
+	currentTime := time.Now()
+
 	walletOperation := entity.WalletOperation{
 		OperationNumber: RandomString(8),
 		Type:            enum.WalletBuyType,
 		Balance:         price,
-		UserId:          id,
-		OrderId:         1,
-		ProductId:       1,
-		OperationDate:   time.Now(),
+		UserId:          &id,
+		OrderId:         nil,
+		ProductId:       nil,
+		OperationDate:   currentTime,
 	}
 
 	walletOperation, err = w.walletOperationRepository.Create(walletOperation)
@@ -192,110 +206,69 @@ func (w *WalletService) Purchase(id int32) error {
 	return nil
 }
 
-func (w *WalletService) GetAllTransactions(id int32) (error, []dto.TransactionDto) {
-	transactions, total, err := w.walletOperationRepository.GetAllTransactions(id)
+func (w *WalletService) GetAllTransactions(id int32, transactionType int8) ([]dto.TransactionDto, int64, error) {
+	transactions, total, err := w.walletOperationRepository.GetAllTransactionsWithJoinTable(id, transactionType)
 	var list []dto.TransactionDto
+	if err != nil {
+		return list, total, err
+	}
 	if total == 0 {
-		if err != nil {
-			return err, list
-		}
-		return internal.WalletNotFound, list
+		return list, total, internal.TransactionNotFound
 	}
 
 	for i, _ := range transactions {
-		//Todo:Reposunda ayarla
-		if transactions[i].Type == enum.WalletSellType {
-			continue
-		}
-		//Todo: Preload
-		product, err := w.productRepository.GetById(transactions[i].ProductId)
-		if product.Id == 0 {
-			return internal.ProductNotFound, list
-		}
-		if err != nil {
-			return err, list
+		var l dto.TransactionDto
+		if transactions[i].OrderId == nil {
+			l.OrderId = 0
+			l.OrderQuantity = 0
+		} else {
+			l.OrderId = *transactions[i].OrderId
+			l.OrderQuantity = transactions[i].Order.Quantity
 		}
 
-		order, err := w.orderRepository.GetById(transactions[i].OrderId)
-		if order.Id == 0 {
-			return internal.OrderNotFound, list
-		}
-		if err != nil {
-			return err, list
-		}
-
-		seller, err := w.userRepository.GetById(product.UserId)
-		if seller.Id == 0 {
-			return internal.UserNotFound, list
-		}
-		if err != nil {
-			return err, list
+		if transactions[i].ProductId == nil {
+			l.ProductName = ""
+		} else {
+			l.ProductName = transactions[i].Product.Name
+			l.SellerName = transactions[i].Product.User.Name
 		}
 
-		//Todo: obje dön id ve name
-		l := dto.TransactionDto{
-			OperationNumber: transactions[i].OperationNumber,
-			Balance:         transactions[i].Balance,
-			OrderId:         transactions[i].OrderId,
-			ProductName:     product.Name,
-			OrderQuantity:   order.Quantity,
-			SellerName:      seller.Name,
-			OperationDate:   transactions[i].OperationDate,
-		}
+		l.OperationNumber = transactions[i].OperationNumber
+		l.Balance = transactions[i].Balance
+		l.OperationDate = transactions[i].OperationDate
+
 		list = append(list, l)
 	}
-	return nil, list
+	return list, total, nil
 }
 
-func (w *WalletService) ShowStatistics(id int32) ([]dto.SellStaticsDto, error) {
-	transactions, total, err := w.walletOperationRepository.GetAllTransactions(id)
-	var list []dto.SellStaticsDto
-	if total == 0 {
-		//Todo: Custom error
-		return list, internal.WalletNotFound
-	}
+func (w *WalletService) ShowStatistics(id int32) error {
+	items, _, err := w.GetAllTransactions(id, enum.WalletSellType)
 	if err != nil {
-		return list, err
+		return err
 	}
 
-	for i, _ := range transactions {
-		if transactions[i].Type == enum.WalletSellType {
-			continue
-		}
-		product, err := w.productRepository.GetById(transactions[i].ProductId)
-		if product.Id == 0 {
-			return list, internal.ProductNotFound
-		}
-		if err != nil {
-			return list, err
-		}
-
-		order, err := w.orderRepository.GetById(transactions[i].OrderId)
-		if order.Id == 0 {
-			return list, internal.OrderNotFound
-		}
-		if err != nil {
-			return list, err
-		}
-
-		buyer, err := w.userRepository.GetById(order.UserId)
-		if buyer.Id == 0 {
-			return list, internal.UserNotFound
-		}
-		if err != nil {
-			return list, err
-		}
-
-		l := dto.SellStaticsDto{
-			OperationNumber: transactions[i].OperationNumber,
-			Balance:         transactions[i].Balance,
-			OrderId:         transactions[i].OrderId,
-			ProductName:     product.Name,
-			OrderQuantity:   order.Quantity,
-			BuyerName:       buyer.Name,
-			OperationDate:   transactions[i].OperationDate,
-		}
-		list = append(list, l)
+	type transactionList struct {
+		Transactions []dto.TransactionDto
 	}
-	return list, nil
+
+	dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	list := transactionList{items}
+
+	filename := fmt.Sprintf("%s/core/internal/application/template/transactions.html", dir)
+	result := mustache.RenderFile(filename, list)
+	client := pdfcrowd.NewHtmlToPdfClient("demo", "ce544b6ea52a5621fb9d55f8b542d14d")
+
+	pdf := fmt.Sprintf("%s/core/internal/application/template/pdf/statistic.pdf", dir)
+	err = client.ConvertStringToFile(result, pdf)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

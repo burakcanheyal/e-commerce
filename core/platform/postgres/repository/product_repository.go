@@ -6,7 +6,6 @@ import (
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
 	"gorm.io/gorm"
-	"time"
 )
 
 type ProductRepository struct {
@@ -27,18 +26,18 @@ func (p *ProductRepository) Create(product entity.Product) (entity.Product, erro
 }
 
 func (p *ProductRepository) Delete(product entity.Product) error {
-	if err := p.db.Where("id = ?", product.Id).Update("status", enum.ProductDeleted).Error; err != nil {
+	if err := p.db.Model(&product).Where("id = ?", product.Id).Update("status", enum.ProductDeleted).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return internal.DBNotFound
 		}
-		return err
+		return internal.DBNotDeleted
 	}
 
-	if err := p.db.Where("id = ?", product.Id).Update("deleted_at", time.Now()).Error; err != nil {
+	if err := p.db.Model(&product).Where("id = ?", product.Id).Update("deleted_at", product.DeletedAt).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return internal.DBNotFound
 		}
-		return err
+		return internal.DBNotDeleted
 	}
 
 	return nil
@@ -105,7 +104,7 @@ func (p *ProductRepository) Update(product entity.Product) error {
 			Name:      product.Name,
 			Quantity:  product.Quantity,
 			Price:     product.Price,
-			UpdatedAt: time.Now(),
+			UpdatedAt: product.UpdatedAt,
 		}).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return internal.DBNotFound

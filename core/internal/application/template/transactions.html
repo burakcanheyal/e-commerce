@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title> Transactions </title>
+    <style>
+        h3{
+            text-align: center;
+        }
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+
+<body>
+<h3> Transactions </h3>
+
+<div class="row">
+    <table>
+        <thead>
+        <tr>
+            <th>Operation Number</th>
+            <th>Balance</th>
+            <th>Order Id</th>
+            <th>Product Name</th>
+            <th>Order Quantity</th>
+            <th>Seller Name</th>
+            <th>Operation Date</th>
+        </tr>
+        </thead>
+        {{#Transactions}}
+        <tr>
+            <td>{{OperationNumber}}</td>
+            <td>{{Balance}}</td>
+            <td>{{OrderId}}</td>
+            <td>{{ProductName}}</td>
+            <td>{{OrderQuantity}}</td>
+            <td>{{SellerName}}</td>
+            <td>{{OperationDate}}</td>
+        </tr>
+        {{/Transactions}}
+    </table>
+
+</div>
+
+<div class="back">
+    <a href="/">
+        &#8617;
+    </a>
+</div>
+</body>
+</html>

@@ -26,18 +26,18 @@ func NewProductService(
 
 func (p *ProductService) CreateProduct(productDto dto.ProductDto, id int32) (dto.ProductDto, error) {
 	product, err := p.productRepos.GetByName(productDto.Name)
+	if err != nil {
+		return productDto, err
+	}
 	if product.Id != 0 {
-		if err != nil {
-			return productDto, err
-		}
 		return productDto, internal.ProductExist
 	}
 
 	user, err := p.UserRepos.GetById(id)
+	if err != nil {
+		return productDto, err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return productDto, err
-		}
 		return productDto, internal.UserNotFound
 	}
 
@@ -48,8 +48,8 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto, id int32) (dto
 		Price:     productDto.Price,
 		Status:    enum.ProductAvailable,
 		CreatedAt: time.Now(),
-		DeletedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		DeletedAt: nil,
+		UpdatedAt: nil,
 		UserId:    user.Id,
 	}
 
@@ -63,13 +63,15 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto, id int32) (dto
 
 func (p *ProductService) DeleteProduct(name string) error {
 	product, err := p.productRepos.GetByName(name)
+	if err != nil {
+		return err
+	}
 	if product.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.ProductNotFound
 	}
+	deletedTime := time.Now()
 
+	product.DeletedAt = &deletedTime
 	product.Status = enum.ProductDeleted
 
 	err = p.productRepos.Delete(product)
@@ -83,10 +85,10 @@ func (p *ProductService) DeleteProduct(name string) error {
 func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
 	productDto := dto.ProductDto{}
 	product, err := p.productRepos.GetByName(name)
+	if err != nil {
+		return productDto, err
+	}
 	if product.Id == 0 {
-		if err != nil {
-			return productDto, err
-		}
 		return productDto, internal.ProductNotFound
 	}
 
@@ -109,10 +111,10 @@ func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
 func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDto, error) {
 	productDto := dto.ProductDto{}
 	product, err := p.productRepos.GetById(id)
+	if err != nil {
+		return productDto, err
+	}
 	if product.Id == 0 {
-		if err != nil {
-			return productDto, err
-		}
 		return productDto, internal.ProductNotFound
 	}
 
@@ -134,18 +136,21 @@ func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDt
 
 func (p *ProductService) UpdateProduct(productDto dto.ProductUpdateDto) error {
 	product, err := p.productRepos.GetByName(productDto.Name)
+	if err != nil {
+		return err
+	}
 	if product.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.ProductNotFound
 	}
 
+	updatedTime := time.Now()
+
 	entityProduct := entity.Product{
-		Id:       product.Id,
-		Name:     productDto.Name,
-		Quantity: productDto.Quantity,
-		Price:    productDto.Price,
+		Id:        product.Id,
+		Name:      productDto.Name,
+		Quantity:  productDto.Quantity,
+		Price:     productDto.Price,
+		UpdatedAt: &updatedTime,
 	}
 	err = p.productRepos.Update(entityProduct)
 	if err != nil {

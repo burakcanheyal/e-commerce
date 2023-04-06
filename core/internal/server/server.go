@@ -66,11 +66,12 @@ func (s *WebServer) SetupRoot() {
 	product.POST("/", s.productServerHandler.Create)
 	product.DELETE("/", s.productServerHandler.Delete)
 	product.PUT("/", s.productServerHandler.Update)
+	product.GET("/statistics", s.walletServerHandler.GetAllSellTransactions)
 
 	wallet := router.Group("/wallet", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
 	wallet.PUT("/", s.walletServerHandler.Update)
 	wallet.GET("/complete", s.walletServerHandler.CompletePurchase)
-	wallet.GET("/", s.walletServerHandler.GetAllTransactions)
+	wallet.GET("/", s.walletServerHandler.GetAllBuyTransactions)
 
 	panel := router.Group("/panel", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleAdmin}))
 	panel.POST("/", s.keyServerHandler.ResponseToChangeUserRole)

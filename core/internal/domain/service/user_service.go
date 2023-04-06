@@ -13,17 +13,17 @@ import (
 
 type UserService struct {
 	userRepository   repository.UserRepository
-	keyRepository    repository.RoleRepository
+	roleRepository   repository.RoleRepository
 	walletRepository repository.WalletRepository
 }
 
 func NewUserService(
 	userRepository repository.UserRepository,
-	keyRepository repository.RoleRepository,
+	roleRepository repository.RoleRepository,
 	walletRepository repository.WalletRepository) UserService {
 	u := UserService{
 		userRepository,
-		keyRepository,
+		roleRepository,
 		walletRepository,
 	}
 	return u
@@ -31,14 +31,17 @@ func NewUserService(
 
 func (u *UserService) DeleteUser(id int32) error {
 	user, err := u.userRepository.GetById(id)
+	if err != nil {
+		return err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.UserNotFound
 	}
 
 	user.Status = enum.UserDeletedStatus
+
+	deletedTime := time.Now()
+	user.DeletedAt = &deletedTime
 
 	err = u.userRepository.Delete(user)
 	if err != nil {
@@ -46,27 +49,30 @@ func (u *UserService) DeleteUser(id int32) error {
 	}
 
 	wallet, err := u.walletRepository.GetByUserId(user.Id)
+	if err != nil {
+		return err
+	}
 	if wallet.Id == 0 {
-		if err != nil {
-			return err
-		}
+
 		return internal.WalletNotFound
 	}
+
+	wallet.DeletedAt = &deletedTime
 
 	err = u.walletRepository.Delete(wallet)
 	if err != nil {
 		return err
 	}
 
-	key, err := u.keyRepository.GetByUserId(user.Id)
-	if key.Id == 0 {
-		if err != nil {
-			return err
-		}
+	role, err := u.roleRepository.GetByUserId(user.Id)
+	if err != nil {
+		return err
+	}
+	if role.Id == 0 {
 		return internal.RoleNotFound
 	}
 
-	err = u.keyRepository.Delete(key)
+	err = u.roleRepository.Delete(role)
 	if err != nil {
 		return err
 	}
@@ -77,10 +83,10 @@ func (u *UserService) DeleteUser(id int32) error {
 func (u *UserService) GetUserByUsername(username string) (dto.UserDto, error) {
 	userDto := dto.UserDto{}
 	user, err := u.userRepository.GetByName(username)
+	if err != nil {
+		return userDto, err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return userDto, err
-		}
 		return userDto, internal.UserNotFound
 	}
 
@@ -90,7 +96,7 @@ func (u *UserService) GetUserByUsername(username string) (dto.UserDto, error) {
 		Name:      user.Name,
 		Surname:   user.Surname,
 		Status:    user.Status,
-		BirthDate: user.BirthDate,
+		BirthDate: *user.BirthDate,
 	}
 
 	return userDto, nil
@@ -99,10 +105,10 @@ func (u *UserService) GetUserByUsername(username string) (dto.UserDto, error) {
 func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 	userDto := dto.UserDto{}
 	user, err := u.userRepository.GetById(id)
+	if err != nil {
+		return userDto, err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return userDto, err
-		}
 		return userDto, internal.UserNotFound
 	}
 
@@ -113,7 +119,7 @@ func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 		Name:      user.Name,
 		Surname:   user.Surname,
 		Status:    user.Status,
-		BirthDate: user.BirthDate,
+		BirthDate: *user.BirthDate,
 	}
 
 	return userDto, nil
@@ -127,6 +133,7 @@ func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 		}
 		return internal.UserNotFound
 	}
+	updatedTime := time.Now()
 	user = entity.User{
 		Id:            user.Id,
 		Username:      user.Username,
@@ -137,7 +144,8 @@ func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 		Status:        userDto.Status,
 		Code:          user.Code,
 		CodeExpiredAt: user.CodeExpiredAt,
-		BirthDate:     userDto.BirthDate,
+		BirthDate:     &userDto.BirthDate,
+		UpdatedAt:     &updatedTime,
 	}
 
 	err = u.userRepository.Update(user)
@@ -149,10 +157,10 @@ func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 
 func (u *UserService) UpdateUserPassword(id int32, userDto dto.UserUpdatePasswordDto) error {
 	user, err := u.userRepository.GetById(id)
+	if err != nil {
+		return err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.UserNotFound
 	}
 
@@ -168,7 +176,7 @@ func (u *UserService) UpdateUserPassword(id int32, userDto dto.UserUpdatePasswor
 		Email:         user.Email,
 		Name:          user.Name,
 		Surname:       user.Surname,
-		Status:        1,
+		Status:        enum.UserActiveStatus,
 		Code:          user.Code,
 		CodeExpiredAt: user.CodeExpiredAt,
 		BirthDate:     user.BirthDate,
@@ -184,10 +192,10 @@ func (u *UserService) UpdateUserPassword(id int32, userDto dto.UserUpdatePasswor
 
 func (u *UserService) CreateUser(userDto dto.UserDto) error {
 	user, err := u.userRepository.GetByName(userDto.Username)
+	if err != nil {
+		return err
+	}
 	if user.Id != 0 {
-		if err != nil {
-			return err
-		}
 		return internal.UserExist
 	}
 
@@ -195,6 +203,9 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 	if err != nil {
 		return err
 	}
+
+	currentTime := time.Now()
+	expiredTime := currentTime.Add(time.Second * 300)
 
 	user = entity.User{
 		Username:      userDto.Username,
@@ -204,11 +215,11 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 		Surname:       userDto.Surname,
 		Status:        enum.UserPassiveStatus,
 		Code:          generateCode(),
-		CodeExpiredAt: time.Now().Add(time.Second * 300),
-		BirthDate:     userDto.BirthDate,
+		CodeExpiredAt: &expiredTime,
+		BirthDate:     &userDto.BirthDate,
 		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
-		DeletedAt:     time.Now(),
+		UpdatedAt:     nil,
+		DeletedAt:     nil,
 	}
 
 	user, err = u.userRepository.Create(user)
@@ -216,12 +227,15 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 		return internal.UserNotCreated
 	}
 
-	key := entity.Key{
+	key := entity.Role{
 		UserId: user.Id,
 		Rol:    enum.RoleUser,
 	}
 
-	key, err = u.keyRepository.Create(key)
+	key, err = u.roleRepository.Create(key)
+	if err != nil {
+		return err
+	}
 	if key.Id == 0 {
 		return internal.RoleNotCreated
 	}
@@ -231,11 +245,14 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 		Balance:   0,
 		Status:    enum.WalletPassive,
 		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		DeletedAt: time.Now(),
+		UpdatedAt: nil,
+		DeletedAt: nil,
 	}
 
 	wallet, err = u.walletRepository.Create(wallet)
+	if err != nil {
+		return err
+	}
 	if wallet.Id == 0 {
 		return internal.WalletNotCreated
 	}
@@ -244,25 +261,26 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 
 func (u *UserService) ActivateUser(codeDto dto.UserUpdateCodeDto) error {
 	user, err := u.userRepository.GetByName(codeDto.Username)
+	if err != nil {
+		return err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.UserNotFound
 	}
 
 	if user.CodeExpiredAt.Before(time.Now()) {
 		user.Code = generateCode()
-		user.CodeExpiredAt = time.Now().Add(time.Second * 300)
-		err = u.userRepository.Update(user)
+		expiredCode := time.Now().Add(time.Second * 300)
+		user.CodeExpiredAt = &expiredCode
 
+		err = u.userRepository.Update(user)
 		if err != nil {
 			return err
 		}
 		return internal.ExceedVerifyCode
 	}
 
-	if codeDto.Code != user.Code {
+	if codeDto.Code != *user.Code {
 		return internal.FailInVerify
 	}
 
@@ -277,14 +295,14 @@ func (u *UserService) ActivateUser(codeDto dto.UserUpdateCodeDto) error {
 
 func (u *UserService) GetUserRoleById(id int32) (int, error) {
 	user, err := u.userRepository.GetById(id)
+	if err != nil {
+		return 0, err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return 0, err
-		}
 		return 0, internal.UserNotFound
 	}
 
-	rol, err := u.keyRepository.GetByUserId(user.Id)
+	rol, err := u.roleRepository.GetByUserId(user.Id)
 	if err != nil {
 		return 0, err
 	}
@@ -292,6 +310,7 @@ func (u *UserService) GetUserRoleById(id int32) (int, error) {
 	return rol.Rol, nil
 }
 
-func generateCode() string {
-	return fmt.Sprint(time.Now().Nanosecond())[:6]
+func generateCode() *string {
+	code := fmt.Sprint(time.Now().Nanosecond())[:6]
+	return &code
 }

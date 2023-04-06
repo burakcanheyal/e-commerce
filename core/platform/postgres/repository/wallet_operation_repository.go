@@ -49,11 +49,26 @@ func (w *WalletOperationRepository) Update(walletOperation entity.WalletOperatio
 	return nil
 }
 
-func (w *WalletOperationRepository) GetAllTransactions(id int32) ([]entity.WalletOperation, int64, error) {
+func (w *WalletOperationRepository) GetAllTransactions(id int32, transactionType int8) ([]entity.WalletOperation, int64, error) {
 	var transactionList []entity.WalletOperation
 	var total int64
-	listQuery := w.db.Find(&transactionList).Where("user_id = ?", id)
+	listQuery := w.db.Find(&transactionList).Where("user_id = ?", id).Where("type = ?", transactionType)
 
+	if err := listQuery.Count(&total).Find(&transactionList).Error; err != nil {
+		return transactionList, 0, err
+	}
+	return transactionList, total, nil
+}
+
+func (w *WalletOperationRepository) GetAllTransactionsWithJoinTable(userId int32, temp int8) ([]entity.WalletOperation, int64, error) {
+	var transactionList []entity.WalletOperation
+	var total int64
+
+	listQuery := w.db.Model(&transactionList).Where("wallet_operations.user_id = ?", userId).Where("type = ?", temp)
+	listQuery = listQuery.Preload("User")
+	listQuery = listQuery.Preload("Order")
+	listQuery = listQuery.Preload("Product")
+	listQuery = listQuery.Preload("Product.User")
 	if err := listQuery.Count(&total).Find(&transactionList).Error; err != nil {
 		return transactionList, 0, err
 	}

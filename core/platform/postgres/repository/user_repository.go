@@ -5,7 +5,6 @@ import (
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
 	"gorm.io/gorm"
-	"time"
 )
 
 type UserRepository struct {
@@ -29,7 +28,7 @@ func (p *UserRepository) Delete(user entity.User) error {
 		return internal.DBNotDeleted
 	}
 
-	if err := p.db.Model(&user).Where("id=?", user.Id).Update("deleted_at", time.Now()).Error; err != nil {
+	if err := p.db.Model(&user).Where("id=?", user.Id).Update("deleted_at", user.DeletedAt).Error; err != nil {
 		return internal.DBNotDeleted
 	}
 
@@ -61,7 +60,8 @@ func (p *UserRepository) Update(user entity.User) error {
 			Surname:   user.Surname,
 			Status:    user.Status,
 			BirthDate: user.BirthDate,
-			UpdatedAt: time.Now(),
+			Code:      user.Code,
+			UpdatedAt: user.UpdatedAt,
 		}).Error; err != nil {
 		return internal.DBNotUpdated
 	}

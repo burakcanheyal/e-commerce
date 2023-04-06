@@ -52,4 +52,6 @@ var (
 	EmptyCart = errors.New("Lütfen sepetinize ürün ekleyiniz")
 
 	FailInPurchase = errors.New("Ödeme tamamlanamadı")
+
+	TransactionNotFound = errors.New("İşlem bulunamadı")
 )

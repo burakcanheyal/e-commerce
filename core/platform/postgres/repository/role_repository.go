@@ -15,36 +15,40 @@ func NewRoleRepository(db *gorm.DB) RoleRepository {
 	r := RoleRepository{db}
 	return r
 }
-func (r *RoleRepository) Create(key entity.Key) (entity.Key, error) {
-	if err := r.db.Create(&key).Error; err != nil {
-		return key, internal.DBNotCreated
+
+func (r *RoleRepository) Create(role entity.Role) (entity.Role, error) {
+	if err := r.db.Create(&role).Error; err != nil {
+		return role, internal.DBNotCreated
 	}
-	return key, nil
+	return role, nil
 }
 
-func (r *RoleRepository) Delete(key entity.Key) error {
-	if err := r.db.Model(&key).Where("status != ?", enum.RoleDeleted).Where("key_id=?", key.Id).Update("status", enum.RoleDeleted).Error; err != nil {
+func (r *RoleRepository) Delete(role entity.Role) error {
+	if err := r.db.Model(&role).Where("rol != ?", enum.RoleDeleted).Where("id=?", role.Id).Update("rol", enum.RoleDeleted).Error; err != nil {
 		return internal.DBNotDeleted
 	}
 	return nil
 }
-func (r *RoleRepository) GetById(id int32) (entity.Key, error) {
-	var key entity.Key
+
+func (r *RoleRepository) GetById(id int32) (entity.Role, error) {
+	var key entity.Role
 	if err := r.db.Model(&key).Where("status != ", enum.RoleDeleted).Where("key_id=?", id).Scan(&key).Error; err != nil {
 		return key, internal.DBNotFound
 	}
 	return key, nil
 }
-func (r *RoleRepository) GetByUserId(id int32) (entity.Key, error) {
-	var key entity.Key
+
+func (r *RoleRepository) GetByUserId(id int32) (entity.Role, error) {
+	var key entity.Role
 	if err := r.db.Model(&key).Where("user_id=?", id).Scan(&key).Error; err != nil {
 		return key, internal.DBNotFound
 	}
 	return key, nil
 }
-func (r *RoleRepository) Update(key entity.Key) error {
-	if err := r.db.Model(&key).Where("key_id=?", key.Id).Updates(entity.Key{
-		Rol: key.Rol,
+
+func (r *RoleRepository) Update(role entity.Role) error {
+	if err := r.db.Model(&role).Where("key_id=?", role.Id).Updates(entity.Role{
+		Rol: role.Rol,
 	}).Error; err != nil {
 		return internal.DBNotUpdated
 	}

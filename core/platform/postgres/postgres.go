@@ -14,7 +14,7 @@ func InitializeDatabase(dsn string) *gorm.DB {
 		&entity.Product{},
 		&entity.User{},
 		&entity.Order{},
-		&entity.Key{},
+		&entity.Role{},
 		&entity.Wallet{},
 		&entity.Submission{},
 		&entity.WalletOperation{},

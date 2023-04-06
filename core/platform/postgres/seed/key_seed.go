@@ -7,9 +7,21 @@ import (
 )
 
 func RolSeed(db *gorm.DB) {
-	rol := []entity.Key{
-		{0, 1, enum.RoleAdmin, entity.User{}},
-		{0, 2, enum.RoleManager, entity.User{}},
+	firstUserId := int32(1)
+	secondUserId := int32(2)
+	rol := []entity.Role{
+		{
+			0,
+			firstUserId,
+			enum.RoleAdmin,
+			entity.User{},
+		},
+		{
+			0,
+			secondUserId,
+			enum.RoleManager,
+			entity.User{},
+		},
 	}
 	var size int64
 	db.Model(&rol).Count(&size)

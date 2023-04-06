@@ -8,25 +8,27 @@ import (
 )
 
 func WalletSeed(db *gorm.DB) {
+	walletUserId := [2]int32{1, 2}
+	walletBalance := [2]float32{15100, 12000}
 	wallets := []entity.Wallet{
 		{
 			0,
-			1,
-			3522.10,
+			walletUserId[0],
+			walletBalance[0],
 			enum.WalletActive,
 			time.Now(),
-			time.Now(),
-			time.Now(),
+			nil,
+			nil,
 			entity.User{},
 		},
 		{
 			0,
-			2,
-			1347.9,
+			walletUserId[1],
+			walletBalance[1],
 			enum.WalletActive,
 			time.Now(),
-			time.Now(),
-			time.Now(),
+			nil,
+			nil,
 			entity.User{},
 		},
 	}

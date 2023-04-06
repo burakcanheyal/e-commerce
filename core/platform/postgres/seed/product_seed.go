@@ -2,16 +2,65 @@ package seed
 
 import (
 	"attempt4/core/internal/domain/entity"
+	"attempt4/core/internal/domain/enum"
 	"gorm.io/gorm"
 	"time"
 )
 
 func ProductSeed(db *gorm.DB) {
+	seedUserId := int32(2)
+	productNames := [4]string{"Domates", "Patates", "Soğan", "Sarımsak"}
+	productQuantity := [4]int32{45, 84, 95, 115}
+	productPrice := [4]float32{13.2, 8.3, 14.6, 20.5}
 	products := []entity.Product{
-		{0, "Domates", 8, 13.2, 1, 2, time.Now(), time.Now(), time.Now(), entity.User{}},
-		{0, "Patates", 13, 33.2, 1, 2, time.Now(), time.Now(), time.Now(), entity.User{}},
-		{0, "Soğan", 7, 22.2, 1, 2, time.Now(), time.Now(), time.Now(), entity.User{}},
-		{0, "Sarımsak", 26, 11.1, 1, 2, time.Now(), time.Now(), time.Now(), entity.User{}},
+		{
+			0,
+			productNames[0],
+			productQuantity[0],
+			productPrice[0],
+			enum.ProductAvailable,
+			seedUserId,
+			time.Now(),
+			nil,
+			nil,
+			entity.User{},
+		},
+		{
+			0,
+			productNames[1],
+			productQuantity[1],
+			productPrice[1],
+			enum.ProductAvailable,
+			seedUserId,
+			time.Now(),
+			nil,
+			nil,
+			entity.User{},
+		},
+		{
+			0,
+			productNames[2],
+			productQuantity[2],
+			productPrice[2],
+			enum.ProductAvailable,
+			seedUserId,
+			time.Now(),
+			nil,
+			nil,
+			entity.User{},
+		},
+		{
+			0,
+			productNames[3],
+			productQuantity[3],
+			productPrice[3],
+			enum.ProductAvailable,
+			seedUserId,
+			time.Now(),
+			nil,
+			nil,
+			entity.User{},
+		},
 	}
 	var size int64
 	db.Model(&products).Count(&size)

@@ -34,42 +34,42 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 	start := o.orderRepos.Db.Begin()
 
 	order, err := o.orderRepos.GetById(orderDto.Id)
+	if err != nil {
+		return orderDescription, err
+	}
 	if order.Id != 0 {
-		if err != nil {
-			return orderDescription, err
-		}
 		return orderDescription, internal.OrderExist
 	}
 
 	user, err := o.userRepos.GetById(id)
+	if err != nil {
+		return orderDescription, err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return orderDescription, err
-		}
 		return orderDescription, internal.UserNotFound
 	}
 
 	product, err := o.productRepos.GetById(orderDto.ProductId)
+	if err != nil {
+		return orderDescription, err
+	}
 	if product.Id == 0 {
-		if err != nil {
-			return orderDescription, err
-		}
 		return orderDescription, internal.ProductNotFound
 	}
 
 	if orderDto.Quantity > product.Quantity {
 		return orderDescription, internal.ExceedOrder
 	}
-
+	
 	order = entity.Order{
 		UserId:    user.Id,
 		ProductId: orderDto.ProductId,
 		Quantity:  orderDto.Quantity,
 		Status:    enum.OrderActive,
-		Price:     float64(orderDto.Quantity) * float64(product.Price),
+		Price:     float32(orderDto.Quantity) * product.Price,
 		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		DeletedAt: time.Now(),
+		UpdatedAt: nil,
+		DeletedAt: nil,
 	}
 
 	order, err = o.orderRepos.Create(order)
@@ -106,14 +106,17 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 
 func (o *OrderService) DeleteOrder(id int32) error {
 	order, err := o.orderRepos.GetById(id)
+	if err != nil {
+		return err
+	}
 	if order.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.OrderNotFound
 	}
 
 	order.Status = enum.OrderCancel
+
+	deletedTime := time.Now()
+	order.DeletedAt = &deletedTime
 
 	err = o.orderRepos.Delete(order)
 	if err != nil {
@@ -125,10 +128,10 @@ func (o *OrderService) DeleteOrder(id int32) error {
 func (o *OrderService) GetOrderById(id int32) (dto.OrderDto, error) {
 	orderDto := dto.OrderDto{}
 	order, err := o.orderRepos.GetById(id)
+	if err != nil {
+		return orderDto, err
+	}
 	if order.Id == 0 {
-		if err != nil {
-			return orderDto, err
-		}
 		return orderDto, internal.OrderNotFound
 	}
 
@@ -143,10 +146,10 @@ func (o *OrderService) GetOrderById(id int32) (dto.OrderDto, error) {
 
 func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, id int32) error {
 	order, err := o.orderRepos.GetById(orderDto.Id)
+	if err != nil {
+		return err
+	}
 	if order.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.OrderNotFound
 	}
 
@@ -154,21 +157,27 @@ func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, id int32) error {
 	if err != nil {
 		return err
 	}
+	if user.Id == 0 {
+		return internal.UserNotFound
+	}
 
 	product, err := o.productRepos.GetById(orderDto.ProductId)
+	if err != nil {
+		return err
+	}
 	if product.Id == 0 {
-		if err != nil {
-			return err
-		}
 		return internal.ProductNotFound
 	}
+
+	updatedTime := time.Now()
 
 	order = entity.Order{
 		Id:        order.Id,
 		UserId:    user.Id,
 		ProductId: orderDto.ProductId,
 		Quantity:  orderDto.Quantity,
-		Price:     float64(orderDto.Quantity) * float64(product.Price),
+		Price:     float32(orderDto.Quantity) * product.Price,
+		UpdatedAt: &updatedTime,
 	}
 
 	err = o.orderRepos.Update(order)
@@ -186,10 +195,10 @@ func (o *OrderService) GetAllOrders(id int32, filter dto.Filter, pagination dto.
 	var err error
 
 	user, err := o.userRepos.GetById(id)
+	if err != nil {
+		return productDto, totalNumber, err
+	}
 	if user.Id == 0 {
-		if err != nil {
-			return productDto, totalNumber, err
-		}
 		return productDto, totalNumber, internal.UserNotFound
 	}
 

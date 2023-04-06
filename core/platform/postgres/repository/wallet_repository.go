@@ -5,7 +5,6 @@ import (
 	"attempt4/core/internal/domain/entity"
 	"attempt4/core/internal/domain/enum"
 	"gorm.io/gorm"
-	"time"
 )
 
 type WalletRepository struct {
@@ -25,11 +24,10 @@ func (w *WalletRepository) Create(wallet entity.Wallet) (entity.Wallet, error) {
 }
 
 func (w *WalletRepository) Delete(wallet entity.Wallet) error {
-	if err := w.Db.Where("id = ?", wallet.Id).Update("status", enum.WalletDeleted).Error; err != nil {
+	if err := w.Db.Model(&wallet).Where("id = ?", wallet.Id).Update("status", enum.WalletDeleted).Error; err != nil {
 		return internal.DBNotDeleted
 	}
-
-	if err := w.Db.Where("id = ?", wallet.Id).Update("deleted_at", time.Now()).Error; err != nil {
+	if err := w.Db.Model(&wallet).Where("id = ?", wallet.Id).Update("deleted_at", wallet.DeletedAt).Error; err != nil {
 		return internal.DBNotDeleted
 	}
 	return nil
@@ -55,7 +53,7 @@ func (w *WalletRepository) Update(wallet entity.Wallet) error {
 	if err := w.Db.Model(&wallet).Where("id=?", wallet.Id).Updates(
 		entity.Wallet{
 			Balance:   wallet.Balance,
-			UpdatedAt: time.Now(),
+			UpdatedAt: wallet.UpdatedAt,
 		}).Error; err != nil {
 		return internal.DBNotUpdated
 	}
