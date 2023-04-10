@@ -1,0 +1,150 @@
+package handler
+
+import (
+	"attempt4/internal"
+	dto2 "attempt4/internal/domain/dto"
+	"attempt4/internal/domain/service"
+	"attempt4/platform/validation"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+type ProfileServerHandler struct {
+	UserService service.UserService
+}
+
+func NewProfileServerHandler(userService service.UserService) ProfileServerHandler {
+	u := ProfileServerHandler{userService}
+	return u
+}
+
+func (p *ProfileServerHandler) Create(context *gin.Context) {
+	user := dto2.UserDto{}
+	if err := context.BindJSON(&user); err != nil {
+		context.JSON(http.StatusBadRequest, ErrorInJson())
+		return
+	}
+
+	err := validation.ValidateStruct(user)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, NewHttpError(err))
+		return
+	}
+
+	err = p.UserService.CreateUser(user)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, NewHttpError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, SuccessInCreate())
+}
+
+func (p *ProfileServerHandler) Update(context *gin.Context) {
+	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+	user := dto2.UserDto{}
+	if err := context.BindJSON(&user); err != nil {
+		context.JSON(http.StatusBadRequest, ErrorInJson())
+		return
+	}
+
+	err := validation.ValidateStruct(user)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, NewHttpError(err))
+		return
+	}
+
+	err = p.UserService.UpdateUser(id.Id, user)
+	if err != nil {
+		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, SuccessInUpdate())
+}
+
+func (p *ProfileServerHandler) Delete(context *gin.Context) {
+	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	err := p.UserService.DeleteUser(id.Id)
+	if err != nil {
+		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, SuccessInDelete())
+}
+
+func (p *ProfileServerHandler) GetUser(context *gin.Context) {
+	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	if exist != true {
+		context.JSON(http.StatusBadRequest, internal.UserNotFound)
+		return
+	}
+
+	user, err := p.UserService.GetUserById(id.Id)
+	if err != nil {
+		context.JSON(http.StatusNotFound, NonExistItem())
+		return
+	}
+
+	context.JSON(http.StatusOK, user)
+}
+
+func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
+	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	if exist != true {
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	user := dto2.UserUpdatePasswordDto{}
+	if err := context.BindJSON(&user); err != nil {
+		context.JSON(http.StatusBadRequest, ErrorInJson())
+		return
+	}
+
+	err := validation.ValidateStruct(user)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, NewHttpError(err))
+		return
+	}
+
+	err = p.UserService.UpdateUserPassword(id.Id, user)
+	if err != nil {
+		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, SuccessInUpdate())
+}
+
+func (p *ProfileServerHandler) ActivateUser(context *gin.Context) {
+	code := dto2.UserUpdateCodeDto{}
+	if err := context.BindJSON(&code); err != nil {
+		context.JSON(http.StatusBadRequest, ErrorInJson())
+		return
+	}
+
+	err := validation.ValidateStruct(code)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, NewHttpError(err))
+		return
+	}
+
+	err = p.UserService.ActivateUser(code)
+	if err != nil {
+		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, SuccessInActivate())
+}

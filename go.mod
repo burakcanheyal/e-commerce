@@ -3,6 +3,8 @@ module attempt4
 go 1.19
 
 require (
+	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.9.0 // indirect
+	github.com/adrg/go-wkhtmltopdf v0.3.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.8.2 // indirect
