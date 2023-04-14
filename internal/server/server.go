@@ -40,6 +40,7 @@ func NewWebServer(
 func (s *WebServer) SetupRoot() {
 	router := gin.Default()
 
+	router.GET("", s.profileServerHandler.Test)
 	router.POST("/login", s.authentication.Login)
 	router.POST("/user/add", s.profileServerHandler.Create)
 	router.POST("/activation", s.profileServerHandler.ActivateUser)
@@ -76,5 +77,5 @@ func (s *WebServer) SetupRoot() {
 	panel := router.Group("/panel", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleAdmin}))
 	panel.POST("/", s.keyServerHandler.ResponseToChangeUserRole)
 
-	router.Run("localhost:8000")
+	router.Run("0.0.0.0:8001")
 }

@@ -2,10 +2,12 @@ package handler
 
 import (
 	"attempt4/internal"
-	dto2 "attempt4/internal/domain/dto"
+	"attempt4/internal/domain/dto"
 	"attempt4/internal/domain/service"
 	"attempt4/platform/validation"
+	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
+	zap2 "go.uber.org/zap"
 	"net/http"
 	"strconv"
 )
@@ -20,14 +22,16 @@ func NewOrderServerHandler(orderService service.OrderService) OrderServerHandler
 }
 
 func (o *OrderServerHandler) Create(context *gin.Context) {
-	order := dto2.OrderDto{}
+	order := dto.OrderDto{}
 	if err := context.BindJSON(&order); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
 
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -44,6 +48,7 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Sipariş oluşturuldu")
 	context.JSON(http.StatusOK, gin.H{"Kullanıcı ": orderDescription.Username, "Ürünler: ": orderDescription.Products})
 }
 
@@ -58,18 +63,21 @@ func (o *OrderServerHandler) GetById(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Id ile sipariş isteme başarılı")
 	context.JSON(http.StatusOK, order)
 }
 
 func (o *OrderServerHandler) Update(context *gin.Context) {
-	order := dto2.OrderDto{}
+	order := dto.OrderDto{}
 	if err := context.BindJSON(&order); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}
 
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -86,12 +94,14 @@ func (o *OrderServerHandler) Update(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Sipariş güncelleme başarılı")
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
 
 func (o *OrderServerHandler) Delete(context *gin.Context) {
-	order := dto2.OrderDto{}
+	order := dto.OrderDto{}
 	if err := context.BindJSON(&order); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}
@@ -102,33 +112,38 @@ func (o *OrderServerHandler) Delete(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Siarpiş silme başarılı")
 	context.JSON(http.StatusOK, SuccessInDelete())
 }
 
 func (o *OrderServerHandler) GetAllOrders(context *gin.Context) {
-	filter := dto2.Filter{}
+	filter := dto.Filter{}
 	if err := context.ShouldBind(&filter); err != nil {
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
 
-	pagination := dto2.Pagination{}
+	pagination := dto.Pagination{}
 	if err := context.ShouldBind(&pagination); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
 
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
 	orderDto, totalNumber, err := o.orderService.GetAllOrders(id.Id, filter, pagination)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(http.StatusNotFound, NonExistItem())
 		return
 	}
 
+	zap.Logger.Info("Tüm siparişleri görüntüleme başarılı")
 	context.JSON(http.StatusOK, gin.H{"Toplam Sipariş sayısı": totalNumber, "Siparişler: ": orderDto})
 }

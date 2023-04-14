@@ -2,10 +2,12 @@ package handler
 
 import (
 	"attempt4/internal"
-	dto2 "attempt4/internal/domain/dto"
+	"attempt4/internal/domain/dto"
 	"attempt4/internal/domain/service"
 	"attempt4/platform/validation"
+	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
+	zap2 "go.uber.org/zap"
 	"net/http"
 )
 
@@ -19,8 +21,9 @@ func NewProfileServerHandler(userService service.UserService) ProfileServerHandl
 }
 
 func (p *ProfileServerHandler) Create(context *gin.Context) {
-	user := dto2.UserDto{}
+	user := dto.UserDto{}
 	if err := context.BindJSON(&user); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -37,17 +40,21 @@ func (p *ProfileServerHandler) Create(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Kullanıcı oluşturma başarılı")
 	context.JSON(http.StatusOK, SuccessInCreate())
 }
 
 func (p *ProfileServerHandler) Update(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
-	user := dto2.UserDto{}
+
+	user := dto.UserDto{}
 	if err := context.BindJSON(&user); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -64,12 +71,14 @@ func (p *ProfileServerHandler) Update(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Kullanıcı güncelleme başarılı")
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
 
 func (p *ProfileServerHandler) Delete(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -80,12 +89,14 @@ func (p *ProfileServerHandler) Delete(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Kullanıcı silme başarılı")
 	context.JSON(http.StatusOK, SuccessInDelete())
 }
 
 func (p *ProfileServerHandler) GetUser(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(http.StatusBadRequest, internal.UserNotFound)
 		return
 	}
@@ -96,18 +107,21 @@ func (p *ProfileServerHandler) GetUser(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Kullanıcı bilgileri görüntüleme başarılı")
 	context.JSON(http.StatusOK, user)
 }
 
 func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	user := dto2.UserUpdatePasswordDto{}
+	user := dto.UserUpdatePasswordDto{}
 	if err := context.BindJSON(&user); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -124,12 +138,14 @@ func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Kullanıcı şifre değiştirme başarılı")
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
 
 func (p *ProfileServerHandler) ActivateUser(context *gin.Context) {
-	code := dto2.UserUpdateCodeDto{}
+	code := dto.UserUpdateCodeDto{}
 	if err := context.BindJSON(&code); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -146,5 +162,11 @@ func (p *ProfileServerHandler) ActivateUser(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Kullanıcı aktive etme başarılı")
 	context.JSON(http.StatusOK, SuccessInActivate())
+}
+
+func (p *ProfileServerHandler) Test(context *gin.Context) {
+
+	context.JSON(http.StatusOK, gin.H{"ping": "pong"})
 }

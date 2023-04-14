@@ -33,7 +33,7 @@ func InitializeDatabase(dsn string) *gorm.DB {
 func ConnectToDb(dsn string) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to connect the database")
+		log.Fatalf("Failed to connect the database %s", err)
 	}
 	return db
 }

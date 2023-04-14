@@ -2,33 +2,35 @@ package service
 
 import (
 	"attempt4/internal"
-	dto2 "attempt4/internal/domain/dto"
-	entity2 "attempt4/internal/domain/entity"
-	enum2 "attempt4/internal/domain/enum"
-	repository2 "attempt4/platform/postgres/repository"
+	"attempt4/internal/domain/dto"
+	"attempt4/internal/domain/entity"
+	"attempt4/internal/domain/enum"
+	"attempt4/platform/postgres/repository"
+	"attempt4/platform/zap"
 	"fmt"
 	"github.com/hoisie/mustache"
 	"github.com/pdfcrowd/pdfcrowd-go"
+	zap2 "go.uber.org/zap"
 	"os"
 	"time"
 )
 
 type WalletService struct {
-	userRepository            repository2.UserRepository
-	walletRepository          repository2.WalletRepository
-	productRepository         repository2.ProductRepository
-	orderRepository           repository2.OrderRepository
-	walletOperationRepository repository2.WalletOperationRepository
-	roleRepository            repository2.RoleRepository
+	userRepository            repository.UserRepository
+	walletRepository          repository.WalletRepository
+	productRepository         repository.ProductRepository
+	orderRepository           repository.OrderRepository
+	walletOperationRepository repository.WalletOperationRepository
+	roleRepository            repository.RoleRepository
 }
 
 func NewWalletService(
-	userRepository repository2.UserRepository,
-	walletRepository repository2.WalletRepository,
-	productRepository repository2.ProductRepository,
-	orderRepository repository2.OrderRepository,
-	walletOperationRepository repository2.WalletOperationRepository,
-	roleRepository repository2.RoleRepository) WalletService {
+	userRepository repository.UserRepository,
+	walletRepository repository.WalletRepository,
+	productRepository repository.ProductRepository,
+	orderRepository repository.OrderRepository,
+	walletOperationRepository repository.WalletOperationRepository,
+	roleRepository repository.RoleRepository) WalletService {
 
 	w := WalletService{
 		userRepository,
@@ -40,20 +42,24 @@ func NewWalletService(
 	}
 	return w
 }
-func (w *WalletService) UpdateBalance(walletDto dto2.WalletDto, id int32) error {
+func (w *WalletService) UpdateBalance(walletDto dto.WalletDto, id int32) error {
 	wallet, err := w.walletRepository.GetByUserId(id)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 	if wallet.Id == 0 {
+		zap.Logger.Error("Hata", zap2.Error(internal.WalletNotFound))
 		return internal.WalletNotFound
 	}
 
 	user, err := w.userRepository.GetById(id)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 	if user.Id == 0 {
+		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
 		return internal.UserNotFound
 	}
 
@@ -61,16 +67,17 @@ func (w *WalletService) UpdateBalance(walletDto dto2.WalletDto, id int32) error 
 
 	updatedTime := time.Now()
 
-	wallet = entity2.Wallet{
+	wallet = entity.Wallet{
 		Id:        wallet.Id,
 		UserId:    user.Id,
 		Balance:   balance,
-		Status:    enum2.WalletActive,
+		Status:    enum.WalletActive,
 		UpdatedAt: &updatedTime,
 	}
 
 	err = w.walletRepository.Update(wallet)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 
@@ -80,16 +87,19 @@ func (w *WalletService) UpdateBalance(walletDto dto2.WalletDto, id int32) error 
 func (w *WalletService) Purchase(id int32) error {
 	wallet, err := w.walletRepository.GetByUserId(id)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 	if wallet.Id == 0 {
+		zap.Logger.Error("Hata", zap2.Error(internal.WalletNotFound))
 		return internal.WalletNotFound
 	}
 
 	price := float32(0)
 
-	orders, count, err := w.orderRepository.GetAllOrders(dto2.Filter{}, dto2.Pagination{}, id)
+	orders, count, err := w.orderRepository.GetAllOrders(dto.Filter{}, dto.Pagination{}, id)
 	if count == 0 {
+		zap.Logger.Error("Hata", zap2.Error(internal.EmptyCart))
 		return internal.EmptyCart
 	}
 
@@ -100,27 +110,31 @@ func (w *WalletService) Purchase(id int32) error {
 		price += orders[i].Price
 
 		product, err := w.productRepository.GetById(orders[i].ProductId)
+		if err != nil {
+			w.orderRepository.Rollback(startOrderRepository)
+			w.walletRepository.Rollback(startWalletRepository)
+			zap.Logger.Error("Hata", zap2.Error(err))
+			return err
+		}
 		if product.Id == 0 {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
+			zap.Logger.Error("Hata", zap2.Error(internal.ProductNotFound))
 			return internal.ProductNotFound
-		}
-		if err != nil {
-			w.orderRepository.Rollback(startOrderRepository)
-			w.walletRepository.Rollback(startWalletRepository)
-			return err
 		}
 
 		sellerWallet, err := w.walletRepository.GetByUserId(product.UserId)
-		if sellerWallet.Id == 0 {
-			w.orderRepository.Rollback(startOrderRepository)
-			w.walletRepository.Rollback(startWalletRepository)
-			return internal.WalletNotFound
-		}
 		if err != nil {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
+			zap.Logger.Error("Hata", zap2.Error(err))
 			return err
+		}
+		if sellerWallet.Id == 0 {
+			w.orderRepository.Rollback(startOrderRepository)
+			w.walletRepository.Rollback(startWalletRepository)
+			zap.Logger.Error("Hata", zap2.Error(internal.WalletNotFound))
+			return internal.WalletNotFound
 		}
 
 		balance := sellerWallet.Balance + orders[i].Price
@@ -128,9 +142,9 @@ func (w *WalletService) Purchase(id int32) error {
 
 		currentTime := time.Now()
 
-		walletOperation := entity2.WalletOperation{
+		walletOperation := entity.WalletOperation{
 			OperationNumber: RandomString(8),
-			Type:            enum2.WalletSellType,
+			Type:            enum.WalletSellType,
 			Balance:         orders[i].Price,
 			UserId:          &product.UserId,
 			OrderId:         &orders[i].Id,
@@ -139,17 +153,25 @@ func (w *WalletService) Purchase(id int32) error {
 		}
 
 		walletOperation, err = w.walletOperationRepository.Create(walletOperation)
+		if err != nil {
+			w.orderRepository.Rollback(startOrderRepository)
+			w.walletRepository.Rollback(startWalletRepository)
+			zap.Logger.Error("Hata", zap2.Error(err))
+			return err
+		}
 		if walletOperation.Id == 0 {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
+			zap.Logger.Error("Hata", zap2.Error(internal.FailInPurchase))
 			return internal.FailInPurchase
 		}
 
-		orders[i].Status = enum2.OrderCompleted
+		orders[i].Status = enum.OrderCompleted
 		err = w.orderRepository.Update(orders[i])
 		if err != nil {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
+			zap.Logger.Error("Hata", zap2.Error(err))
 			return err
 		}
 
@@ -157,6 +179,7 @@ func (w *WalletService) Purchase(id int32) error {
 		if err != nil {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
+			zap.Logger.Error("Hata", zap2.Error(err))
 			return err
 		}
 	}
@@ -164,6 +187,7 @@ func (w *WalletService) Purchase(id int32) error {
 	if price > wallet.Balance {
 		w.orderRepository.Rollback(startOrderRepository)
 		w.walletRepository.Rollback(startWalletRepository)
+		zap.Logger.Error("Hata", zap2.Error(internal.WalletInadequate))
 		return internal.WalletInadequate
 	}
 
@@ -174,14 +198,15 @@ func (w *WalletService) Purchase(id int32) error {
 	if err != nil {
 		w.orderRepository.Rollback(startOrderRepository)
 		w.walletRepository.Rollback(startWalletRepository)
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 
 	currentTime := time.Now()
 
-	walletOperation := entity2.WalletOperation{
+	walletOperation := entity.WalletOperation{
 		OperationNumber: RandomString(8),
-		Type:            enum2.WalletBuyType,
+		Type:            enum.WalletBuyType,
 		Balance:         price,
 		UserId:          &id,
 		OrderId:         nil,
@@ -190,15 +215,17 @@ func (w *WalletService) Purchase(id int32) error {
 	}
 
 	walletOperation, err = w.walletOperationRepository.Create(walletOperation)
-	if walletOperation.Id == 0 {
-		w.orderRepository.Rollback(startOrderRepository)
-		w.walletRepository.Rollback(startWalletRepository)
-		return internal.FailInPurchase
-	}
 	if err != nil {
 		w.orderRepository.Rollback(startOrderRepository)
 		w.walletRepository.Rollback(startWalletRepository)
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
+	}
+	if walletOperation.Id == 0 {
+		w.orderRepository.Rollback(startOrderRepository)
+		w.walletRepository.Rollback(startWalletRepository)
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInPurchase))
+		return internal.FailInPurchase
 	}
 
 	w.orderRepository.Commit(startOrderRepository)
@@ -206,18 +233,20 @@ func (w *WalletService) Purchase(id int32) error {
 	return nil
 }
 
-func (w *WalletService) GetAllTransactions(id int32, transactionType int8) ([]dto2.TransactionDto, int64, error) {
+func (w *WalletService) GetAllTransactions(id int32, transactionType int8) ([]dto.TransactionDto, int64, error) {
 	transactions, total, err := w.walletOperationRepository.GetAllTransactionsWithJoinTable(id, transactionType)
-	var list []dto2.TransactionDto
+	var list []dto.TransactionDto
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return list, total, err
 	}
 	if total == 0 {
+		zap.Logger.Error("Hata", zap2.Error(internal.TransactionNotFound))
 		return list, total, internal.TransactionNotFound
 	}
 
 	for i, _ := range transactions {
-		var l dto2.TransactionDto
+		var l dto.TransactionDto
 		if transactions[i].OrderId == nil {
 			l.OrderId = 0
 			l.OrderQuantity = 0
@@ -243,17 +272,19 @@ func (w *WalletService) GetAllTransactions(id int32, transactionType int8) ([]dt
 }
 
 func (w *WalletService) ShowStatistics(id int32) error {
-	items, _, err := w.GetAllTransactions(id, enum2.WalletSellType)
+	items, _, err := w.GetAllTransactions(id, enum.WalletSellType)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 
 	type transactionList struct {
-		Transactions []dto2.TransactionDto
+		Transactions []dto.TransactionDto
 	}
 
 	dir, err := os.Getwd()
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 
@@ -267,6 +298,7 @@ func (w *WalletService) ShowStatistics(id int32) error {
 	client := pdfcrowd.NewHtmlToPdfClient("demo", "ce544b6ea52a5621fb9d55f8b542d14d")
 	err = client.ConvertStringToFile(result, pdfPath)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 	/*

@@ -2,9 +2,11 @@ package handler
 
 import (
 	"attempt4/internal"
-	dto2 "attempt4/internal/domain/dto"
+	"attempt4/internal/domain/dto"
 	"attempt4/internal/domain/service"
+	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
+	zap2 "go.uber.org/zap"
 	"net/http"
 )
 
@@ -18,8 +20,9 @@ func NewSubmissionServerHandler(keyService service.RolService) SubmissionServerH
 }
 
 func (a *SubmissionServerHandler) UpdateUserRole(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -30,18 +33,21 @@ func (a *SubmissionServerHandler) UpdateUserRole(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("User rol değiştirme isteği başarılıyla eklendi")
 	context.JSON(http.StatusOK, SuccessInSendRequest())
 }
 
 func (a *SubmissionServerHandler) ResponseToChangeUserRole(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	response := dto2.AppOperationDto{}
+	response := dto.AppOperationDto{}
 	if err := context.BindJSON(&response); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}
@@ -52,5 +58,6 @@ func (a *SubmissionServerHandler) ResponseToChangeUserRole(context *gin.Context)
 		return
 	}
 
+	zap.Logger.Info("User rol değiştirme isteğine cevap başarılı")
 	context.JSON(http.StatusOK, SuccessInResponseRequest())
 }

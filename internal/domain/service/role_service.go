@@ -4,22 +4,24 @@ import (
 	"attempt4/internal"
 	"attempt4/internal/domain/dto"
 	"attempt4/internal/domain/entity"
-	enum2 "attempt4/internal/domain/enum"
-	repository2 "attempt4/platform/postgres/repository"
+	"attempt4/internal/domain/enum"
+	"attempt4/platform/postgres/repository"
+	"attempt4/platform/zap"
+	zap2 "go.uber.org/zap"
 	"math/rand"
 	"time"
 )
 
 type RolService struct {
-	userRepository       repository2.UserRepository
-	keyRepository        repository2.RoleRepository
-	submissionRepository repository2.SubmissionRepository
+	userRepository       repository.UserRepository
+	keyRepository        repository.RoleRepository
+	submissionRepository repository.SubmissionRepository
 }
 
 func NewRolService(
-	userRepository repository2.UserRepository,
-	keyRepository repository2.RoleRepository,
-	submissionRepository repository2.SubmissionRepository) RolService {
+	userRepository repository.UserRepository,
+	keyRepository repository.RoleRepository,
+	submissionRepository repository.SubmissionRepository) RolService {
 	k := RolService{
 		userRepository,
 		keyRepository,
@@ -31,13 +33,16 @@ func NewRolService(
 func (k *RolService) SubmissionUserRole(id int32) error {
 	operation, err := k.submissionRepository.GetByUserId(id)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 	if operation.Id != 0 {
+		zap.Logger.Error("Hata", zap2.Error(internal.OperationWaiting))
 		return internal.OperationWaiting
 	}
 
-	if operation.Status != enum2.SubmissionWaiting {
+	if operation.Status != enum.SubmissionWaiting {
+		zap.Logger.Error("Hata", zap2.Error(internal.OperationWaiting))
 		return internal.OperationResponded
 	}
 
@@ -45,8 +50,8 @@ func (k *RolService) SubmissionUserRole(id int32) error {
 
 	operation = entity.Submission{
 		SubmissionNumber: RandomString(15),
-		SubmissionType:   enum2.SubmissionRolChange,
-		Status:           enum2.SubmissionWaiting,
+		SubmissionType:   enum.SubmissionRolChange,
+		Status:           enum.SubmissionWaiting,
 		AppliedUserId:    id,
 		ReceiverUserId:   &receiverUserId,
 		OperationDate:    time.Now(),
@@ -54,9 +59,11 @@ func (k *RolService) SubmissionUserRole(id int32) error {
 
 	operation, err = k.submissionRepository.Create(operation)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 	if operation.Id == 0 {
+		zap.Logger.Error("Hata", zap2.Error(internal.OperationNotCreated))
 		return internal.OperationNotCreated
 	}
 
@@ -66,13 +73,16 @@ func (k *RolService) SubmissionUserRole(id int32) error {
 func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id int32) error {
 	operation, err := k.submissionRepository.GetByUserId(ResponseDto.UserId)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 	if operation.Id == 0 {
+		zap.Logger.Error("Hata", zap2.Error(internal.OperationNotFound))
 		return internal.OperationNotFound
 	}
 
 	if operation.SubmissionNumber != ResponseDto.OperationNumber {
+		zap.Logger.Error("Hata", zap2.Error(internal.OperationFailInNumber))
 		return internal.OperationFailInNumber
 	}
 
@@ -80,17 +90,19 @@ func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id 
 
 	key, err := k.keyRepository.GetByUserId(ResponseDto.UserId)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 	if key.Id == 0 {
+		zap.Logger.Error("Hata", zap2.Error(internal.RoleNotFound))
 		return internal.RoleNotFound
 	}
 
-	if ResponseDto.Response == enum2.SubmissionApproved {
-		key.Rol = enum2.RoleManager
-		operation.Status = enum2.SubmissionApproved
+	if ResponseDto.Response == enum.SubmissionApproved {
+		key.Rol = enum.RoleManager
+		operation.Status = enum.SubmissionApproved
 	} else {
-		operation.Status = enum2.SubmissionRejected
+		operation.Status = enum.SubmissionRejected
 	}
 
 	currentTime := time.Now()
@@ -99,11 +111,13 @@ func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id 
 
 	err = k.submissionRepository.Update(operation)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 
 	err = k.keyRepository.Update(key)
 	if err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		return err
 	}
 

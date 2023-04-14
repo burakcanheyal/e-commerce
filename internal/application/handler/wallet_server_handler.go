@@ -2,11 +2,13 @@ package handler
 
 import (
 	"attempt4/internal"
-	dto2 "attempt4/internal/domain/dto"
+	"attempt4/internal/domain/dto"
 	"attempt4/internal/domain/enum"
 	"attempt4/internal/domain/service"
 	"attempt4/platform/validation"
+	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
+	zap2 "go.uber.org/zap"
 	"net/http"
 )
 
@@ -20,14 +22,16 @@ func NewWalletServerHandler(walletService service.WalletService) WalletServerHan
 }
 
 func (w *WalletServerHandler) Update(context *gin.Context) {
-	wallet := dto2.WalletDto{}
+	wallet := dto.WalletDto{}
 	if err := context.BindJSON(&wallet); err != nil {
+		zap.Logger.Error("Hata", zap2.Error(err))
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}
 
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -44,12 +48,15 @@ func (w *WalletServerHandler) Update(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Cüzdan bakiye güncelleme isteği başarılı")
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
 
 func (w *WalletServerHandler) CompletePurchase(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -60,13 +67,14 @@ func (w *WalletServerHandler) CompletePurchase(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Ödeme tamamlama isteği başarılı")
 	context.JSON(http.StatusOK, SuccessInPurchase())
-
 }
 
 func (w *WalletServerHandler) GetAllBuyTransactions(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto2.TokenUserDto)
+	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -77,13 +85,14 @@ func (w *WalletServerHandler) GetAllBuyTransactions(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Tüm alım işlemlerini gösterme isteği başarılı")
 	context.JSON(http.StatusOK, gin.H{"Toplam sipariş sayısı ": total, "Siparişler: ": items})
-
 }
 
 func (w *WalletServerHandler) GetAllSellTransactions(context *gin.Context) {
-	user, exist := context.Keys["user"].(dto2.TokenUserDto)
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
+		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -94,5 +103,6 @@ func (w *WalletServerHandler) GetAllSellTransactions(context *gin.Context) {
 		return
 	}
 
+	zap.Logger.Info("Tüm satış işlemlerini gösterme isteği başarılı")
 	context.JSON(http.StatusOK, SuccessInCreatingPdf())
 }

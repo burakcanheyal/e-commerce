@@ -1,10 +1,12 @@
 package validation
 
 import (
+	"attempt4/platform/zap"
 	"errors"
 	"github.com/go-playground/locales/tr"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	zap2 "go.uber.org/zap"
 )
 
 var v = validator.New()
@@ -19,11 +21,12 @@ func ValidateStruct(s interface{}) error {
 
 	err := v.Struct(s)
 	if err != nil {
-
 		errs := err.(validator.ValidationErrors)
 
 		for _, e := range errs {
-			return errors.New(e.Translate(trans))
+			tempErr := errors.New(e.Translate(trans))
+			zap.Logger.Error("Hata", zap2.Error(tempErr))
+			return tempErr
 		}
 	}
 	return nil

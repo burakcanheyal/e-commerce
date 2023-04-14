@@ -13,6 +13,8 @@ import (
 )
 
 func init() {
+	log.Println("Env dosyaları okunuyor")
+
 	viper.AddConfigPath(".")
 	viper.SetConfigType("env")
 	viper.SetConfigName(".env")
@@ -22,12 +24,12 @@ func init() {
 	}
 }
 func Setup() {
+	log.Println("Setup Başlatıldı")
 	config := dto.Config{}
 	err := viper.Unmarshal(&config)
 	if err != nil {
 		log.Println(err)
 	}
-
 	db := postgres.InitializeDatabase(config.DBURL)
 
 	userRepository := repository2.NewUserRepository(db)

@@ -3,7 +3,7 @@ version: "3.8"
 services:
   postgres_db:
     image: postgres:latest
-    container_name: "database"
+    container_name: database
     restart: always
     ports:
       - "5432:5432"
@@ -11,3 +11,27 @@ services:
       POSTGRES_DB: cart
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 4a8cd0fd1
+      DATABASE_HOST: host.docker.internal
+    networks:
+      - attempt-network
+  container:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      POSTGRES_DB: cart
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 4a8cd0fd1
+      DATABASE_HOST: host.docker.internal
+      DATABASE_PORT: "5432:5432"
+    depends_on:
+      - postgres_db
+    links:
+      - postgres_db
+    networks:
+      - attempt-network
+networks:
+  attempt-network:
+    driver: bridge
