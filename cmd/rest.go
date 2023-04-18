@@ -7,13 +7,14 @@ import (
 	"attempt4/internal/middleware"
 	"attempt4/internal/server"
 	"attempt4/platform/postgres"
-	repository2 "attempt4/platform/postgres/repository"
+	"attempt4/platform/postgres/repository"
+	"attempt4/platform/zap"
 	"github.com/spf13/viper"
 	"log"
 )
 
 func init() {
-	log.Println("Env dosyaları okunuyor")
+	zap.Logger.Info("Env dosyaları okunuyor")
 
 	viper.AddConfigPath(".")
 	viper.SetConfigType("env")
@@ -24,7 +25,7 @@ func init() {
 	}
 }
 func Setup() {
-	log.Println("Setup Başlatıldı")
+	zap.Logger.Info("Setup Başlatıldı")
 	config := dto.Config{}
 	err := viper.Unmarshal(&config)
 	if err != nil {
@@ -32,13 +33,13 @@ func Setup() {
 	}
 	db := postgres.InitializeDatabase(config.DBURL)
 
-	userRepository := repository2.NewUserRepository(db)
-	productRepository := repository2.NewProductRepository(db)
-	orderRepository := repository2.NewOrderRepository(db)
-	roleRepository := repository2.NewRoleRepository(db)
-	walletRepository := repository2.NewWalletRepository(db)
-	panelRepository := repository2.NewSubmissionRepository(db)
-	walletOperation := repository2.NewWalletOperationRepository(db)
+	userRepository := repository.NewUserRepository(db)
+	productRepository := repository.NewProductRepository(db)
+	orderRepository := repository.NewOrderRepository(db)
+	roleRepository := repository.NewRoleRepository(db)
+	walletRepository := repository.NewWalletRepository(db)
+	panelRepository := repository.NewSubmissionRepository(db)
+	walletOperation := repository.NewWalletOperationRepository(db)
 
 	userService := service.NewUserService(userRepository, roleRepository, walletRepository)
 	productService := service.NewProductService(productRepository, userRepository)

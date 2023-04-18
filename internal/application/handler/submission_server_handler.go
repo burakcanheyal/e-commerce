@@ -6,7 +6,6 @@ import (
 	"attempt4/internal/domain/service"
 	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
-	zap2 "go.uber.org/zap"
 	"net/http"
 )
 
@@ -22,7 +21,7 @@ func NewSubmissionServerHandler(keyService service.RolService) SubmissionServerH
 func (a *SubmissionServerHandler) UpdateUserRole(context *gin.Context) {
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -40,14 +39,14 @@ func (a *SubmissionServerHandler) UpdateUserRole(context *gin.Context) {
 func (a *SubmissionServerHandler) ResponseToChangeUserRole(context *gin.Context) {
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
 	response := dto.AppOperationDto{}
 	if err := context.BindJSON(&response); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}

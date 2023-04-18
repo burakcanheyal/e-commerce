@@ -7,7 +7,6 @@ import (
 	"attempt4/internal/domain/enum"
 	"attempt4/platform/postgres/repository"
 	"attempt4/platform/zap"
-	zap2 "go.uber.org/zap"
 	"math/rand"
 	"time"
 )
@@ -33,16 +32,16 @@ func NewRolService(
 func (k *RolService) SubmissionUserRole(id int32) error {
 	operation, err := k.submissionRepository.GetByUserId(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if operation.Id != 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.OperationWaiting))
+		zap.Logger.Error(internal.OperationWaiting)
 		return internal.OperationWaiting
 	}
 
 	if operation.Status != enum.SubmissionWaiting {
-		zap.Logger.Error("Hata", zap2.Error(internal.OperationWaiting))
+		zap.Logger.Error(internal.OperationResponded)
 		return internal.OperationResponded
 	}
 
@@ -59,11 +58,11 @@ func (k *RolService) SubmissionUserRole(id int32) error {
 
 	operation, err = k.submissionRepository.Create(operation)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if operation.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.OperationNotCreated))
+		zap.Logger.Error(internal.OperationNotCreated)
 		return internal.OperationNotCreated
 	}
 
@@ -73,16 +72,16 @@ func (k *RolService) SubmissionUserRole(id int32) error {
 func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id int32) error {
 	operation, err := k.submissionRepository.GetByUserId(ResponseDto.UserId)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if operation.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.OperationNotFound))
+		zap.Logger.Error(internal.OperationNotFound)
 		return internal.OperationNotFound
 	}
 
 	if operation.SubmissionNumber != ResponseDto.OperationNumber {
-		zap.Logger.Error("Hata", zap2.Error(internal.OperationFailInNumber))
+		zap.Logger.Error(internal.OperationFailInNumber)
 		return internal.OperationFailInNumber
 	}
 
@@ -90,11 +89,11 @@ func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id 
 
 	key, err := k.keyRepository.GetByUserId(ResponseDto.UserId)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if key.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.RoleNotFound))
+		zap.Logger.Error(internal.RoleNotFound)
 		return internal.RoleNotFound
 	}
 
@@ -111,13 +110,13 @@ func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id 
 
 	err = k.submissionRepository.Update(operation)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
 	err = k.keyRepository.Update(key)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 

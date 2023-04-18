@@ -8,7 +8,6 @@ import (
 	"attempt4/platform/validation"
 	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
-	zap2 "go.uber.org/zap"
 	"net/http"
 )
 
@@ -24,14 +23,14 @@ func NewWalletServerHandler(walletService service.WalletService) WalletServerHan
 func (w *WalletServerHandler) Update(context *gin.Context) {
 	wallet := dto.WalletDto{}
 	if err := context.BindJSON(&wallet); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}
 
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.FailInTokenParse)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -56,7 +55,7 @@ func (w *WalletServerHandler) CompletePurchase(context *gin.Context) {
 
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -74,7 +73,7 @@ func (w *WalletServerHandler) CompletePurchase(context *gin.Context) {
 func (w *WalletServerHandler) GetAllBuyTransactions(context *gin.Context) {
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -92,17 +91,17 @@ func (w *WalletServerHandler) GetAllBuyTransactions(context *gin.Context) {
 func (w *WalletServerHandler) GetAllSellTransactions(context *gin.Context) {
 	user, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	err := w.walletService.ShowStatistics(user.Id)
+	pdf, err := w.walletService.ShowStatistics(user.Id)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
 	}
 
 	zap.Logger.Info("Tüm satış işlemlerini gösterme isteği başarılı")
-	context.JSON(http.StatusOK, SuccessInCreatingPdf())
+	context.JSON(http.StatusOK, pdf)
 }

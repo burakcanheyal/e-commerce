@@ -9,7 +9,6 @@ import (
 	"attempt4/platform/postgres/repository"
 	"attempt4/platform/zap"
 	"fmt"
-	zap2 "go.uber.org/zap"
 	"time"
 )
 
@@ -34,11 +33,11 @@ func NewUserService(
 func (u *UserService) DeleteUser(id int32) error {
 	user, err := u.userRepository.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return internal.UserNotFound
 	}
 
@@ -49,17 +48,17 @@ func (u *UserService) DeleteUser(id int32) error {
 
 	err = u.userRepository.Delete(user)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
 	wallet, err := u.walletRepository.GetByUserId(user.Id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if wallet.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.WalletNotFound))
+		zap.Logger.Error(internal.WalletNotFound)
 		return internal.WalletNotFound
 	}
 
@@ -67,23 +66,23 @@ func (u *UserService) DeleteUser(id int32) error {
 
 	err = u.walletRepository.Delete(wallet)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
 	role, err := u.roleRepository.GetByUserId(user.Id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if role.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return internal.RoleNotFound
 	}
 
 	err = u.roleRepository.Delete(role)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
@@ -94,11 +93,11 @@ func (u *UserService) GetUserByUsername(username string) (dto.UserDto, error) {
 	userDto := dto.UserDto{}
 	user, err := u.userRepository.GetByName(username)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return userDto, err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return userDto, internal.UserNotFound
 	}
 
@@ -118,11 +117,11 @@ func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 	userDto := dto.UserDto{}
 	user, err := u.userRepository.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return userDto, err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return userDto, internal.UserNotFound
 	}
 
@@ -142,11 +141,11 @@ func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 	user, err := u.userRepository.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return internal.UserNotFound
 	}
 
@@ -167,7 +166,7 @@ func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 
 	err = u.userRepository.Update(user)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	return nil
@@ -176,17 +175,17 @@ func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 func (u *UserService) UpdateUserPassword(id int32, userDto dto.UserUpdatePasswordDto) error {
 	user, err := u.userRepository.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return internal.UserNotFound
 	}
 
 	err = hash.CompareEncryptedPasswords(user.Password, userDto.Password)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
@@ -205,7 +204,7 @@ func (u *UserService) UpdateUserPassword(id int32, userDto dto.UserUpdatePasswor
 
 	err = u.userRepository.Update(entityUser)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
@@ -215,17 +214,17 @@ func (u *UserService) UpdateUserPassword(id int32, userDto dto.UserUpdatePasswor
 func (u *UserService) CreateUser(userDto dto.UserDto) error {
 	user, err := u.userRepository.GetByName(userDto.Username)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if user.Id != 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserExist))
+		zap.Logger.Error(internal.UserExist)
 		return internal.UserExist
 	}
 
 	encryptedPassword, err := hash.EncryptPassword(userDto.Password)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
@@ -249,7 +248,7 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 
 	user, err = u.userRepository.Create(user)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return internal.UserNotCreated
 	}
 
@@ -260,11 +259,11 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 
 	key, err = u.roleRepository.Create(key)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if key.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.RoleNotCreated))
+		zap.Logger.Error(internal.RoleNotCreated)
 		return internal.RoleNotCreated
 	}
 
@@ -279,11 +278,11 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 
 	wallet, err = u.walletRepository.Create(wallet)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if wallet.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.WalletNotCreated))
+		zap.Logger.Error(internal.WalletNotCreated)
 		return internal.WalletNotCreated
 	}
 	return nil
@@ -292,11 +291,11 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 func (u *UserService) ActivateUser(codeDto dto.UserUpdateCodeDto) error {
 	user, err := u.userRepository.GetByName(codeDto.Username)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return internal.UserNotFound
 	}
 
@@ -307,22 +306,22 @@ func (u *UserService) ActivateUser(codeDto dto.UserUpdateCodeDto) error {
 
 		err = u.userRepository.Update(user)
 		if err != nil {
-			zap.Logger.Error("Hata", zap2.Error(err))
+			zap.Logger.Error(err)
 			return err
 		}
-		zap.Logger.Error("Hata", zap2.Error(internal.ExceedVerifyCode))
+		zap.Logger.Error(internal.ExceedVerifyCode)
 		return internal.ExceedVerifyCode
 	}
 
 	if codeDto.Code != *user.Code {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInVerify))
+		zap.Logger.Error(internal.FailInVerify)
 		return internal.FailInVerify
 	}
 
 	user.Status = enum.UserActiveStatus
 	err = u.userRepository.Update(user)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
@@ -332,17 +331,17 @@ func (u *UserService) ActivateUser(codeDto dto.UserUpdateCodeDto) error {
 func (u *UserService) GetUserRoleById(id int32) (int, error) {
 	user, err := u.userRepository.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return 0, err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return 0, internal.UserNotFound
 	}
 
 	rol, err := u.roleRepository.GetByUserId(user.Id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return 0, err
 	}
 

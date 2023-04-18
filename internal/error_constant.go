@@ -54,4 +54,6 @@ var (
 	FailInPurchase = errors.New("Ödeme tamamlanamadı")
 
 	TransactionNotFound = errors.New("İşlem bulunamadı")
+
+	PdfNotCreated = errors.New("Pdf yaratılamadı")
 )

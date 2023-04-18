@@ -3,9 +3,9 @@ package postgres
 import (
 	entity2 "attempt4/internal/domain/entity"
 	seed2 "attempt4/platform/postgres/seed"
+	"attempt4/platform/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 )
 
 func InitializeDatabase(dsn string) *gorm.DB {
@@ -33,7 +33,7 @@ func InitializeDatabase(dsn string) *gorm.DB {
 func ConnectToDb(dsn string) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Failed to connect the database %s", err)
+		zap.Logger.Fatalf("Failed to connect the database %s", err)
 	}
 	return db
 }

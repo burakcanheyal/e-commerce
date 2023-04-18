@@ -6,11 +6,10 @@ import (
 	"attempt4/internal/domain/entity"
 	"attempt4/internal/domain/enum"
 	"attempt4/platform/postgres/repository"
+	"attempt4/platform/wkhtmltopdf"
 	"attempt4/platform/zap"
 	"fmt"
 	"github.com/hoisie/mustache"
-	"github.com/pdfcrowd/pdfcrowd-go"
-	zap2 "go.uber.org/zap"
 	"os"
 	"time"
 )
@@ -45,21 +44,21 @@ func NewWalletService(
 func (w *WalletService) UpdateBalance(walletDto dto.WalletDto, id int32) error {
 	wallet, err := w.walletRepository.GetByUserId(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if wallet.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.WalletNotFound))
+		zap.Logger.Error(internal.WalletNotFound)
 		return internal.WalletNotFound
 	}
 
 	user, err := w.userRepository.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return internal.UserNotFound
 	}
 
@@ -77,7 +76,7 @@ func (w *WalletService) UpdateBalance(walletDto dto.WalletDto, id int32) error {
 
 	err = w.walletRepository.Update(wallet)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
@@ -87,11 +86,11 @@ func (w *WalletService) UpdateBalance(walletDto dto.WalletDto, id int32) error {
 func (w *WalletService) Purchase(id int32) error {
 	wallet, err := w.walletRepository.GetByUserId(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if wallet.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.WalletNotFound))
+		zap.Logger.Error(internal.WalletNotFound)
 		return internal.WalletNotFound
 	}
 
@@ -99,7 +98,7 @@ func (w *WalletService) Purchase(id int32) error {
 
 	orders, count, err := w.orderRepository.GetAllOrders(dto.Filter{}, dto.Pagination{}, id)
 	if count == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.EmptyCart))
+		zap.Logger.Error(internal.EmptyCart)
 		return internal.EmptyCart
 	}
 
@@ -113,13 +112,13 @@ func (w *WalletService) Purchase(id int32) error {
 		if err != nil {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
-			zap.Logger.Error("Hata", zap2.Error(err))
+			zap.Logger.Error(err)
 			return err
 		}
 		if product.Id == 0 {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
-			zap.Logger.Error("Hata", zap2.Error(internal.ProductNotFound))
+			zap.Logger.Error(internal.ProductNotFound)
 			return internal.ProductNotFound
 		}
 
@@ -127,13 +126,13 @@ func (w *WalletService) Purchase(id int32) error {
 		if err != nil {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
-			zap.Logger.Error("Hata", zap2.Error(err))
+			zap.Logger.Error(err)
 			return err
 		}
 		if sellerWallet.Id == 0 {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
-			zap.Logger.Error("Hata", zap2.Error(internal.WalletNotFound))
+			zap.Logger.Error(internal.WalletNotFound)
 			return internal.WalletNotFound
 		}
 
@@ -156,13 +155,13 @@ func (w *WalletService) Purchase(id int32) error {
 		if err != nil {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
-			zap.Logger.Error("Hata", zap2.Error(err))
+			zap.Logger.Error(err)
 			return err
 		}
 		if walletOperation.Id == 0 {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
-			zap.Logger.Error("Hata", zap2.Error(internal.FailInPurchase))
+			zap.Logger.Error(internal.FailInPurchase)
 			return internal.FailInPurchase
 		}
 
@@ -171,7 +170,7 @@ func (w *WalletService) Purchase(id int32) error {
 		if err != nil {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
-			zap.Logger.Error("Hata", zap2.Error(err))
+			zap.Logger.Error(err)
 			return err
 		}
 
@@ -179,7 +178,7 @@ func (w *WalletService) Purchase(id int32) error {
 		if err != nil {
 			w.orderRepository.Rollback(startOrderRepository)
 			w.walletRepository.Rollback(startWalletRepository)
-			zap.Logger.Error("Hata", zap2.Error(err))
+			zap.Logger.Error(err)
 			return err
 		}
 	}
@@ -187,7 +186,7 @@ func (w *WalletService) Purchase(id int32) error {
 	if price > wallet.Balance {
 		w.orderRepository.Rollback(startOrderRepository)
 		w.walletRepository.Rollback(startWalletRepository)
-		zap.Logger.Error("Hata", zap2.Error(internal.WalletInadequate))
+		zap.Logger.Error(internal.WalletInadequate)
 		return internal.WalletInadequate
 	}
 
@@ -198,7 +197,7 @@ func (w *WalletService) Purchase(id int32) error {
 	if err != nil {
 		w.orderRepository.Rollback(startOrderRepository)
 		w.walletRepository.Rollback(startWalletRepository)
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
@@ -218,13 +217,13 @@ func (w *WalletService) Purchase(id int32) error {
 	if err != nil {
 		w.orderRepository.Rollback(startOrderRepository)
 		w.walletRepository.Rollback(startWalletRepository)
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if walletOperation.Id == 0 {
 		w.orderRepository.Rollback(startOrderRepository)
 		w.walletRepository.Rollback(startWalletRepository)
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInPurchase))
+		zap.Logger.Error(internal.FailInPurchase)
 		return internal.FailInPurchase
 	}
 
@@ -237,11 +236,11 @@ func (w *WalletService) GetAllTransactions(id int32, transactionType int8) ([]dt
 	transactions, total, err := w.walletOperationRepository.GetAllTransactionsWithJoinTable(id, transactionType)
 	var list []dto.TransactionDto
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return list, total, err
 	}
 	if total == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.TransactionNotFound))
+		zap.Logger.Error(internal.TransactionNotFound)
 		return list, total, internal.TransactionNotFound
 	}
 
@@ -271,11 +270,11 @@ func (w *WalletService) GetAllTransactions(id int32, transactionType int8) ([]dt
 	return list, total, nil
 }
 
-func (w *WalletService) ShowStatistics(id int32) error {
+func (w *WalletService) ShowStatistics(id int32) ([]byte, error) {
 	items, _, err := w.GetAllTransactions(id, enum.WalletSellType)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
-		return err
+		zap.Logger.Error(err)
+		return nil, err
 	}
 
 	type transactionList struct {
@@ -284,8 +283,8 @@ func (w *WalletService) ShowStatistics(id int32) error {
 
 	dir, err := os.Getwd()
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
-		return err
+		zap.Logger.Error(err)
+		return nil, err
 	}
 
 	list := transactionList{items}
@@ -294,21 +293,25 @@ func (w *WalletService) ShowStatistics(id int32) error {
 	result := mustache.RenderFile(filename, list)
 
 	pdfPath := fmt.Sprintf("%s/internal/application/template/pdf/statistic.pdf", dir)
-
-	client := pdfcrowd.NewHtmlToPdfClient("demo", "ce544b6ea52a5621fb9d55f8b542d14d")
-	err = client.ConvertStringToFile(result, pdfPath)
-	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
-		return err
-	}
 	/*
-		preparedPdfData := wkhtmltopdf.RequestPdf{Body: result}
+			client := pdfcrowd.NewHtmlToPdfClient("demo", "ce544b6ea52a5621fb9d55f8b542d14d")
+			err = client.ConvertStringToFile(result, pdfPath)
 
-		bool, err := preparedPdfData.GeneratePDF(pdfPath)
-		if !bool {
-			return err
-		}
+			if err != nil {
+		zap.Logger.Error(err)
+				return nil, err
+			}
 	*/
 
-	return nil
+	preparedPdfData := wkhtmltopdf.RequestPdf{Body: result}
+
+	pdf, err := preparedPdfData.GeneratePDF(pdfPath)
+	if err != nil {
+		return nil, err
+	}
+	if pdf == nil {
+		return nil, internal.PdfNotCreated
+	}
+
+	return []byte(result), nil
 }

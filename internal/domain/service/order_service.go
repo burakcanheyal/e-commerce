@@ -7,7 +7,6 @@ import (
 	"attempt4/internal/domain/enum"
 	"attempt4/platform/postgres/repository"
 	"attempt4/platform/zap"
-	zap2 "go.uber.org/zap"
 	"time"
 )
 
@@ -37,31 +36,31 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 
 	order, err := o.orderRepos.GetById(orderDto.Id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return orderDescription, err
 	}
 	if order.Id != 0 {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return orderDescription, internal.OrderExist
 	}
 
 	user, err := o.userRepos.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return orderDescription, err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return orderDescription, internal.UserNotFound
 	}
 
 	product, err := o.productRepos.GetById(orderDto.ProductId)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return orderDescription, err
 	}
 	if product.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductNotFound))
+		zap.Logger.Error(internal.ProductNotFound)
 		return orderDescription, internal.ProductNotFound
 	}
 
@@ -82,7 +81,7 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 
 	order, err = o.orderRepos.Create(order)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return orderDescription, err
 	}
 
@@ -93,7 +92,7 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 
 	err = o.productRepos.Update(product)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		start.Rollback()
 		return orderDescription, err
 	}
@@ -117,11 +116,11 @@ func (o *OrderService) CreateOrder(orderDto dto.OrderDto, id int32) (dto.OrderDe
 func (o *OrderService) DeleteOrder(id int32) error {
 	order, err := o.orderRepos.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if order.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.OrderNotFound))
+		zap.Logger.Error(internal.OrderNotFound)
 		return internal.OrderNotFound
 	}
 
@@ -132,7 +131,7 @@ func (o *OrderService) DeleteOrder(id int32) error {
 
 	err = o.orderRepos.Delete(order)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	return nil
@@ -142,11 +141,11 @@ func (o *OrderService) GetOrderById(id int32) (dto.OrderDto, error) {
 	orderDto := dto.OrderDto{}
 	order, err := o.orderRepos.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return orderDto, err
 	}
 	if order.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.OrderNotFound))
+		zap.Logger.Error(internal.OrderNotFound)
 		return orderDto, internal.OrderNotFound
 	}
 
@@ -162,31 +161,31 @@ func (o *OrderService) GetOrderById(id int32) (dto.OrderDto, error) {
 func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, id int32) error {
 	order, err := o.orderRepos.GetById(orderDto.Id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if order.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.OrderNotFound))
+		zap.Logger.Error(internal.OrderNotFound)
 		return internal.OrderNotFound
 	}
 
 	user, err := o.userRepos.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return internal.UserNotFound
 	}
 
 	product, err := o.productRepos.GetById(orderDto.ProductId)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if product.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductNotFound))
+		zap.Logger.Error(internal.ProductNotFound)
 		return internal.ProductNotFound
 	}
 
@@ -203,7 +202,7 @@ func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, id int32) error {
 
 	err = o.orderRepos.Update(order)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
@@ -217,24 +216,24 @@ func (o *OrderService) GetAllOrders(id int32, filter dto.Filter, pagination dto.
 
 	user, err := o.userRepos.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return productDto, totalNumber, err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return productDto, totalNumber, internal.UserNotFound
 	}
 
 	order, totalNumber, err = o.orderRepos.GetAllOrders(filter, pagination, user.Id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return productDto, totalNumber, err
 	}
 
 	for i, _ := range order {
 		product, err := o.productRepos.GetById(order[i].ProductId)
 		if err != nil {
-			zap.Logger.Error("Hata", zap2.Error(err))
+			zap.Logger.Error(err)
 			return productDto, totalNumber, err
 		}
 		productDto = append(productDto, dto.ProductDto{

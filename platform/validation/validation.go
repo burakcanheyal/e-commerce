@@ -6,7 +6,6 @@ import (
 	"github.com/go-playground/locales/tr"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	zap2 "go.uber.org/zap"
 )
 
 var v = validator.New()
@@ -25,7 +24,7 @@ func ValidateStruct(s interface{}) error {
 
 		for _, e := range errs {
 			tempErr := errors.New(e.Translate(trans))
-			zap.Logger.Error("Hata", zap2.Error(tempErr))
+			zap.Logger.Error(tempErr)
 			return tempErr
 		}
 	}

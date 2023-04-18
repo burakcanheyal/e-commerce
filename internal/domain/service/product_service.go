@@ -7,7 +7,6 @@ import (
 	"attempt4/internal/domain/enum"
 	"attempt4/platform/postgres/repository"
 	"attempt4/platform/zap"
-	zap2 "go.uber.org/zap"
 	"time"
 )
 
@@ -29,21 +28,21 @@ func NewProductService(
 func (p *ProductService) CreateProduct(productDto dto.ProductDto, id int32) (dto.ProductDto, error) {
 	product, err := p.productRepos.GetByName(productDto.Name)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return productDto, err
 	}
 	if product.Id != 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductExist))
+		zap.Logger.Error(internal.ProductExist)
 		return productDto, internal.ProductExist
 	}
 
 	user, err := p.UserRepos.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return productDto, err
 	}
 	if user.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.UserNotFound))
+		zap.Logger.Error(internal.UserNotFound)
 		return productDto, internal.UserNotFound
 	}
 
@@ -61,7 +60,7 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto, id int32) (dto
 
 	product, err = p.productRepos.Create(product)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return productDto, err
 	}
 
@@ -71,11 +70,11 @@ func (p *ProductService) CreateProduct(productDto dto.ProductDto, id int32) (dto
 func (p *ProductService) DeleteProduct(name string) error {
 	product, err := p.productRepos.GetByName(name)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if product.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductNotFound))
+		zap.Logger.Error(internal.ProductNotFound)
 		return internal.ProductNotFound
 	}
 	deletedTime := time.Now()
@@ -86,7 +85,7 @@ func (p *ProductService) DeleteProduct(name string) error {
 	err = p.productRepos.Delete(product)
 
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	return nil
@@ -96,11 +95,11 @@ func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
 	productDto := dto.ProductDto{}
 	product, err := p.productRepos.GetByName(name)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return productDto, err
 	}
 	if product.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductNotFound))
+		zap.Logger.Error(internal.ProductNotFound)
 		return productDto, internal.ProductNotFound
 	}
 
@@ -111,11 +110,11 @@ func (p *ProductService) GetProductByName(name string) (dto.ProductDto, error) {
 	}
 
 	if product.Status == enum.ProductDeleted {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductDeleted))
+		zap.Logger.Error(internal.ProductDeleted)
 		return productDto, internal.ProductDeleted
 	}
 	if product.Status == enum.ProductUnAvailable {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductUnavailable))
+		zap.Logger.Error(internal.ProductUnavailable)
 		return productDto, internal.ProductUnavailable
 	}
 
@@ -126,11 +125,11 @@ func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDt
 	productDto := dto.ProductDto{}
 	product, err := p.productRepos.GetById(id)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return productDto, err
 	}
 	if product.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductNotFound))
+		zap.Logger.Error(internal.ProductNotFound)
 		return productDto, internal.ProductNotFound
 	}
 
@@ -141,11 +140,11 @@ func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDt
 	}
 
 	if product.Status == enum.ProductDeleted {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductDeleted))
+		zap.Logger.Error(internal.ProductDeleted)
 		return productDto, internal.ProductDeleted
 	}
 	if product.Status == enum.ProductUnAvailable {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductUnavailable))
+		zap.Logger.Error(internal.ProductUnavailable)
 		return productDto, internal.ProductUnavailable
 	}
 
@@ -155,11 +154,11 @@ func (p *ProductService) GetProductById(id int32, quantity int32) (dto.ProductDt
 func (p *ProductService) UpdateProduct(productDto dto.ProductUpdateDto) error {
 	product, err := p.productRepos.GetByName(productDto.Name)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 	if product.Id == 0 {
-		zap.Logger.Error("Hata", zap2.Error(internal.ProductNotFound))
+		zap.Logger.Error(internal.ProductNotFound)
 		return internal.ProductNotFound
 	}
 
@@ -174,7 +173,7 @@ func (p *ProductService) UpdateProduct(productDto dto.ProductUpdateDto) error {
 	}
 	err = p.productRepos.Update(entityProduct)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return err
 	}
 
@@ -189,7 +188,7 @@ func (p *ProductService) GetAllProducts(filter dto.Filter, pagination dto.Pagina
 
 	products, totalNumber, err = p.productRepos.GetAllProducts(filter, pagination)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		return productsDto, totalNumber, err
 	}
 

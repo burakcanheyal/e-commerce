@@ -7,7 +7,6 @@ import (
 	"attempt4/platform/validation"
 	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
-	zap2 "go.uber.org/zap"
 	"net/http"
 )
 
@@ -23,7 +22,7 @@ func NewProfileServerHandler(userService service.UserService) ProfileServerHandl
 func (p *ProfileServerHandler) Create(context *gin.Context) {
 	user := dto.UserDto{}
 	if err := context.BindJSON(&user); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -47,14 +46,14 @@ func (p *ProfileServerHandler) Create(context *gin.Context) {
 func (p *ProfileServerHandler) Update(context *gin.Context) {
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
 	user := dto.UserDto{}
 	if err := context.BindJSON(&user); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -78,7 +77,7 @@ func (p *ProfileServerHandler) Update(context *gin.Context) {
 func (p *ProfileServerHandler) Delete(context *gin.Context) {
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -96,7 +95,7 @@ func (p *ProfileServerHandler) Delete(context *gin.Context) {
 func (p *ProfileServerHandler) GetUser(context *gin.Context) {
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(http.StatusBadRequest, internal.UserNotFound)
 		return
 	}
@@ -114,14 +113,15 @@ func (p *ProfileServerHandler) GetUser(context *gin.Context) {
 func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
 	user := dto.UserUpdatePasswordDto{}
 	if err := context.BindJSON(&user); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(internal.FailInTokenParse)
+
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -137,7 +137,6 @@ func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
 	}
-
 	zap.Logger.Info("Kullanıcı şifre değiştirme başarılı")
 	context.JSON(http.StatusOK, SuccessInUpdate())
 }
@@ -145,7 +144,7 @@ func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
 func (p *ProfileServerHandler) ActivateUser(context *gin.Context) {
 	code := dto.UserUpdateCodeDto{}
 	if err := context.BindJSON(&code); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(internal.FailInTokenParse)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}

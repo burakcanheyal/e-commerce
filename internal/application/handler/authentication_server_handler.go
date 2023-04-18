@@ -6,7 +6,6 @@ import (
 	"attempt4/platform/validation"
 	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
-	zap2 "go.uber.org/zap"
 	"net/http"
 )
 
@@ -21,7 +20,7 @@ func NewAuthenticationServerHandler(authenticationService service.Authentication
 func (u *AuthenticationServerHandler) Login(context *gin.Context) {
 	user := dto.AuthDto{}
 	if err := context.BindJSON(&user); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}

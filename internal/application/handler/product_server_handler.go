@@ -7,7 +7,6 @@ import (
 	"attempt4/platform/validation"
 	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
-	zap2 "go.uber.org/zap"
 	"net/http"
 )
 
@@ -23,7 +22,7 @@ func NewProductServerHandler(productService service.ProductService) ProductServe
 func (p *ProductServerHandler) Create(context *gin.Context) {
 	product := dto.ProductDto{}
 	if err := context.BindJSON(&product); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -36,7 +35,7 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -67,7 +66,7 @@ func (p *ProductServerHandler) GetByName(context *gin.Context) {
 func (p *ProductServerHandler) Update(context *gin.Context) {
 	product := dto.ProductUpdateDto{}
 	if err := context.BindJSON(&product); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -91,7 +90,7 @@ func (p *ProductServerHandler) Update(context *gin.Context) {
 func (p *ProductServerHandler) Delete(context *gin.Context) {
 	product := dto.ProductDto{}
 	if err := context.BindJSON(&product); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
@@ -109,14 +108,14 @@ func (p *ProductServerHandler) Delete(context *gin.Context) {
 func (p *ProductServerHandler) GetAllProducts(context *gin.Context) {
 	filter := dto.Filter{}
 	if err := context.ShouldBind(&filter); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
 
 	pagination := dto.Pagination{}
 	if err := context.ShouldBind(&pagination); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}

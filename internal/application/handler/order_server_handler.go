@@ -7,7 +7,6 @@ import (
 	"attempt4/platform/validation"
 	"attempt4/platform/zap"
 	"github.com/gin-gonic/gin"
-	zap2 "go.uber.org/zap"
 	"net/http"
 	"strconv"
 )
@@ -24,14 +23,14 @@ func NewOrderServerHandler(orderService service.OrderService) OrderServerHandler
 func (o *OrderServerHandler) Create(context *gin.Context) {
 	order := dto.OrderDto{}
 	if err := context.BindJSON(&order); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
 
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -70,14 +69,14 @@ func (o *OrderServerHandler) GetById(context *gin.Context) {
 func (o *OrderServerHandler) Update(context *gin.Context) {
 	order := dto.OrderDto{}
 	if err := context.BindJSON(&order); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}
 
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
@@ -101,7 +100,7 @@ func (o *OrderServerHandler) Update(context *gin.Context) {
 func (o *OrderServerHandler) Delete(context *gin.Context) {
 	order := dto.OrderDto{}
 	if err := context.BindJSON(&order); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusServiceUnavailable, ErrorInJson())
 		return
 	}
@@ -125,21 +124,21 @@ func (o *OrderServerHandler) GetAllOrders(context *gin.Context) {
 
 	pagination := dto.Pagination{}
 	if err := context.ShouldBind(&pagination); err != nil {
-		zap.Logger.Error("Hata", zap2.Error(err))
+		zap.Logger.Error(err)
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
 
 	id, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
 	orderDto, totalNumber, err := o.orderService.GetAllOrders(id.Id, filter, pagination)
 	if err != nil {
-		zap.Logger.Error("Hata", zap2.Error(internal.FailInTokenParse))
+		zap.Logger.Error(internal.FailInTokenParse)
 		context.JSON(http.StatusNotFound, NonExistItem())
 		return
 	}
