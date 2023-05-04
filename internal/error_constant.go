@@ -56,4 +56,6 @@ var (
 	TransactionNotFound = errors.New("İşlem bulunamadı")
 
 	PdfNotCreated = errors.New("Pdf yaratılamadı")
+
+	LogNotCreated = errors.New("Log yaratılamadı")
 )

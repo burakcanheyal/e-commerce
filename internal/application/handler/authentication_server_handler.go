@@ -17,6 +17,7 @@ func NewAuthenticationServerHandler(authenticationService service.Authentication
 	a := AuthenticationServerHandler{authenticationService}
 	return a
 }
+
 func (u *AuthenticationServerHandler) Login(context *gin.Context) {
 	user := dto.AuthDto{}
 	if err := context.BindJSON(&user); err != nil {
@@ -31,24 +32,12 @@ func (u *AuthenticationServerHandler) Login(context *gin.Context) {
 		return
 	}
 
-	err = u.authenticationService.Login(user)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, NewHttpError(err))
-		return
-	}
-
-	accessToken, err := u.authenticationService.GenerateAccessToken(user.Username)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, NewHttpError(err))
-		return
-	}
-
-	refreshToken, err := u.authenticationService.GenerateRefreshToken(user.Username)
+	tokens, err := u.authenticationService.Login(user)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
 	}
 
 	zap.Logger.Info("Giriş başarılı")
-	context.JSON(http.StatusOK, gin.H{"access": accessToken, "refresh": refreshToken})
+	context.JSON(http.StatusOK, tokens)
 }

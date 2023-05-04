@@ -33,14 +33,14 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	product, err = p.productService.CreateProduct(product, id.Id)
+	product, err = p.productService.CreateProduct(product, user.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, ItemNotAdded())
 		return
@@ -53,7 +53,14 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 func (p *ProductServerHandler) GetByName(context *gin.Context) {
 	name := context.Param("name")
 
-	pro, err := p.productService.GetProductByName(name)
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		zap.Logger.Error(internal.UserNotFound)
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	pro, err := p.productService.GetProductByName(name, user.Id)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
@@ -77,7 +84,14 @@ func (p *ProductServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	err = p.productService.UpdateProduct(product)
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		zap.Logger.Error(internal.UserNotFound)
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	err = p.productService.UpdateProduct(product, user.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -94,8 +108,14 @@ func (p *ProductServerHandler) Delete(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		zap.Logger.Error(internal.UserNotFound)
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
 
-	err := p.productService.DeleteProduct(product.Name)
+	err := p.productService.DeleteProduct(product.Name, user.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -119,8 +139,14 @@ func (p *ProductServerHandler) GetAllProducts(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, ErrorInJson())
 		return
 	}
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		zap.Logger.Error(internal.UserNotFound)
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
 
-	products, totalNumber, err := p.productService.GetAllProducts(filter, pagination)
+	products, totalNumber, err := p.productService.GetAllProducts(filter, pagination, user.Id)
 	if err != nil {
 		context.JSON(http.StatusNotFound, NonExistItem())
 		return

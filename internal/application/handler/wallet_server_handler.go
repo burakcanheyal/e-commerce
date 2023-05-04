@@ -28,7 +28,7 @@ func (w *WalletServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	userDto, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		zap.Logger.Error(internal.FailInTokenParse)
 		context.JSON(401, internal.UserNotFound)
@@ -41,7 +41,7 @@ func (w *WalletServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	err = w.walletService.UpdateBalance(wallet, id.Id)
+	err = w.walletService.UpdateBalance(wallet, userDto.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -53,14 +53,14 @@ func (w *WalletServerHandler) Update(context *gin.Context) {
 
 func (w *WalletServerHandler) CompletePurchase(context *gin.Context) {
 
-	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	userDto, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	err := w.walletService.Purchase(id.Id)
+	err := w.walletService.Purchase(userDto.Id)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
@@ -71,14 +71,14 @@ func (w *WalletServerHandler) CompletePurchase(context *gin.Context) {
 }
 
 func (w *WalletServerHandler) GetAllBuyTransactions(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	userDto, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	items, total, err := w.walletService.GetAllTransactions(id.Id, enum.WalletBuyType)
+	items, total, err := w.walletService.GetAllTransactions(userDto.Id, enum.WalletBuyType)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
@@ -101,7 +101,9 @@ func (w *WalletServerHandler) GetAllSellTransactions(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
 	}
+	context.Writer.Header().Set("Content-Type", "application/pdf")
+	context.Writer.Header().Set("Content-disposition", "attachment; filename=kittens.pdf")
 
 	zap.Logger.Info("Tüm satış işlemlerini gösterme isteği başarılı")
-	context.JSON(http.StatusOK, pdf)
+	context.Data(http.StatusOK, "application/octet-stream", pdf)
 }

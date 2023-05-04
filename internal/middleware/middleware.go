@@ -5,16 +5,17 @@ import (
 	"attempt4/internal/application/handler"
 	"attempt4/internal/domain/dto"
 	"attempt4/internal/domain/enum"
-	service2 "attempt4/internal/domain/service"
+	"attempt4/internal/domain/service"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 type Middleware struct {
-	authenticationService service2.Authentication
-	userService           service2.UserService
+	authenticationService service.Authentication
+	userService           service.UserService
 }
 
-func NewMiddleware(authenticationService service2.Authentication, userService service2.UserService) Middleware {
+func NewMiddleware(authenticationService service.Authentication, userService service.UserService) Middleware {
 	a := Middleware{authenticationService, userService}
 	return a
 }
@@ -22,6 +23,7 @@ func (a *Middleware) Auth() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenString := context.GetHeader("Authentication")
 		refreshToken := context.GetHeader("Refresh")
+
 		if tokenString == "" {
 			context.AbortWithStatusJSON(401, handler.TokenError())
 			return
@@ -54,7 +56,7 @@ func (a *Middleware) Auth() gin.HandlerFunc {
 				context.AbortWithStatusJSON(401, handler.NewHttpError(err))
 				return
 			}
-			context.JSON(200, tokenString)
+			log.Println(tokenString)
 		}
 
 		context.Set("user", dto.TokenUserDto{Id: user.Id})

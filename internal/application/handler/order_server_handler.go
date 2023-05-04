@@ -28,7 +28,7 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
@@ -41,7 +41,7 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 		return
 	}
 
-	orderDescription, err := o.orderService.CreateOrder(order, id.Id)
+	orderDescription, err := o.orderService.CreateOrder(order, user.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -52,11 +52,18 @@ func (o *OrderServerHandler) Create(context *gin.Context) {
 }
 
 func (o *OrderServerHandler) GetById(context *gin.Context) {
-	id := context.Param("id")
-	orderId, _ := strconv.ParseInt(id, 10, 64)
+	oId := context.Param("id")
+	orderId, _ := strconv.ParseInt(oId, 10, 64)
 	orderIdInt32 := int32(orderId)
 
-	order, err := o.orderService.GetOrderById(orderIdInt32)
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		zap.Logger.Error(internal.UserNotFound)
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	order, err := o.orderService.GetOrderById(orderIdInt32, user.Id)
 	if err != nil {
 		context.JSON(http.StatusNotFound, NonExistItem())
 		return
@@ -105,7 +112,14 @@ func (o *OrderServerHandler) Delete(context *gin.Context) {
 		return
 	}
 
-	err := o.orderService.DeleteOrder(order.Id)
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		zap.Logger.Error(internal.UserNotFound)
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	err := o.orderService.DeleteOrder(order.Id, user.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return

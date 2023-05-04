@@ -2,7 +2,7 @@ package repository
 
 import (
 	"attempt4/internal"
-	dto2 "attempt4/internal/domain/dto"
+	dto "attempt4/internal/domain/dto"
 	"attempt4/internal/domain/entity"
 	"attempt4/internal/domain/enum"
 	"gorm.io/gorm"
@@ -67,7 +67,7 @@ func (p *ProductRepository) GetById(id int32) (entity.Product, error) {
 	return product, nil
 }
 
-func (p *ProductRepository) GetAllProducts(filter dto2.Filter, pagination dto2.Pagination) ([]entity.Product, int64, error) {
+func (p *ProductRepository) GetAllProducts(filter dto.Filter, pagination dto.Pagination) ([]entity.Product, int64, error) {
 	var productList []entity.Product
 	var total int64
 	var order string

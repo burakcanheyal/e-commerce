@@ -1,7 +1,7 @@
 package seed
 
 import (
-	entity2 "attempt4/internal/domain/entity"
+	"attempt4/internal/domain/entity"
 	"attempt4/internal/domain/enum"
 	"gorm.io/gorm"
 	"time"
@@ -12,7 +12,7 @@ func ProductSeed(db *gorm.DB) {
 	productNames := [4]string{"Domates", "Patates", "Soğan", "Sarımsak"}
 	productQuantity := [4]int32{45, 84, 95, 115}
 	productPrice := [4]float32{13.2, 8.3, 14.6, 20.5}
-	products := []entity2.Product{
+	products := []entity.Product{
 		{
 			0,
 			productNames[0],
@@ -23,7 +23,7 @@ func ProductSeed(db *gorm.DB) {
 			time.Now(),
 			nil,
 			nil,
-			entity2.User{},
+			entity.User{},
 		},
 		{
 			0,
@@ -35,7 +35,7 @@ func ProductSeed(db *gorm.DB) {
 			time.Now(),
 			nil,
 			nil,
-			entity2.User{},
+			entity.User{},
 		},
 		{
 			0,
@@ -47,7 +47,7 @@ func ProductSeed(db *gorm.DB) {
 			time.Now(),
 			nil,
 			nil,
-			entity2.User{},
+			entity.User{},
 		},
 		{
 			0,
@@ -59,7 +59,7 @@ func ProductSeed(db *gorm.DB) {
 			time.Now(),
 			nil,
 			nil,
-			entity2.User{},
+			entity.User{},
 		},
 	}
 	var size int64

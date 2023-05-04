@@ -11,3 +11,6 @@ type TransactionDto struct {
 	SellerName      string
 	OperationDate   time.Time
 }
+type Transaction struct {
+	Transactions []TransactionDto
+}

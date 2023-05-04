@@ -44,7 +44,7 @@ func (p *ProfileServerHandler) Create(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) Update(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	userDto, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
@@ -64,7 +64,7 @@ func (p *ProfileServerHandler) Update(context *gin.Context) {
 		return
 	}
 
-	err = p.UserService.UpdateUser(id.Id, user)
+	err = p.UserService.UpdateUser(userDto.Id, user)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -75,14 +75,14 @@ func (p *ProfileServerHandler) Update(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) Delete(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	user, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
 		return
 	}
 
-	err := p.UserService.DeleteUser(id.Id)
+	err := p.UserService.DeleteUser(user.Id)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -93,14 +93,14 @@ func (p *ProfileServerHandler) Delete(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) GetUser(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	userDto, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(http.StatusBadRequest, internal.UserNotFound)
 		return
 	}
 
-	user, err := p.UserService.GetUserById(id.Id)
+	user, err := p.UserService.GetUserById(userDto.Id)
 	if err != nil {
 		context.JSON(http.StatusNotFound, NonExistItem())
 		return
@@ -111,7 +111,7 @@ func (p *ProfileServerHandler) GetUser(context *gin.Context) {
 }
 
 func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
-	id, exist := context.Keys["user"].(dto.TokenUserDto)
+	userDto, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
 		zap.Logger.Error(internal.UserNotFound)
 		context.JSON(401, internal.UserNotFound)
@@ -132,7 +132,7 @@ func (p *ProfileServerHandler) UpdatePassword(context *gin.Context) {
 		return
 	}
 
-	err = p.UserService.UpdateUserPassword(id.Id, user)
+	err = p.UserService.UpdateUserPassword(userDto.Id, user)
 	if err != nil {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
@@ -163,9 +163,4 @@ func (p *ProfileServerHandler) ActivateUser(context *gin.Context) {
 
 	zap.Logger.Info("Kullanıcı aktive etme başarılı")
 	context.JSON(http.StatusOK, SuccessInActivate())
-}
-
-func (p *ProfileServerHandler) Test(context *gin.Context) {
-
-	context.JSON(http.StatusOK, gin.H{"ping": "pong"})
 }

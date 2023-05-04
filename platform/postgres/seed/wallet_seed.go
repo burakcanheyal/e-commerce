@@ -1,7 +1,7 @@
 package seed
 
 import (
-	entity2 "attempt4/internal/domain/entity"
+	"attempt4/internal/domain/entity"
 	"attempt4/internal/domain/enum"
 	"gorm.io/gorm"
 	"time"
@@ -10,7 +10,7 @@ import (
 func WalletSeed(db *gorm.DB) {
 	walletUserId := [2]int32{1, 2}
 	walletBalance := [2]float32{15100, 12000}
-	wallets := []entity2.Wallet{
+	wallets := []entity.Wallet{
 		{
 			0,
 			walletUserId[0],
@@ -19,7 +19,7 @@ func WalletSeed(db *gorm.DB) {
 			time.Now(),
 			nil,
 			nil,
-			entity2.User{},
+			entity.User{},
 		},
 		{
 			0,
@@ -29,7 +29,7 @@ func WalletSeed(db *gorm.DB) {
 			time.Now(),
 			nil,
 			nil,
-			entity2.User{},
+			entity.User{},
 		},
 	}
 	var size int64

@@ -5,6 +5,7 @@ import (
 	"attempt4/internal/domain/dto"
 	"attempt4/internal/domain/entity"
 	"attempt4/internal/domain/enum"
+	"attempt4/platform/app_log"
 	"attempt4/platform/postgres/repository"
 	"attempt4/platform/zap"
 	"math/rand"
@@ -13,18 +14,21 @@ import (
 
 type RolService struct {
 	userRepository       repository.UserRepository
-	keyRepository        repository.RoleRepository
+	roleRepository       repository.RoleRepository
 	submissionRepository repository.SubmissionRepository
+	appLogService        app_log.ApplicationLogService
 }
 
 func NewRolService(
 	userRepository repository.UserRepository,
-	keyRepository repository.RoleRepository,
-	submissionRepository repository.SubmissionRepository) RolService {
+	roleRepository repository.RoleRepository,
+	submissionRepository repository.SubmissionRepository,
+	appLogService app_log.ApplicationLogService) RolService {
 	k := RolService{
 		userRepository,
-		keyRepository,
+		roleRepository,
 		submissionRepository,
+		appLogService,
 	}
 	return k
 }
@@ -32,15 +36,18 @@ func NewRolService(
 func (k *RolService) SubmissionUserRole(id int32) error {
 	operation, err := k.submissionRepository.GetByUserId(id)
 	if err != nil {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(err)
 		return err
 	}
 	if operation.Id != 0 {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.OperationWaiting.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(internal.OperationWaiting)
 		return internal.OperationWaiting
 	}
 
 	if operation.Status != enum.SubmissionWaiting {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.OperationResponded.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(internal.OperationResponded)
 		return internal.OperationResponded
 	}
@@ -58,10 +65,12 @@ func (k *RolService) SubmissionUserRole(id int32) error {
 
 	operation, err = k.submissionRepository.Create(operation)
 	if err != nil {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(err)
 		return err
 	}
 	if operation.Id == 0 {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.OperationNotCreated.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(internal.OperationNotCreated)
 		return internal.OperationNotCreated
 	}
@@ -72,27 +81,32 @@ func (k *RolService) SubmissionUserRole(id int32) error {
 func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id int32) error {
 	operation, err := k.submissionRepository.GetByUserId(ResponseDto.UserId)
 	if err != nil {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(err)
 		return err
 	}
 	if operation.Id == 0 {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.OperationNotFound.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(internal.OperationNotFound)
 		return internal.OperationNotFound
 	}
 
 	if operation.SubmissionNumber != ResponseDto.OperationNumber {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.OperationFailInNumber.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(internal.OperationFailInNumber)
 		return internal.OperationFailInNumber
 	}
 
 	operation.Status = ResponseDto.Response
 
-	key, err := k.keyRepository.GetByUserId(ResponseDto.UserId)
+	key, err := k.roleRepository.GetByUserId(ResponseDto.UserId)
 	if err != nil {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(err)
 		return err
 	}
 	if key.Id == 0 {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.RoleNotFound.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(internal.RoleNotFound)
 		return internal.RoleNotFound
 	}
@@ -110,12 +124,14 @@ func (k *RolService) ResultOfUpdateUserRole(ResponseDto dto.AppOperationDto, id 
 
 	err = k.submissionRepository.Update(operation)
 	if err != nil {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(err)
 		return err
 	}
 
-	err = k.keyRepository.Update(key)
+	err = k.roleRepository.Update(key)
 	if err != nil {
+		k.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Role", CreatedAt: time.Now()})
 		zap.Logger.Error(err)
 		return err
 	}
@@ -134,6 +150,7 @@ func RandomString(len int) string {
 	str := string(bytes)
 	return str
 }
+
 func randInt(min int, max int) int {
 
 	return min + rand.Intn(max-min)

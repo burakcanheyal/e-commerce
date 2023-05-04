@@ -6,6 +6,7 @@ import (
 	"attempt4/internal/domain/service"
 	"attempt4/internal/middleware"
 	"attempt4/internal/server"
+	"attempt4/platform/app_log"
 	"attempt4/platform/postgres"
 	"attempt4/platform/postgres/repository"
 	"attempt4/platform/zap"
@@ -31,7 +32,15 @@ func Setup() {
 	if err != nil {
 		log.Println(err)
 	}
-	db := postgres.InitializeDatabase(config.DBURL)
+	db, err := postgres.InitializeDatabase(config.DBURL)
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = app_log.InitializeAppLogDatabase(db)
+	if err != nil {
+		log.Println(err)
+	}
 
 	userRepository := repository.NewUserRepository(db)
 	productRepository := repository.NewProductRepository(db)
@@ -39,15 +48,17 @@ func Setup() {
 	roleRepository := repository.NewRoleRepository(db)
 	walletRepository := repository.NewWalletRepository(db)
 	panelRepository := repository.NewSubmissionRepository(db)
-	walletOperation := repository.NewWalletOperationRepository(db)
+	walletOperationRepository := repository.NewWalletOperationRepository(db)
+	applicationLogRepository := app_log.NewApplicationLogRepository(db)
 
-	userService := service.NewUserService(userRepository, roleRepository, walletRepository)
-	productService := service.NewProductService(productRepository, userRepository)
-	orderService := service.NewOrderService(orderRepository, productRepository, userRepository)
-	authenticationService := service.NewAuthentication(userRepository, config.Secret, config.Secret2)
+	appLogService := app_log.NewApplicationLogService(applicationLogRepository)
+	userService := service.NewUserService(userRepository, roleRepository, walletRepository, appLogService)
+	productService := service.NewProductService(productRepository, userRepository, appLogService)
+	orderService := service.NewOrderService(orderRepository, productRepository, userRepository, appLogService)
+	authenticationService := service.NewAuthentication(userRepository, config.Secret, config.Secret2, appLogService)
 	walletService := service.NewWalletService(userRepository, walletRepository, productRepository,
-		orderRepository, walletOperation, roleRepository)
-	keyService := service.NewRolService(userRepository, roleRepository, panelRepository)
+		orderRepository, walletOperationRepository, roleRepository, appLogService)
+	keyService := service.NewRolService(userRepository, roleRepository, panelRepository, appLogService)
 
 	authenticationMiddleware := middleware.NewMiddleware(authenticationService, userService)
 

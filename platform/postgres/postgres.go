@@ -1,34 +1,34 @@
 package postgres
 
 import (
-	entity2 "attempt4/internal/domain/entity"
-	seed2 "attempt4/platform/postgres/seed"
+	"attempt4/internal/domain/entity"
+	"attempt4/platform/postgres/seed"
 	"attempt4/platform/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func InitializeDatabase(dsn string) *gorm.DB {
+func InitializeDatabase(dsn string) (*gorm.DB, error) {
 	db := ConnectToDb(dsn)
 	err := db.AutoMigrate(
-		&entity2.Product{},
-		&entity2.User{},
-		&entity2.Order{},
-		&entity2.Role{},
-		&entity2.Wallet{},
-		&entity2.Submission{},
-		&entity2.WalletOperation{},
+		&entity.Product{},
+		&entity.User{},
+		&entity.Order{},
+		&entity.Role{},
+		&entity.Wallet{},
+		&entity.Submission{},
+		&entity.WalletOperation{},
 	)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	seed2.UserSeed(db)
-	seed2.ProductSeed(db)
-	seed2.RolSeed(db)
-	seed2.WalletSeed(db)
+	seed.UserSeed(db)
+	seed.ProductSeed(db)
+	seed.RolSeed(db)
+	seed.WalletSeed(db)
 
-	return db
+	return db, nil
 }
 func ConnectToDb(dsn string) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

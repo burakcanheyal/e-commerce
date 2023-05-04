@@ -68,17 +68,25 @@
             <th>Operation Date</th>
         </tr>
         </thead>
-        {{#Transactions}}
-        <tr>
-            <td>{{OperationNumber}}</td>
-            <td>{{Balance}}</td>
-            <td>{{OrderId}}</td>
-            <td>{{ProductName}}</td>
-            <td>{{OrderQuantity}}</td>
-            <td>{{SellerName}}</td>
-            <td>{{OperationDate}}</td>
+                <tr>
+            <td>gmwjgsap</td>
+            <td>24.900002</td>
+            <td>1</td>
+            <td>Patates</td>
+            <td>3</td>
+            <td>Fatih</td>
+            <td>2023-03-31 14:52:37.528675 +0300 +03</td>
         </tr>
-        {{/Transactions}}
+                <tr>
+            <td>gatlmody</td>
+            <td>39.6</td>
+            <td>2</td>
+            <td>Domates</td>
+            <td>3</td>
+            <td>Fatih</td>
+            <td>2023-03-31 14:52:37.539296 +0300 +03</td>
+        </tr>
+        
     </table>
 </div>
 <div id="pie-chart">
@@ -86,12 +94,15 @@
     <div id="legenda"></div>
 </div>
 <div id="PieData">
-    {{#PieChartData}}
-    <div class="pie-entry">
-        <p class="ratio">{{Ratio}}</p>
-        <p class="operationNumber">{{OperationNumber}}</p>
+        <div class="pie-entry">
+        <p class="ratio">0.39</p>
+        <p class="operationNumber">gmwjgsap</p>
     </div>
-    {{/PieChartData}}
+        <div class="pie-entry">
+        <p class="ratio">0.61</p>
+        <p class="operationNumber">gatlmody</p>
+    </div>
+    
 </div>
 
 <script type="text/javascript">

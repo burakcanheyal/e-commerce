@@ -40,7 +40,6 @@ func NewWebServer(
 func (s *WebServer) SetupRoot() {
 	router := gin.Default()
 
-	router.GET("", s.profileServerHandler.Test)
 	router.POST("/login", s.authentication.Login)
 	router.POST("/user/add", s.profileServerHandler.Create)
 	router.POST("/activation", s.profileServerHandler.ActivateUser)
