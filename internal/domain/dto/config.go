@@ -1,7 +1,8 @@
 package dto
 
 type Config struct {
-	DBURL        string `mapstructure:"DB_URL"`
+	DBURL string `mapstructure:"DB_URL"`
+	//DBTestUrl    string `mapstructure:"DB_TEST_URL"`
 	Secret       string `mapstructure:"SECRET"`
 	Secret2      string `mapstructure:"SECRET2"`
 	WkHtmlPath   string `mapstructure:"WKHTMLTOPDF_PATH"`

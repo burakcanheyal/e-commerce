@@ -2,7 +2,6 @@ package app_log
 
 import (
 	"attempt4/internal"
-	"attempt4/platform/app_log/seed"
 	"attempt4/platform/zap"
 	"gorm.io/gorm"
 	"time"
@@ -61,7 +60,6 @@ func InitializeAppLogDatabase(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	seed.ApplicationLogSeed(db)
 	return nil
 }
 

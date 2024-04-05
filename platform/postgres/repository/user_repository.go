@@ -43,10 +43,10 @@ func (p *UserRepository) GetById(id int32) (entity.User, error) {
 	return user, nil
 }
 
-func (p *UserRepository) GetByName(userName string) (entity.User, error) {
+func (p *UserRepository) GetByName(username string) (entity.User, error) {
 	var user entity.User
-	if err := p.db.Model(&user).Where("status != ?", enum.UserDeletedStatus).Where("username=?", userName).Scan(&user).Error; err != nil {
-		return user, internal.DBNotFound
+	if err := p.db.Model(&user).Where("status != ?", enum.UserDeletedStatus).Where("username=?", username).Scan(&user).Error; err != nil {
+		return user, err
 	}
 	return user, nil
 }
@@ -59,6 +59,7 @@ func (p *UserRepository) Update(user entity.User) error {
 			Name:      user.Name,
 			Surname:   user.Surname,
 			Status:    user.Status,
+			Phone:     user.Phone,
 			BirthDate: user.BirthDate,
 			Code:      user.Code,
 			UpdatedAt: user.UpdatedAt,

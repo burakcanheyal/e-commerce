@@ -17,7 +17,7 @@ var (
 
 	InvalidPassword = errors.New("Hatalı şifre")
 
-	UserNotCreated   = errors.New("Kayıtlı kullanıcı")
+	UserNotCreated   = errors.New("Kullanıcı yaratılamadı")
 	UserExist        = errors.New("Kayıtlı kullanıcı")
 	UserNotFound     = errors.New("Kullanıcı bulunamadı")
 	DeletedUser      = errors.New("Silinmiş kullanıcı")

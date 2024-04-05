@@ -19,7 +19,7 @@ func init() {
 
 	viper.AddConfigPath(".")
 	viper.SetConfigType("env")
-	viper.SetConfigName(".env")
+	viper.SetConfigName("dev.env")
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Println(err)
@@ -32,6 +32,7 @@ func Setup() {
 	if err != nil {
 		log.Println(err)
 	}
+	log.Println(config)
 	db, err := postgres.InitializeDatabase(config.DBURL)
 	if err != nil {
 		log.Println(err)

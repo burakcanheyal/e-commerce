@@ -23,7 +23,6 @@ func NewHashId(hd *hashids.HashID) HashId {
 	return h
 }
 func EncodeId(id int) (string, error) {
-
 	hashedIds, err := hId.hd.Encode([]int{id})
 	if err != nil {
 		return "", err
