@@ -10,14 +10,11 @@ function ChatWidget() {
 
   const handleNewUserMessage = (newMessage) => {
     console.log(`New message incoming! ${newMessage}`);
-    // Analiz edilmiş mesaja göre uygun cevabı seç
     const response = generateResponse(newMessage);
-    // Cevabı kullanıcıya gönder
     addResponseMessage(response);
   };
 
   const generateResponse = (message) => {
-    // Mesajı analiz et ve uygun cevabı döndür
     if (message.toLowerCase().includes('hello') || message.toLowerCase().includes('hi')) {
       return 'Hi there! How can I assist you today?';
     } else if (message.toLowerCase().includes('help')) {
@@ -29,7 +26,6 @@ function ChatWidget() {
 
   const handleQuickButtonClicked = (value) => {
     console.log(`Quick button clicked! Value: ${value}`);
-    // Handle the quick button click event
   };
 
   return (

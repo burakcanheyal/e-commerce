@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Grid, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import {
+  Grid,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Popover, List, ListItem, ListItemText, Badge,
+} from '@mui/material';
 import { Select, MenuItem } from '@mui/material';
 import DashboardCard from '../../components/shared/DashboardCard';
 import izmirImage from '../../assets/images/izmir.jpg';
@@ -12,11 +22,14 @@ import balikesirImage from '../../assets/images/balikesir.jpg';
 import samsunImage from '../../assets/images/samsun.jpg';
 import eskisehirImage from '../../assets/images/eskisehir.jpg';
 import DialogTrips from './dialogTrips.jsx';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ClearIcon from '@mui/icons-material/Clear';
+import ShopIcon from '@mui/icons-material/Shop';
 
 const OfferedTrips = () => {
   const [trip, setTrip] = useState('1');
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedCities, setSelectedCities] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
 
   const handleChange = (event) => {
     setTrip(event.target.value);
@@ -24,16 +37,34 @@ const OfferedTrips = () => {
 
   const handleDialogOpen = (tripIndex) => {
     setOpenDialog(true);
-    setTrip(tripIndex.toString()); // Seçilen tur paketinin index'i olarak trip state'ini güncelle
+    setTrip(tripIndex.toString());
   };
 
   const handleDialogClose = () => {
     setOpenDialog(false);
   };
-  const handleAddCity = (cityName) => {
-    setSelectedCities((prevCities) => [...prevCities, cityName]);
+
+  const handleAddToCart = (trip) => {
+    if (!cartItems.find(item => item.name === trip.name)) {
+      setCartItems([...cartItems, trip]);
+    }
   };
 
+  const handleClearCart = () => {
+    setCartItems([]);
+  };
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
   const tripPackages = [
     {
       name: 'İzmir Tour',
@@ -101,10 +132,10 @@ const OfferedTrips = () => {
       ], // Yeni eklendi
     }, // Yeni eklendi
     {
-      name: 'Çanakkale Tour', // Yeni eklendi
+      name: 'Çanakkale Tour',
       description: 'Discover the historical sites and natural beauty of Çanakkale, a city rich in culture and significance.', // Yeni eklendi
-      image: canakkaleImage, // Yeni eklendi
-      places: [ // Yeni eklendi
+      image: canakkaleImage,
+      places: [
         { name: 'Troy Ancient City', coords: { lat: 39.9572, lng: 26.2386 }, details: 'Troy Ancient City is a UNESCO World Heritage Site, known for its mythological significance as the setting of the Trojan War.' }, // Yeni eklendi
         { name: 'Gallipoli Peninsula', coords: { lat: 40.2470, lng: 26.3437 }, details: 'Gallipoli Peninsula is a historic site of significant importance, known for the Gallipoli Campaign during World War I.' }, // Yeni eklendi
         { name: 'Çanakkale Martyrs\' Memorial', coords: { lat: 40.1464, lng: 26.4086 }, details: 'Çanakkale Martyrs\' Memorial is a commemorative monument dedicated to the Turkish soldiers who participated in the Battle of Gallipoli.' }, // Yeni eklendi
@@ -114,9 +145,9 @@ const OfferedTrips = () => {
       ], // Yeni eklendi
     }, // Yeni eklendi
     {
-      name: 'Balıkesir Tour', // Balıkesir turu eklendi
+      name: 'Balıkesir Tour',
       description: 'Explore the stunning coastline, pristine beaches, and historical sites of Balıkesir, a province on the Aegean coast of Turkey.',
-      image: balikesirImage, // Balıkesir resmi eklendi
+      image: balikesirImage,
       places: [
         { name: 'Assos Ancient City', coords: { lat: 39.4891, lng: 26.3329 }, details: 'Assos Ancient City is an archaeological site located in the Çanakkale Province of Turkey. It is known for its Temple of Athena, built on a hill overlooking the Aegean Sea.' },
         { name: 'Ayvalık', coords: { lat: 39.3173, lng: 26.6954 }, details: 'Ayvalık is a seaside town known for its olive oil production, historic architecture, and charming streets lined with colorful houses.' },
@@ -153,56 +184,95 @@ const OfferedTrips = () => {
   ];
 
   return (
-    <DashboardCard>
-      <Select
-        defaultValue={8}
-        size="small"
-        onChange={handleChange}
+    <div>
+      <IconButton style={{ position: 'relative', top: '-15px', left: '-50px' }} onClick={handlePopoverOpen}>
+        <Badge badgeContent={cartItems.length} color="secondary">
+          <ShoppingCartIcon />
+        </Badge>
+      </IconButton>
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handlePopoverClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        PaperProps={{
+          sx: {
+            border: '1px solid black',
+            borderRadius:'5px'
+          },
+        }}
       >
-        <MenuItem value={1}>Beach</MenuItem>
-        <MenuItem value={2}>Adventure</MenuItem>
-        <MenuItem value={3}>Camping</MenuItem>
-        <MenuItem value={4}>Road Trips</MenuItem>
-        <MenuItem value={5}>Backpacking</MenuItem>
-        <MenuItem value={6}>Cultural</MenuItem>
-        <MenuItem value={7}>Relaxing</MenuItem>
-        <MenuItem value={8}>All Tours</MenuItem>
-      </Select>
-      <br/>
-      <br/>
-      <div>
-        <Grid container spacing={5}>
-          {tripPackages.map((trip, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <TripPackage trip={trip} onDialogOpen={() => handleDialogOpen(index + 1)} />
-            </Grid>
+        <List>
+          {cartItems.map((item, index) => (
+            <ListItem key={index}>
+              <ListItemText primary={item.name} />
+            </ListItem>
           ))}
-        </Grid>
-      </div>
-      <Dialog open={openDialog} onClose={handleDialogClose} fullWidth maxWidth="lg">
-        <DialogTitle>Trip Details</DialogTitle>
-        <DialogContent dividers>
-          <DialogTrips places={tripPackages[parseInt(trip) - 1].places} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} color="primary">Close</Button>
-        </DialogActions>
-      </Dialog>
-    </DashboardCard>
+          <ListItem>
+            <Button startIcon={<ClearIcon />} onClick={() => { handleClearCart(); handlePopoverClose(); }}>Clear Cart</Button>
+            <Button startIcon={<ShopIcon />} color="primary">Buy</Button>
+          </ListItem>
+        </List>
+      </Popover>
+      <DashboardCard>
+        <Select
+          defaultValue={8}
+          size="small"
+          onChange={handleChange}
+        >
+          <MenuItem value={1}>Beach</MenuItem>
+          <MenuItem value={2}>Adventure</MenuItem>
+          <MenuItem value={3}>Camping</MenuItem>
+          <MenuItem value={4}>Road Trips</MenuItem>
+          <MenuItem value={5}>Backpacking</MenuItem>
+          <MenuItem value={6}>Cultural</MenuItem>
+          <MenuItem value={7}>Relaxing</MenuItem>
+          <MenuItem value={8}>All Tours</MenuItem>
+        </Select>
+        <br />
+        <br />
+        <div>
+          <Grid container spacing={5}>
+            {tripPackages.map((trip, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <TripPackage trip={trip} onDialogOpen={() => handleDialogOpen(index + 1)} onAddToCart={() => handleAddToCart(trip)} />
+              </Grid>
+            ))}
+          </Grid>
+        </div>
+        <Dialog open={openDialog} onClose={handleDialogClose} fullWidth maxWidth="lg">
+          <DialogTitle>Trip Details</DialogTitle>
+          <DialogContent dividers>
+            <DialogTrips places={tripPackages[parseInt(trip) - 1].places} />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose} color="primary">Close</Button>
+          </DialogActions>
+        </Dialog>
+      </DashboardCard>
+    </div>
   );
 };
 
-const TripPackage = ({ trip, onDialogOpen,onAddCity }) => {
+const TripPackage = ({ trip, onDialogOpen, onAddToCart }) => {
   return (
     <div style={{ border: '1px solid #ccc', padding: '25px', borderRadius: '5px', position: 'relative' }}>
       <img src={trip.image} alt={trip.name} style={{ width: '100%', borderRadius: '5px 5px 0 0', marginBottom: '10px' }} />
       <Typography variant="h2" align="center" style={{ marginBottom: '10px' }}>{trip.name}</Typography>
       <Typography variant="body1" style={{ marginBottom: '10px' }}>{trip.description}</Typography>
-      <Button variant="contained" color="primary" onClick={onDialogOpen} style={{ position: 'absolute', bottom: '10px', right: '10px' }}>Search</Button>
-      <Button variant="contained" color="secondary" onClick={onAddCity}>Add</Button>
 
+      <Button variant="contained" color="primary" onClick={onDialogOpen} style={{ position: 'relative', bottom: '5px', right: '10px' }}>Search</Button>
+      <Button variant="contained" color="secondary" onClick={onAddToCart} style={{ position: 'relative', bottom: '5px', left: '150px' }}>Add</Button>
     </div>
   );
 };
+
 
 export default OfferedTrips;
