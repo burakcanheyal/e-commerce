@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, AppBar, Toolbar, styled, Stack, IconButton, Badge } from '@mui/material';
 import PropTypes from 'prop-types';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 // components
 import Profile from './Profile.jsx';
@@ -24,13 +23,6 @@ const Header = (props) => {
     color: theme.palette.text.secondary,
   }));
 
-  const CartIconButton = () => {
-    return (
-      <IconButton style={{ position: 'relative', top: '10px', left: '10px'}}>
-        <ShoppingCartIcon />
-      </IconButton>
-    );
-  };
 
   return (
     <AppBarStyled position="sticky" color="default">

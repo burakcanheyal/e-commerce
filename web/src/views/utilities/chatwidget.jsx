@@ -1,31 +1,17 @@
-import React, { useEffect } from 'react';
-import { Widget, addResponseMessage } from 'react-chat-widget';
+// ChatWidget.jsx
 
+import React, { useEffect, useState } from 'react';
+import { Widget, addResponseMessage } from 'react-chat-widget';
 import 'react-chat-widget/lib/styles.css';
 
-function ChatWidget() {
+function ChatWidget({ messageHandler }) {
   useEffect(() => {
     addResponseMessage('Welcome to our **support** chat! How can I assist you today?');
   }, []);
 
   const handleNewUserMessage = (newMessage) => {
     console.log(`New message incoming! ${newMessage}`);
-    const response = generateResponse(newMessage);
-    addResponseMessage(response);
-  };
-
-  const generateResponse = (message) => {
-    if (message.toLowerCase().includes('hello') || message.toLowerCase().includes('hi')) {
-      return 'Hi there! How can I assist you today?';
-    } else if (message.toLowerCase().includes('help')) {
-      return 'Sure, I can help you. What do you need assistance with?';
-    } else {
-      return "I'm sorry, I didn't understand that. Could you please rephrase?";
-    }
-  };
-
-  const handleQuickButtonClicked = (value) => {
-    console.log(`Quick button clicked! Value: ${value}`);
+    messageHandler(newMessage); // Yeni mesajı ana bileşene iletiyoruz
   };
 
   return (
@@ -41,7 +27,6 @@ function ChatWidget() {
         launcherOpenLabel="Open chat"
         launcherCloseLabel="Close chat"
         sendButtonAlt="Send"
-        handleQuickButtonClicked={handleQuickButtonClicked}
         showTimeStamp={true}
         resizable={false}
         emojis={false}

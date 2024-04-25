@@ -15,6 +15,7 @@ const Login = Loadable(lazy(() => import('../views/authentication/Login.jsx')));
 const OfferedTrips = Loadable(lazy(() => import('../views/OfferedTrips/offeredtrips.jsx')));
 const Survey = Loadable(lazy(() => import('../views/survey/surveypage.jsx')));
 const Wallet = Loadable(lazy(() => import('../views/wallet/walletdetails.jsx')));
+const Admin = Loadable(lazy(() => import('../views/authentication/Admin.jsx')));
 
 const Router = [
   {
@@ -37,6 +38,7 @@ const Router = [
       { path: '404', element: <ErrorPage /> },
       { path: '/auth/register', element: <Register /> },
       { path: '/auth/login', element: <Login /> },
+      { path: '/auth/admin', element: <Admin /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
