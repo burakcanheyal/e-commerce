@@ -27,7 +27,6 @@ const Admin = () => {
   const [response, setResponse] = useState('');
 
   useEffect(() => {
-    // Ana bileşenden gelen mesajları dinleme
     const handleMessage = (newMessage) => {
       setMessages([...messages, newMessage]);
     };
@@ -41,9 +40,7 @@ const Admin = () => {
 
   const handleNewResponse = () => {
     if (response.trim() !== '') {
-      // Yeni yanıtı mesajlar listesine ekleyin
       setMessages([...messages, response]);
-      // Yanıt alanını temizleyin
       setResponse('');
     }
   };
@@ -73,7 +70,6 @@ const Admin = () => {
           <Paper elevation={3} style={{ marginTop: '20px', padding: '20px' }}>
             <Typography variant="h5">Live Response</Typography>
             <div>
-              {/* Diğer sekmeden gelen mesajları burada gösterin */}
               {messages.map((message, index) => (
                 <div key={index}>
                   <p>{message}</p>

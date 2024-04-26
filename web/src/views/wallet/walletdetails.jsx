@@ -5,7 +5,6 @@ const Wallet = () => {
   const [wallet, setWallet] = useState(null);
   const [operations, setOperations] = useState([]);
 
-  // Wallet ve işlemler için örnek veri
   const sampleWallet = {
     balance: 1000,
     status: 1,
@@ -18,7 +17,6 @@ const Wallet = () => {
     { id: 2, operationNumber: 'OP002', type: 2, balance: 200, operationDate: '2022-04-11T09:00:00Z' },
   ];
 
-  // Komponent yüklendiğinde örnek verileri ayarla
   useState(() => {
     setWallet(sampleWallet);
     setOperations(sampleOperations);
