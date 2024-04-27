@@ -24,7 +24,11 @@ const MenuItems = [
     icon: LocalOfferIcon,
     href: '/offeredtrips',
   },
-
+  {
+    id: uniqueId(),
+    title: 'Routes Page',
+    href: '/routespage',
+  },
   {
     id: uniqueId(),
     title: 'Survey',

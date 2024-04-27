@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useJsApiLoader, GoogleMap, Marker, InfoWindow, DirectionsRenderer } from '@react-google-maps/api';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, FormGroup, FormControlLabel, Checkbox, Alert } from '@mui/material'; // Import DialogContentText
 
 const SearchMap = () => {
   const { isLoaded, loadError } = useJsApiLoader({
@@ -14,6 +15,8 @@ const SearchMap = () => {
   const [autocompleteService, setAutocompleteService] = useState(null);
   const [autocompleteSessionToken, setAutocompleteSessionToken] = useState(null);
   const [autocompleteResults, setAutocompleteResults] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [showAlert, setShowAlert] = useState(false); // State for alert
 
   useEffect(() => {
     if (isLoaded) {
@@ -29,6 +32,7 @@ const SearchMap = () => {
           input: searchText,
           sessionToken: autocompleteSessionToken,
           componentRestrictions: { country: 'TR' },
+          types: ['(cities)']
         },
         (results, status) => {
           if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
@@ -79,36 +83,24 @@ const SearchMap = () => {
         }
       }
     );
-    setAutocompleteResults([]); const handleAutocompleteSelect = (placeId, description) => {
-  const service = new window.google.maps.places.PlacesService(map);
-  service.getDetails(
-    {
-      placeId: placeId,
-      sessionToken: autocompleteSessionToken,
-    },
-    (result, status) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-        const selectedLocation = {
-          name: result.name,
-          location: {
-            lat: result.geometry.location.lat(),
-            lng: result.geometry.location.lng(),
-          },
-        };
-        setSelectedCity(selectedLocation);
-        setMap((prevMap) => {
-          prevMap.panTo(selectedLocation.location);
-          return prevMap;
-        });
-        setSearchText(description); // Seçilen şehri giriş kutusuna yerleştir
-      }
-    }
-  );
-  setAutocompleteResults([]); // Menüyü kapat
-};
   };
+
   const handleMarkerClick = () => {
     setSelectedCity(null);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleNewTripClick = () => {
+    if (!selectedCity) {
+      // Şehir seçilmediyse alert göster
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 1000);
+    } else {
+      setOpen(true);
+    }
   };
 
   if (loadError) return <div>Error: It cannot loaded</div>;
@@ -117,12 +109,12 @@ const SearchMap = () => {
   return (
     <div style={{ position: 'relative', flexDirection: 'column', alignItems: 'center', height: '100vh', width: '71vw' }}>
       <div style={{ position: 'relative', left: 0, top: 0, height: '100%', width: '100%' }}>
-        <input
-          type="text"
+        <TextField
+          label="Where do you want to go?"
           value={searchText}
           onChange={handleSearchChange}
           placeholder="Search a city in Turkey..."
-          style={{ marginBottom: '20px', padding: '5px', width: '50%' }}
+          style={{ marginBottom: '20px', padding: '5px', width: '30%' }}
         />
         <ul style={{
           listStyleType: 'none',
@@ -131,7 +123,7 @@ const SearchMap = () => {
           maxHeight: '200px',
           overflowY: 'scroll',
           width: '50%',
-          display: autocompleteResults.length > 0 ? 'block' : 'none' // Menünün görünürlüğünü kontrol et
+          display: autocompleteResults.length > 0 ? 'block' : 'none'
         }}>
           {autocompleteResults.map((result) => (
             <li
@@ -143,6 +135,12 @@ const SearchMap = () => {
             </li>
           ))}
         </ul>
+        <Button variant="contained" onClick={handleNewTripClick} style={{ marginLeft: '690px', marginBottom: '20px' }}>New Trip</Button>
+        {showAlert && !selectedCity && (
+          <Alert style={{ position: 'absolute', top: -5, right: '10%'}} severity="warning">
+            You should choose city first.
+          </Alert>
+        )}
         <GoogleMap
           center={selectedCity ? selectedCity.location : { lat: 41.0082, lng: 28.9784 }}
           zoom={10}
@@ -176,6 +174,41 @@ const SearchMap = () => {
           )}
         </GoogleMap>
       </div>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Plan your next adventure</DialogTitle>
+        <DialogContent>
+          <DialogContentText >
+            Select the kind of activities you want to do in <b>{selectedCity ? selectedCity.name : 'selected city'}</b>.
+          </DialogContentText>
+          <FormGroup>
+          <FormControlLabel
+              control={<Checkbox />}
+              label="Beach"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="Camping"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="Cultural"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="Adventure"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="Road Trips"
+            />
+          </FormGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleClose}>Create New Trip</Button>
+        </DialogActions>
+      </Dialog>
+
     </div>
   );
 };

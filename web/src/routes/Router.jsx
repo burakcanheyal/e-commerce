@@ -16,6 +16,7 @@ const OfferedTrips = Loadable(lazy(() => import('../views/OfferedTrips/offeredtr
 const Survey = Loadable(lazy(() => import('../views/survey/surveypage.jsx')));
 const Wallet = Loadable(lazy(() => import('../views/wallet/walletdetails.jsx')));
 const Admin = Loadable(lazy(() => import('../views/authentication/Admin.jsx')));
+const RoutesPage = Loadable(lazy(() => import('../views/dashboard/components/routespage.jsx')));
 
 const Router = [
   {
@@ -28,6 +29,7 @@ const Router = [
       { path: '/offeredtrips', exact:true, element: <OfferedTrips/>},
       { path: '/survey', exact:true, element: <Survey/>},
       { path: '/wallet', exact:true, element: <Wallet/>},
+      { path: '/routespage', exact:true, element: <RoutesPage/>},
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },

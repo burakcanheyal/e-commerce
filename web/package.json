@@ -17,6 +17,7 @@
     "@mui/styles": "^5.15.15",
     "@mui/system": "^5.15.15",
     "@react-google-maps/api": "^2.19.3",
+    "axios": "^1.6.8",
     "firebase": "^10.10.0",
     "lodash": "^4.17.21",
     "prop-types": "^15.8.1",
