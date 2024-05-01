@@ -47,7 +47,7 @@ const SearchMap = () => {
 
   useEffect(() => {
     if (selectedCity) {
-      setAutocompleteResults([]); // Menüyü kapat
+      setAutocompleteResults([]);
     }
   }, [selectedCity]);
 
@@ -95,7 +95,6 @@ const SearchMap = () => {
 
   const handleNewTripClick = () => {
     if (!selectedCity) {
-      // Şehir seçilmediyse alert göster
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 1000);
     } else {

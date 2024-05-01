@@ -4,6 +4,7 @@ import (
 	handler2 "attempt4/internal/application/handler"
 	"attempt4/internal/domain/enum"
 	"attempt4/internal/middleware"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,7 +40,7 @@ func NewWebServer(
 }
 func (s *WebServer) SetupRoot() {
 	router := gin.Default()
-
+	router.Use(cors.Default())
 	router.POST("/login", s.authentication.Login)
 	router.POST("/user/add", s.profileServerHandler.Create)
 	router.POST("/activation", s.profileServerHandler.ActivateUser)
