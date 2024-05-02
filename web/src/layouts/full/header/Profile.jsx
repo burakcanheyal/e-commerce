@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom'; // Import Navigate
 import {
   Avatar,
   Box,
@@ -11,8 +11,6 @@ import {
   ListItemText
 } from '@mui/material';
 
-
-
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
   const handleClick2 = (event) => {
@@ -22,9 +20,9 @@ const Profile = () => {
     setAnchorEl2(null);
   };
   const handleLogout = () => {
-
     localStorage.clear();
-    window.location.reload();
+    // Redirect to the login page after logout
+    return <Navigate to="/auth/login" />;
   };
   return (
     <Box>

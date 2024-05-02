@@ -1,8 +1,6 @@
-// Admin.jsx
-
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Drawer, List, ListItem, ListItemText, Typography, Divider, Box, Paper, TextField, Button } from '@mui/material';
+import { Drawer, List, ListItem, ListItemText, Typography, Divider, Box, Paper, TextField, Button, Table, TableContainer, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
 
 const drawerWidth = 240;
 
@@ -25,6 +23,7 @@ const Admin = () => {
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [messages, setMessages] = useState([]);
   const [response, setResponse] = useState('');
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     const handleMessage = (newMessage) => {
@@ -36,12 +35,34 @@ const Admin = () => {
 
   const handleMenuClick = (menu) => {
     setSelectedMenu(menu === selectedMenu ? null : menu);
+    if (menu === 'User Management') {
+      fetchUsers();
+    }
   };
 
   const handleNewResponse = () => {
     if (response.trim() !== '') {
       setMessages([...messages, response]);
       setResponse('');
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await fetch('http://localhost:8001/profil/', {
+        headers: {
+          'Authentication': `${accessToken}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.users);
+      } else {
+        console.error('Error fetching users:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -66,6 +87,39 @@ const Admin = () => {
       <Box className={classes.content}>
         <Typography variant="h4">Admin Panel</Typography>
         <Divider />
+        {selectedMenu && selectedMenu === 'User Management' && (
+          <Paper elevation={3} style={{ marginTop: '20px', padding: '20px' }}>
+            <Typography variant="h5">User Management</Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Username</TableCell>
+                    <TableCell>Email</TableCell>
+                  </TableRow>
+                </TableHead>
+                {users && users.length > 0 ? (
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>{user.id}</TableCell>
+                        <TableCell>{user.username}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                ) : (
+                  <TableBody>
+                    <TableRow>
+                      <TableCell colSpan={3}>No users found</TableCell>
+                    </TableRow>
+                  </TableBody>
+                )}
+              </Table>
+            </TableContainer>
+          </Paper>
+        )}
         {selectedMenu && selectedMenu === 'Live Response' && (
           <Paper elevation={3} style={{ marginTop: '20px', padding: '20px' }}>
             <Typography variant="h5">Live Response</Typography>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Typography, Button } from '@mui/material';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -11,6 +11,11 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { NavLink } from 'react-router-dom';
 
 const IntroPage = () => {
+  useEffect(() => {
+    const accessToken = localStorage.getItem('AccessToken');
+    console.log('AccessToken:', accessToken);
+  }, []);
+
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <div style={{ flex: 1 }}>

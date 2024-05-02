@@ -122,6 +122,7 @@ func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 		Email:     user.Email,
 		Name:      user.Name,
 		Surname:   user.Surname,
+		Phone:     user.Phone,
 		Status:    user.Status,
 		BirthDate: *user.BirthDate,
 	}
@@ -152,6 +153,7 @@ func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 		Surname:       userDto.Surname,
 		Status:        userDto.Status,
 		Code:          user.Code,
+		Phone:         user.Phone,
 		CodeExpiredAt: user.CodeExpiredAt,
 		BirthDate:     &userDto.BirthDate,
 		UpdatedAt:     &updatedTime,

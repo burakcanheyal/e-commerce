@@ -6,6 +6,7 @@ import (
 	"attempt4/internal/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 type WebServer struct {
@@ -40,12 +41,21 @@ func NewWebServer(
 }
 func (s *WebServer) SetupRoot() {
 	router := gin.Default()
-	router.Use(cors.Default())
+	cors.Default()
+	corsConfig := cors.Config{
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authentication"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+	}
+	corsConfig.AllowAllOrigins = true
+	c := cors.New(corsConfig)
+	router.Use(c)
 	router.POST("/login", s.authentication.Login)
 	router.POST("/user/add", s.profileServerHandler.Create)
 	router.POST("/activation", s.profileServerHandler.ActivateUser)
 
-	user := router.Group("/profil", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
+	user := router.Group("/profil/", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
 	user.PUT("/", s.profileServerHandler.Update)
 	user.PUT("/pass/", s.profileServerHandler.UpdatePassword)
 	user.DELETE("/", s.profileServerHandler.Delete)

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -10,15 +10,16 @@ import {
   TextField,
   Grid
 } from '@mui/material';
+import axios from 'axios';
 
 const AccountProfileDetails = () => {
   const [values, setValues] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
+    username: '',
+    name: '',
+    surname: '',
+    birthdate: '',
     phone: '',
-    state: '',
-    country: ''
+    email: ''
   });
 
   const handleChange = useCallback(
@@ -34,93 +35,112 @@ const AccountProfileDetails = () => {
   const handleSubmit = useCallback(
     (event) => {
       event.preventDefault();
-      // Burada form verilerini gönderme işlemleri yapılabilir
+      // Form gönderimini burada işleyebilirsiniz
     },
     []
   );
 
+  useEffect(() => {
+    const fetchProfileDetails = async () => {
+      try {
+        const accessToken = localStorage.getItem('AccessToken');
+        const response = await axios.get('http://localhost:8001/profil/', {
+          headers: {
+            'Authentication': `${accessToken}`
+          }
+        });
+        const profileData = response.data;
+        setValues({
+          username: profileData.username,
+          name: profileData.name,
+          surname: profileData.surname,
+          birthdate: profileData.birth_date,
+          phone: profileData.phone || '',
+          email: profileData.email
+        });
+        console.log(response.data)
+      } catch (error) {
+        console.error('Hesap detayları alınırken hata oluştu:', error);
+      }
+    };
+
+    fetchProfileDetails();
+  }, []);
+
   return (
     <form autoComplete="off" noValidate onSubmit={handleSubmit}>
       <Card>
-        <CardHeader title="Details" />
+        <CardHeader title="Detaylar" />
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -0.5 }}>
             <Grid container spacing={2}>
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  helperText="Please specify the first name"
-                  label="First name"
-                  name="firstName"
+                  helperText="Kullanıcı adınızı belirtin"
+                  label="Kullanıcı Adı"
+                  name="username"
                   onChange={handleChange}
                   required
-                  value={values.firstName}
+                  value={values.username}
                 />
               </Grid>
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Last name"
-                  name="lastName"
+                  label="Ad"
+                  name="name"
                   onChange={handleChange}
                   required
-                  value={values.lastName}
+                  value={values.name}
                 />
               </Grid>
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Email Address"
-                  name="email"
+                  label="Soyad"
+                  name="surname"
                   onChange={handleChange}
                   required
-                  value={values.email}
+                  value={values.surname}
                 />
               </Grid>
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Phone Number"
+                  label="Doğum Tarihi"
+                  name="birthdate"
+                  onChange={handleChange}
+                  required
+                  value={values.birthdate}
+                />
+              </Grid>
+              <Grid xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Telefon Numarası"
                   name="phone"
                   onChange={handleChange}
-                  type="number"
+                  type="string"
                   value={values.phone}
                 />
               </Grid>
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Country"
-                  name="country"
+                  label="Email Adresi"
+                  name="email"
                   onChange={handleChange}
                   required
-                  value={values.country}
+                  value={values.email}
                 />
-              </Grid>
-              <Grid xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Select State"
-                  name="state"
-                  onChange={handleChange}
-                  required
-                  select
-                  SelectProps={{ native: true }}
-                  value={values.state}
-                >
-                  <option value=""></option>
-                  <option value="alabama">Alabama</option>
-                  <option value="new-york">New York</option>
-                  <option value="san-francisco">San Francisco</option>
-                  <option value="los-angeles">Los Angeles</option>
-                </TextField>
               </Grid>
             </Grid>
           </Box>
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained">Save details</Button>
+          <Button variant="contained">Detayları Kaydet</Button>
         </CardActions>
       </Card>
     </form>
