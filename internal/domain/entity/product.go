@@ -9,6 +9,7 @@ type Product struct {
 	Price     float32    `gorm:"column:price"`
 	Status    int8       `gorm:"type:smallint;column:status"`
 	UserId    int32      `gorm:"foreign_key;column:user_id"`
+	Trip      string     `gorm:"column:trip"`
 	CreatedAt time.Time  `gorm:"column:created_at"`
 	UpdatedAt *time.Time `gorm:"column:updated_at"`
 	DeletedAt *time.Time `gorm:"column:deleted_at"`

@@ -54,3 +54,13 @@ func (r *TripRepository) Update(question entity.Trip) error {
 	}
 	return nil
 }
+func (r *TripRepository) GetAllTrips() ([]entity.Trip, int64, error) {
+	var productList []entity.Trip
+	var total int64
+	listQuery := r.db.Find(&productList).Where("status != ?", enum.TripPassive)
+
+	if err := listQuery.Count(&total).Find(&productList).Error; err != nil {
+		return productList, 0, err
+	}
+	return productList, total, nil
+}
