@@ -1,0 +1,504 @@
+package seed
+
+/*
+func TripSeed(db *gorm.DB) {
+	Izmirtrips := []entity.Trip{
+		{
+			Id:          0,
+			Name:        "Alsancak",
+			Description: "Alsancak is a vibrant neighborhood in İzmir known for its entertainment and nightlife.",
+			Status:      enum.TripActive,
+			Lat:         38.4325,
+			Lng:         27.1503,
+			ProductId:   1,
+		},
+		{
+			Id:          0,
+			Name:        "Konak Square",
+			Description: "Konak Square is a popular public square in İzmir.",
+			Status:      enum.TripActive,
+			Lat:         38.4192,
+			Lng:         27.1287,
+			ProductId:   1,
+		},
+		{
+			Id:          0,
+			Name:        "Kordon",
+			Description: "Kordon is a promenade along the waterfront of İzmir.",
+			Status:      enum.TripActive,
+			Lat:         38.4161,
+			Lng:         27.1287,
+			ProductId:   1,
+		},
+		{
+			Id:          0,
+			Name:        "Asansör",
+			Description: "Asansör is a historical elevator in İzmir with panoramic views of the city.",
+			Status:      enum.TripActive,
+			Lat:         38.4267,
+			Lng:         27.1419,
+			ProductId:   1,
+		},
+		{
+			Id:          0,
+			Name:        "Kemeraltı Market",
+			Description: "Kemeraltı Market is a bustling bazaar in İzmir offering a variety of goods and foods.",
+			Status:      enum.TripActive,
+			Lat:         38.4213,
+			Lng:         27.1281,
+			ProductId:   1,
+		},
+		{
+			Id:          0,
+			Name:        "Ephesus Ancient City",
+			Description: "Ephesus Ancient City is an archaeological site near Selçuk, İzmir Province, Turkey. It is one of the best-preserved ancient cities in the world.",
+			Status:      enum.TripActive,
+			Lat:         37.9499,
+			Lng:         27.3697,
+			ProductId:   1,
+		},
+	}
+	AntalyaTrips := []entity.Trip{
+		{
+			Id:          0,
+			Name:        "Konyaaltı Beach",
+			Description: "Konyaaltı Beach is one of the most popular beaches in Antalya, known for its crystal-clear waters and stunning views of the Taurus Mountains.",
+			Status:      enum.TripActive,
+			Lat:         36.8636,
+			Lng:         30.6956,
+			ProductId:   2,
+		},
+		{
+			Id:          0,
+			Name:        "Old Town (Kaleiçi)",
+			Description: "Old Town, also known as Kaleiçi, is the historic heart of Antalya with narrow cobblestone streets, historic Ottoman houses, and charming cafes.",
+			Status:      enum.TripActive,
+			Lat:         36.8854,
+			Lng:         30.7057,
+			ProductId:   2,
+		},
+		{
+			Id:          0,
+			Name:        "Düden Waterfalls",
+			Description: "Düden Waterfalls are a series of waterfalls located northeast of Antalya, offering breathtaking natural scenery and walking trails.",
+			Status:      enum.TripActive,
+			Lat:         36.8625,
+			Lng:         30.7708,
+			ProductId:   2,
+		},
+		{
+			Id:          0,
+			Name:        "Antalya Museum",
+			Description: "Antalya Museum is one of Turkey's largest museums, showcasing artifacts from the ancient Lycian, Pamphylian, Hellenistic, Roman, and Byzantine periods.",
+			Status:      enum.TripActive,
+			Lat:         36.8841, Lng: 30.7057,
+			ProductId: 2,
+		},
+		{
+			Id:          0,
+			Name:        "Termessos Ancient City",
+			Description: "Termessos is an ancient city located in the Taurus Mountains, known for its well-preserved ruins and stunning mountain views.",
+			Status:      enum.TripActive,
+			Lat:         37.0179, Lng: 30.5214,
+			ProductId: 2,
+		},
+		{
+			Id:          0,
+			Name:        "Perge Ancient City",
+			Description: "Perge is an ancient city located 15 kilometers east of Antalya, known for its well-preserved Roman ruins, including a theater, stadium, and agora.",
+			Status:      enum.TripActive,
+			Lat:         36.9722, Lng: 30.9171,
+			ProductId: 2,
+		},
+	}
+	CappadociaTrips := []entity.Trip{
+		{
+			Id:          0,
+			Name:        "Göreme Open Air Museum",
+			Description: "Göreme Open Air Museum is a UNESCO World Heritage Site, famous for its rock-cut churches with stunning frescoes dating back to the 10th century.",
+			Status:      enum.TripActive,
+			Lat:         38.6437, Lng: 34.8303,
+			ProductId: 3,
+		},
+		{
+			Id:          0,
+			Name:        "Ürgüp",
+			Description: "Ürgüp is a town in Cappadocia known for its cave hotels, vineyards, and spectacular panoramic views of the fairy chimneys.",
+			Status:      enum.TripActive,
+			Lat:         38.6303, Lng: 34.9140,
+			ProductId: 3,
+		},
+		{
+			Id:          0,
+			Name:        "Love Valley",
+			Description: "Love Valley, named for its phallic-shaped rock formations, offers some of the most iconic views of Cappadocia and is a popular spot for hiking and photography.",
+			Status:      enum.TripActive,
+			Lat:         38.6443, Lng: 34.8469,
+			ProductId: 3,
+		},
+		{
+			Id:          0,
+			Name:        "Derinkuyu Underground City",
+			Description: "Derinkuyu Underground City is one of the largest and deepest underground cities in Cappadocia, featuring a complex network of tunnels, rooms, and passages.",
+			Status:      enum.TripActive,
+			Lat:         38.3763, Lng: 34.8485,
+			ProductId: 3,
+		},
+		{
+			Id:          0,
+			Name:        "Hot Air Balloon Ride",
+			Description: "A hot air balloon ride over Cappadocia is a must-do experience, offering panoramic views of the surreal landscape dotted with fairy chimneys, rock formations, and ancient settlements.",
+			Status:      enum.TripActive,
+			Lat:         38.6431, Lng: 34.8303,
+			ProductId: 3,
+		},
+		{
+			Id:          0,
+			Name:        "Zelve Open Air Museum",
+			Description: "Zelve Open Air Museum is an ancient cave settlement in Cappadocia, showcasing rock-cut churches, monasteries, and dwellings carved into the soft volcanic rock.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 38.6525, Lng: 34.8355},
+			ProductId:   3,
+		},
+	}
+	IstanbulTrips := []entity.Trip{
+		{
+			Id:          0,
+			Name:        "Hagia Sophia",
+			Description: "Hagia Sophia is a former Greek Orthodox Christian cathedral, later an Ottoman imperial mosque, and now a museum in Istanbul.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.0082, Lng: 28.9784},
+			ProductId:   4,
+		},
+		{
+			Id:          0,
+			Name:        "Topkapı Palace",
+			Description: "Topkapı Palace is a large palace in Istanbul, Turkey, that was the primary residence of the Ottoman sultans for approximately 400 years.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.0115, Lng: 28.9833},
+			ProductId:   4,
+		},
+		{
+			Id:          0,
+			Name:        "Blue Mosque",
+			Description: "The Blue Mosque, also known as the Sultan Ahmed Mosque, is a historic mosque located in Istanbul, Turkey.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.0054, Lng: 28.9760},
+			ProductId:   4,
+		},
+		{
+			Id:          0,
+			Name:        "Grand Bazaar",
+			Description: "The Grand Bazaar in Istanbul is one of the largest and oldest covered markets in the world, with 61 covered streets and over 4,000 shops.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.0105, Lng: 28.9685},
+			ProductId:   4,
+		},
+		{
+			Id:          0,
+			Name:        "Bosphorus Cruise",
+			Description: "A Bosphorus cruise offers breathtaking views of Istanbul's skyline, historic landmarks, and waterfront mansions along the Bosphorus Strait.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.0390, Lng: 29.0251},
+			ProductId:   4,
+		},
+		{
+			Id:          0,
+			Name:        "Galata Tower",
+			Description: "Galata Tower is a medieval stone tower in the Galata/Karaköy quarter of Istanbul, Turkey.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.0256, Lng: 28.9747},
+			ProductId:   4,
+		},
+	}
+	AnkaraTrips := []entity.Trip{
+		{
+			Id:          0,
+			Name:        "Anıtkabir",
+			Description: "Anıtkabir is the mausoleum of Mustafa Kemal Atatürk, the founder of the Republic of Turkey, located in Ankara.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.9256, Lng: 32.8357},
+			ProductId:   5,
+		},
+		{
+			Id:          0,
+			Name:        "Kocatepe Mosque",
+			Description: "Kocatepe Mosque is the largest mosque in Ankara, known for its imposing architecture and grand interior.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.9289, Lng: 32.8524},
+			ProductId:   5,
+		},
+		{
+			Id:          0,
+			Name:        "Ankara Citadel",
+			Description: "Ankara Citadel is a historic citadel located in Ankara, Turkey, dating back to ancient times and offering panoramic views of the city.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.9439, Lng: 32.8544},
+			ProductId:   5,
+		},
+		{
+			Id:          0,
+			Name:        "Museum of Anatolian Civilizations",
+			Description: "The Museum of Anatolian Civilizations is located in Ankara and houses a rich collection of artifacts from the Neolithic Age to the Byzantine period.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.9413, Lng: 32.8641},
+			ProductId:   5,
+		},
+		{
+			Id:          0,
+			Name:        "Atakule Tower",
+			Description: "Atakule Tower is a prominent landmark in Ankara, offering panoramic views of the city from its observation deck and revolving restaurant.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.8973, Lng: 32.8639},
+			ProductId:   5,
+		},
+		{
+			Id:          0,
+			Name:        "Gençlik Parkı",
+			Description: "Gençlik Parkı is a large public park in Ankara, popular for picnics, leisure activities, and recreational facilities.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.9175, Lng: 32.8517},
+			ProductId:   5,
+		},
+	}
+	CanakkaleTrips := []entity.Trip{
+		{
+			Id:          0,
+			Name:        "Troy Ancient City",
+			Description: "Troy Ancient City is a UNESCO World Heritage Site, known for its mythological significance as the setting of the Trojan War.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.9572, Lng: 26.2386},
+			ProductId:   6,
+		},
+		{
+			Id:          0,
+			Name:        "Gallipoli Peninsula",
+			Description: "Gallipoli Peninsula is a historic site of significant importance, known for the Gallipoli Campaign during World War I.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 40.2470, Lng: 26.3437},
+			ProductId:   6,
+		},
+		{
+			Id:          0,
+			Name:        "Çanakkale Martyrs' Memorial",
+			Description: "Çanakkale Martyrs' Memorial is a commemorative monument dedicated to the Turkish soldiers who participated in the Battle of Gallipoli.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 40.1464, Lng: 26.4086},
+			ProductId:   6,
+		},
+		{
+			Id:          0,
+			Name:        "Bozcaada",
+			Description: "Bozcaada is a picturesque island known for its charming villages, vineyards, and pristine beaches.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.8222, Lng: 26.0444},
+			ProductId:   6,
+		},
+		{
+			Id:          0,
+			Name:        "Assos",
+			Description: "Assos is a historical town with ancient ruins, including the Temple of Athena, offering stunning views of the Aegean Sea.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.4894, Lng: 26.3344},
+			ProductId:   6,
+		},
+		{
+			Id:          0,
+			Name:        "Kaz Mountains",
+			Description: "Kaz Mountains, also known as Mount Ida, is a mountain range in northwestern Turkey, famous for its natural beauty and diverse flora.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.6769, Lng: 26.8265},
+			ProductId:   6,
+		},
+	}
+	BalikesirTrips := []entity.Trip{
+		{
+			Id:          0,
+			Name:        "Assos Ancient City",
+			Description: "Assos Ancient City is an archaeological site located in the Çanakkale Province of Turkey. It is known for its Temple of Athena, built on a hill overlooking the Aegean Sea.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.4891, Lng: 26.3329},
+			ProductId:   7,
+		},
+		{
+			Id:          0,
+			Name:        "Ayvalık",
+			Description: "Ayvalık is a seaside town known for its olive oil production, historic architecture, and charming streets lined with colorful houses.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.3173, Lng: 26.6954},
+			ProductId:   7,
+		},
+		{
+			Id:          0,
+			Name:        "Cunda Island",
+			Description: "Cunda Island, also known as Alibey Island, is a small island connected to the mainland by a causeway. It is famous for its narrow streets, traditional Greek houses, and seafood restaurants.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.4142, Lng: 26.9713},
+			ProductId:   7,
+		},
+		{
+			Id:          0,
+			Name:        "Troy Ancient City",
+			Description: "Troy Ancient City, located in the Çanakkale Province, is one of the most famous archaeological sites in the world. It is believed to be the setting of the Trojan War described in Homer's epic poems.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.9574, Lng: 26.2386},
+			ProductId:   7,
+		},
+		{
+			Id:          0,
+			Name:        "Mount Ida (Kaz Dağı)",
+			Description: "Mount Ida, also known as Kaz Dağı in Turkish, is a mountain range in northwestern Turkey. It is famous for its mythological significance as the birthplace of the Greek god Zeus and for its diverse flora and fauna.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.7976, Lng: 26.7813},
+			ProductId:   7,
+		},
+		{
+			Id:          0,
+			Name:        "Edremit",
+			Description: "Edremit is a district in the Balıkesir Province known for its thermal springs, olive groves, and scenic coastline.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.5996, Lng: 26.9291},
+			ProductId:   7,
+		},
+	}
+	SamsunTrips := []entity.Trip{
+		{
+			Id:          0,
+			Name:        "Amisos Hill",
+			Description: "Amisos Hill is a historic site in Samsun, featuring ancient tombs, artifacts, and panoramic views of the city and the Black Sea.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.3006, Lng: 36.3325},
+			ProductId:   8,
+		},
+		{
+			Id:          0,
+			Name:        "Bandırma Ferry",
+			Description: "The Bandırma Ferry, docked in Samsun, is a replica of the ship that carried Mustafa Kemal Atatürk from Istanbul to Samsun in 1919, marking the start of the Turkish War of Independence.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.2870, Lng: 36.3305},
+			ProductId:   8,
+		},
+		{
+			Id:          0,
+			Name:        "Amazon Village",
+			Description: "The Amazon Village is a cultural complex in Samsun, offering insights into the legendary female warriors of antiquity, the Amazons, through exhibitions, performances, and workshops.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.3689, Lng: 36.2998},
+			ProductId:   8,
+		},
+		{
+			Id:          0,
+			Name:        "Samsun Archaeology and Ethnography Museum",
+			Description: "Samsun Archaeology and Ethnography Museum showcases artifacts from prehistoric, Hittite, Phrygian, Roman, Byzantine, and Ottoman periods, providing insights into the region's rich history and cultural heritage.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.2863, Lng: 36.3353},
+			ProductId:   8,
+		},
+		{
+			Id:          0,
+			Name:        "Gazi Museum",
+			Description: "Gazi Museum in Samsun is dedicated to Mustafa Kemal Atatürk, featuring exhibitions on his life, leadership, and contributions to the founding of the Republic of Turkey.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.2869, Lng: 36.3325},
+			ProductId:   8,
+		},
+		{
+			Id:          0,
+			Name:        "İncesu Waterfall",
+			Description: "İncesu Waterfall is a natural wonder near Samsun, offering scenic views, hiking trails, and picnic areas amidst lush greenery.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 41.1892, Lng: 36.4338},
+			ProductId:   8,
+		},
+	}
+	EskisehirTrips := []entity.Trip{
+		{
+			Id:          0,
+			Name:        "Odunpazarı Historic District",
+			Description: "Odunpazarı is a historic district of Eskişehir, Turkey. It is named after the Ottoman term for 'wood market'.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.7755, Lng: 30.5211},
+			ProductId:   9,
+		},
+		{
+			Id:          0,
+			Name:        "Porsuk River",
+			Description: "The Porsuk River is a small river in Anatolia in north-central Turkey, flowing through the city of Eskişehir.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.7736, Lng: 30.5206},
+			ProductId:   9,
+		},
+		{
+			Id:          0,
+			Name:        "Eskişehir Clock Tower",
+			Description: "The Eskişehir Clock Tower is a clock tower in Eskişehir, Turkey. The tower stands in the city center, in the square that was named after it, on the banks of the Porsuk River.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.7737, Lng: 30.5252},
+			ProductId:   9,
+		},
+		{
+			Id:          0,
+			Name:        "Lületaşı Museum",
+			Description: "The Lületaşı Museum is a museum in Eskişehir, Turkey, dedicated to the local variety of opal known as lületaşı.",
+			Status:      enum.TripActive,
+			Coordinate:  entity.Coordinates{Lat: 39.7677, Lng: 30.5254},
+			ProductId:   9,
+		},
+	}
+	var size int64
+	db.Model(&Izmirtrips).Count(&size)
+	if size == 0 {
+		for _, p := range Izmirtrips {
+			db.Create(&p)
+		}
+	}
+	db.Model(&AntalyaTrips).Count(&size)
+	if size == 0 {
+		for _, p := range AntalyaTrips {
+			db.Create(&p)
+		}
+	}
+	db.Model(&CappadociaTrips).Count(&size)
+	if size == 0 {
+		for _, p := range CappadociaTrips {
+			db.Create(&p)
+		}
+	}
+	db.Model(&IstanbulTrips).Count(&size)
+	if size == 0 {
+		for _, p := range IstanbulTrips {
+			db.Create(&p)
+		}
+	}
+	db.Model(&AnkaraTrips).Count(&size)
+	if size == 0 {
+		for _, p := range AnkaraTrips {
+			db.Create(&p)
+		}
+	}
+	db.Model(&CanakkaleTrips).Count(&size)
+	if size == 0 {
+		for _, p := range CanakkaleTrips {
+			db.Create(&p)
+		}
+	}
+	db.Model(&BalikesirTrips).Count(&size)
+	if size == 0 {
+		for _, p := range BalikesirTrips {
+			db.Create(&p)
+		}
+	}
+	db.Model(&SamsunTrips).Count(&size)
+	if size == 0 {
+		for _, p := range SamsunTrips {
+			db.Create(&p)
+		}
+	}
+	db.Model(&EskisehirTrips).Count(&size)
+	if size == 0 {
+		for _, p := range EskisehirTrips {
+			db.Create(&p)
+		}
+	}
+}
+*/

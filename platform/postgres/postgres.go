@@ -3,6 +3,7 @@ package postgres
 import (
 	"attempt4/internal/domain/entity"
 	"attempt4/platform/app_log"
+	"attempt4/platform/postgres/seed"
 	"attempt4/platform/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -19,16 +20,17 @@ func InitializeDatabase(dsn string) (*gorm.DB, error) {
 		&entity.Submission{},
 		&entity.WalletOperation{},
 		&app_log.ApplicationLog{},
+		&entity.Trip{},
 	)
 	if err != nil {
 		return nil, err
 	}
-	/*
-		seed.UserSeed(db)
-		seed.ProductSeed(db)
-		seed.RolSeed(db)
-		seed.WalletSeed(db)
-	*/
+
+	seed.UserSeed(db)
+	seed.ProductSeed(db)
+	seed.RolSeed(db)
+	seed.WalletSeed(db)
+	//seed.TripSeed(db)
 
 	return db, nil
 }
