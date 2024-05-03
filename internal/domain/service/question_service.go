@@ -69,8 +69,8 @@ func (q *QuestionService) CalculatePoints(id int32, questions []dto.TopicPointsD
 		point = append(point,
 			entity.TopicPoints{
 				Id:         0,
-				QuestionId: id,
-				UserId:     questions[i].UserId,
+				QuestionId: questions[i].QuestionId,
+				UserId:     id,
 				Points:     questions[i].Points,
 				Status:     enum.UserActiveStatus,
 			})
