@@ -32,7 +32,7 @@ func (p *PointRepository) Delete(points entity.TopicPoints) error {
 
 func (p *PointRepository) GetById(id int32) (entity.TopicPoints, error) {
 	var key entity.TopicPoints
-	if err := p.db.Model(&key).Where("status != ", enum.UserDeletedStatus).Where("key_id=?", id).Scan(&key).Error; err != nil {
+	if err := p.db.Model(&key).Where("user_id=?", id).Scan(&key).Error; err != nil {
 		return key, internal.DBNotFound
 	}
 	return key, nil
@@ -47,7 +47,7 @@ func (p *PointRepository) GetByUserId(id int32) (entity.TopicPoints, error) {
 }
 
 func (p *PointRepository) Update(role entity.TopicPoints) error {
-	if err := p.db.Model(&role).Where("key_id=?", role.Id).Updates(entity.TopicPoints{
+	if err := p.db.Model(&role).Where("id=?", role.Id).Updates(entity.TopicPoints{
 		Points: role.Points,
 	}).Error; err != nil {
 		return internal.DBNotUpdated

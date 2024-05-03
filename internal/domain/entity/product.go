@@ -4,7 +4,7 @@ import "time"
 
 type Product struct {
 	Id        int32      `gorm:"primary_key;AUTO_INCREMENT;column:id"`
-	Name      string     `gorm:"type:varchar(32);unique;not null;column:name"`
+	Name      string     `gorm:"type:varchar(32);not null;column:name"`
 	Quantity  int32      `gorm:"column:quantity"`
 	Price     float32    `gorm:"column:price"`
 	Status    int8       `gorm:"type:smallint;column:status"`

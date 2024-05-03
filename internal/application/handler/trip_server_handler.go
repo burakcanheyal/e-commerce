@@ -52,6 +52,7 @@ func (t *TripServerHandler) AnswerQuestion(context *gin.Context) {
 	err := t.questionService.CalculatePoints(user.Id, questions)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, AnswerQuestion())
+		return
 	}
 	zap.Logger.Info("Soruları cevaplama başarılı")
 	context.JSON(http.StatusOK, SuccessInCreate())

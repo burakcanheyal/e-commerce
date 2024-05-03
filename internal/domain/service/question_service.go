@@ -65,6 +65,14 @@ func (q *QuestionService) GetQuestions() ([]dto.QuestionDto, error) {
 }
 func (q *QuestionService) CalculatePoints(id int32, questions []dto.TopicPointsDto) error {
 	var point []entity.TopicPoints
+	tempPoints, err := q.pointRepository.GetById(id)
+	if tempPoints.Id != 0 {
+		return errors.New("Önceden çözülmüş")
+	}
+	if err != nil {
+		return err
+	}
+
 	for i, _ := range questions {
 		point = append(point,
 			entity.TopicPoints{
@@ -153,18 +161,32 @@ func MatchTrip(userPoints []entity.TopicPoints, trips []entity.Trip) ([]entity.T
 	minDistance := math.Inf(1)
 	perfectTripIndex := -1
 
-	var distances []float64
 	matchRates := make(map[int]float64)
+	var NaturePoint float64
+	var HistoricalPoint float64
+	var CulturalPoint float64
+	var RelaxPoint float64
+	var AdventurePoint float64
+
 	for i, trip := range trips {
-		matchRate := math.Sqrt(math.Pow(float64(trip.NaturePoint-userPoints[1].Points), 2) +
-			math.Pow(float64(trip.HistoricalPoint-userPoints[2].Points), 2) +
-			math.Pow(float64(trip.CulturalPoint-userPoints[4].Points), 2) +
-			math.Pow(float64(trip.RelaxPoint-userPoints[5].Points), 2) +
-			math.Pow(float64(trip.AdventurePoint-userPoints[3].Points), 2))
+		NaturePoint = float64(trip.NaturePoint - (userPoints[0].Points + userPoints[1].Points))
+		HistoricalPoint = float64(trip.NaturePoint - (userPoints[2].Points + userPoints[3].Points))
+		CulturalPoint = float64(trip.NaturePoint - (userPoints[4].Points + userPoints[5].Points))
+		RelaxPoint = float64(trip.NaturePoint - (userPoints[6].Points + userPoints[7].Points))
+		AdventurePoint = float64(trip.NaturePoint - (userPoints[8].Points + userPoints[9].Points))
+		matchRate := math.Sqrt(
+			math.Pow(NaturePoint, 2) +
+				math.Pow(HistoricalPoint, 2) +
+				math.Pow(CulturalPoint, 2) +
+				math.Pow(RelaxPoint, 2) +
+				math.Pow(AdventurePoint, 2))
 		matchRates[i] = matchRate
-
-		perfectTripIndex = i
-
+	}
+	perfectTripIndex = 0
+	for i, matchRate := range matchRates {
+		if matchRates[perfectTripIndex] > matchRate {
+			perfectTripIndex = i
+		}
 	}
 
 	if perfectTripIndex == -1 {
@@ -174,9 +196,8 @@ func MatchTrip(userPoints []entity.TopicPoints, trips []entity.Trip) ([]entity.T
 	destination = append(destination, trips[perfectTripIndex])
 
 	for i, trip := range trips {
-		if distances[i] <= 100 && i != perfectTripIndex {
-			dist := Distance(trips[i].Lat, trips[i].Lng, trip.Lat, trip.Lng)
-			distances = append(distances, dist)
+		dist := Distance(trips[i].Lat, trips[i].Lng, destination[0].Lat, destination[0].Lng)
+		if dist <= 100 && i != perfectTripIndex && matchRates[i] > 1 {
 			destination = append(destination, trip)
 			if dist < minDistance {
 				minDistance = dist

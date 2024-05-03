@@ -22,6 +22,7 @@ func InitializeDatabase(dsn string) (*gorm.DB, error) {
 		&app_log.ApplicationLog{},
 		&entity.Trip{},
 		&entity.Question{},
+		&entity.TopicPoints{},
 	)
 	if err != nil {
 		return nil, err
