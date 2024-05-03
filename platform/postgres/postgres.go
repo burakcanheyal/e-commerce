@@ -30,7 +30,7 @@ func InitializeDatabase(dsn string) (*gorm.DB, error) {
 	seed.ProductSeed(db)
 	seed.RolSeed(db)
 	seed.WalletSeed(db)
-	//seed.TripSeed(db)
+	seed.TripSeed(db)
 
 	return db, nil
 }
