@@ -19,8 +19,10 @@ const AccountProfileDetails = () => {
     surname: '',
     birthdate: '',
     phone: '',
-    email: ''
+    email: '',
+    password: ''
   });
+
 
   const handleChange = useCallback(
     (event) => {
@@ -33,13 +35,34 @@ const AccountProfileDetails = () => {
   );
 
   const handleSubmit = useCallback(
-    (event) => {
+    async (event) => {
       event.preventDefault();
-      // Form gönderimini burada işleyebilirsiniz
+      try {
+        const accessToken = localStorage.getItem('AccessToken');
+        const response = await fetch('http://localhost:8001/profil/', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authentication': `${accessToken}`
+          },
+          body: JSON.stringify({
+            userName: values.username,
+            name: values.name,
+            surname: values.surname,
+            birthDate: values.birthdate,
+            phone: values.phone,
+            email: values.email,
+            password: values.password
+          })
+        });
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.error('Profil bilgileri güncellenirken hata oluştu:', error);
+      }
     },
-    []
+    [values]
   );
-
   useEffect(() => {
     const fetchProfileDetails = async () => {
       try {
@@ -54,11 +77,11 @@ const AccountProfileDetails = () => {
           username: profileData.username,
           name: profileData.name,
           surname: profileData.surname,
-          birthdate: profileData.birth_date,
+          birthdate: profileData.birthdate,
           phone: profileData.phone || '',
           email: profileData.email
         });
-        console.log(response.data)
+        console.log(response.data);
       } catch (error) {
         console.error('Hesap detayları alınırken hata oluştu:', error);
       }
@@ -135,12 +158,22 @@ const AccountProfileDetails = () => {
                   value={values.email}
                 />
               </Grid>
+              <Grid xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Şifre"
+                  name="password"
+                  onChange={handleChange}
+                  required
+                  value={values.password}
+                />
+              </Grid>
             </Grid>
           </Box>
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained">Detayları Kaydet</Button>
+          <Button type="submit" variant="contained">Detayları Kaydet</Button>
         </CardActions>
       </Card>
     </form>
