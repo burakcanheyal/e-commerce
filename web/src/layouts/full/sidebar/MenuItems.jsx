@@ -33,8 +33,8 @@ const MenuItems = [
   },
   {
     id: uniqueId(),
-    title: 'Routes Page',
-    href: '/routespage',
+    title: 'Update Password',
+    href: '/updatepassword',
   },
   {
     id: uniqueId(),

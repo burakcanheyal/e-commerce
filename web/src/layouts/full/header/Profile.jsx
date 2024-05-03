@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom'; // Import Navigate
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios'; // Axios'u ekledim
 import {
   Avatar,
   Box,
@@ -10,20 +11,44 @@ import {
   ListItemIcon,
   ListItemText
 } from '@mui/material';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import EnhancedEncryptionOutlinedIcon from '@mui/icons-material/EnhancedEncryptionOutlined';
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    const fetchProfileDetails = async () => {
+      try {
+        const accessToken = localStorage.getItem('AccessToken');
+        const response = await axios.get('http://localhost:8001/profil/', {
+          headers: {
+            'Authentication': `${accessToken}`
+          }
+        });
+        setUsername(response.data.username);
+      } catch (error) {
+        console.error('Error fetching username:', error);
+      }
+    };
+    fetchProfileDetails();
+  }, []);
+
   const handleClick2 = (event) => {
     setAnchorEl2(event.currentTarget);
   };
+
   const handleClose2 = () => {
     setAnchorEl2(null);
   };
+
   const handleLogout = () => {
     localStorage.clear();
     // Redirect to the login page after logout
     return <Navigate to="/auth/login" />;
   };
+
   return (
     <Box>
       <IconButton
@@ -46,9 +71,8 @@ const Profile = () => {
           }}
         />
       </IconButton>
-      {/* ------------------------------------------- */}
+
       {/* Message Dropdown */}
-      {/* ------------------------------------------- */}
       <Menu
         id="msgs-menu"
         anchorEl={anchorEl2}
@@ -60,27 +84,30 @@ const Profile = () => {
         sx={{
           '& .MuiMenu-paper': {
             width: '200px',
+            borderRadius: '5px',
           },
         }}
       >
-        <MenuItem>
+        <MenuItem component={Link} to="/sample-page">
           <ListItemIcon>
+            <AccountCircleOutlinedIcon />
           </ListItemIcon>
-          <ListItemText>My Profile</ListItemText>
+          <ListItemText>My Profile ({username})</ListItemText>
         </MenuItem>
-        <MenuItem>
+        <MenuItem component={Link} to="/updatepassword">
           <ListItemIcon>
+            <EnhancedEncryptionOutlinedIcon />
           </ListItemIcon>
-          <ListItemText>My Account</ListItemText>
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon>
-          </ListItemIcon>
-          <ListItemText>My Tasks</ListItemText>
+          <ListItemText>Update Password</ListItemText>
         </MenuItem>
         <Box mt={1} py={1} px={2}>
-          <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth
-                  onClick={handleLogout}
+          <Button
+            to="/auth/login"
+            variant="contained"
+            color="primary"
+            component={Link}
+            fullWidth
+            onClick={handleLogout}
           >
             Logout
           </Button>
