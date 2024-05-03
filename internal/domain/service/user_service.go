@@ -8,6 +8,7 @@ import (
 	"attempt4/platform/app_log"
 	"attempt4/platform/hash"
 	"attempt4/platform/postgres/repository"
+	"attempt4/platform/smtp"
 	"attempt4/platform/zap"
 	"fmt"
 	"time"
@@ -243,6 +244,7 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 		Email:         userDto.Email,
 		Name:          userDto.Name,
 		Surname:       userDto.Surname,
+		Phone:         user.Phone,
 		Status:        enum.UserPassiveStatus,
 		Code:          code,
 		CodeExpiredAt: &expiredTime,
@@ -292,12 +294,12 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 		return internal.WalletNotCreated
 	}
 
-	/*toEmail := []string{userDto.Email}
+	toEmail := []string{userDto.Email}
 	err = smtp.SendMail(toEmail, *code)
 	if err != nil {
 		return err
 	}
-	*/
+
 	return nil
 }
 

@@ -247,9 +247,9 @@ const OfferedTrips = () => {
             ))}
           </Grid>
         </div>
-        <Dialog open={openDialog} onClose={handleDialogClose} fullWidth maxWidth="lg">
+        <Dialog open={openDialog} onClose={handleDialogClose} fullWidth maxWidth="lg" >
           <DialogTitle>Trip Details</DialogTitle>
-          <DialogContent dividers>
+          <DialogContent dividers style={{ maxHeight: '80vh' }}>
             <DialogTrips places={tripPackages[parseInt(trip) - 1].places} />
           </DialogContent>
           <DialogActions>

@@ -17,7 +17,7 @@ const Survey = Loadable(lazy(() => import('../views/survey/surveypage.jsx')));
 const Wallet = Loadable(lazy(() => import('../views/wallet/walletdetails.jsx')));
 const Admin = Loadable(lazy(() => import('../views/authentication/Admin.jsx')));
 const RoutesPage = Loadable(lazy(() => import('../views/dashboard/components/routespage.jsx')));
-
+const Recommendation = Loadable(lazy(() => import('../views/recommendation/airecom.jsx')));
 const Router = [
   {
     path: '/',
@@ -27,6 +27,7 @@ const Router = [
       { path: '/dashboard', exact: true, element: <Dashboard /> },
       { path: '/sample-page', exact: true, element: <SamplePage /> },
       { path: '/offeredtrips', exact:true, element: <OfferedTrips/>},
+      { path: '/airecom', exact:true, element: <Recommendation/>},
       { path: '/survey', exact:true, element: <Survey/>},
       { path: '/wallet', exact:true, element: <Wallet/>},
       { path: '/routespage', exact:true, element: <RoutesPage/>},

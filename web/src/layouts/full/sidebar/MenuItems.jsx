@@ -5,6 +5,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import Person2Icon from '@mui/icons-material/Person2';
 import WalletIcon from '@mui/icons-material/Wallet';
+import AssistantIcon from '@mui/icons-material/Assistant';
 const MenuItems = [
   {
     navlabel: true,
@@ -23,6 +24,12 @@ const MenuItems = [
     title: 'Offered Trips',
     icon: LocalOfferIcon,
     href: '/offeredtrips',
+  },
+  {
+    id: uniqueId(),
+    title: 'AI Recommendation',
+    href: '/airecom',
+    icon: AssistantIcon,
   },
   {
     id: uniqueId(),

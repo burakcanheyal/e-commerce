@@ -33,9 +33,9 @@ const Surveypage = () => {
                 value={answers[index]}
                 onChange={(e) => handleAnswerChange(index, e.target.value)}
             >
-              <FormControlLabel value="A" control={<Radio />} label="Option A" />
-              <FormControlLabel value="B" control={<Radio />} label="Option B" />
-              <FormControlLabel value="C" control={<Radio />} label="Option C" />
+              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+              <FormControlLabel value="no" control={<Radio />} label="No" />
+              <FormControlLabel value="maybe" control={<Radio />} label="Maybe" />
             </RadioGroup>
           </FormControl>
         </Grid>
