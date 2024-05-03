@@ -119,18 +119,18 @@ const OfferedTrips = () => {
       ],
     },
     {
-      name: 'Ankara Tour', // Yeni eklendi
+      name: 'Ankara Tour',
       description: 'Experience the political, cultural, and historical heart of Turkey with a tour of Ankara, its capital city.', // Yeni eklendi
-      image: ankaraImage, // Yeni eklendi
-      places: [ // Yeni eklendi
+      image: ankaraImage,
+      places: [
         { name: 'Anıtkabir', coords: { lat: 39.9256, lng: 32.8357 }, details: 'Anıtkabir is the mausoleum of Mustafa Kemal Atatürk, the founder of the Republic of Turkey, located in Ankara.' }, // Yeni eklendi
         { name: 'Kocatepe Mosque', coords: { lat: 39.9289, lng: 32.8524 }, details: 'Kocatepe Mosque is the largest mosque in Ankara, known for its imposing architecture and grand interior.' }, // Yeni eklendi
         { name: 'Ankara Citadel', coords: { lat: 39.9439, lng: 32.8544 }, details: 'Ankara Citadel is a historic citadel located in Ankara, Turkey, dating back to ancient times and offering panoramic views of the city.' }, // Yeni eklendi
         { name: 'Museum of Anatolian Civilizations', coords: { lat: 39.9413, lng: 32.8641 }, details: 'The Museum of Anatolian Civilizations is located in Ankara and houses a rich collection of artifacts from the Neolithic Age to the Byzantine period.' }, // Yeni eklendi
         { name: 'Atakule Tower', coords: { lat: 39.8973, lng: 32.8639 }, details: 'Atakule Tower is a prominent landmark in Ankara, offering panoramic views of the city from its observation deck and revolving restaurant.' }, // Yeni eklendi
         { name: 'Gençlik Parkı', coords: { lat: 39.9175, lng: 32.8517 }, details: 'Gençlik Parkı is a large public park in Ankara, popular for picnics, leisure activities, and recreational facilities.' }, // Yeni eklendi
-      ], // Yeni eklendi
-    }, // Yeni eklendi
+      ],
+    },
     {
       name: 'Çanakkale Tour',
       description: 'Discover the historical sites and natural beauty of Çanakkale, a city rich in culture and significance.', // Yeni eklendi
@@ -142,8 +142,8 @@ const OfferedTrips = () => {
         { name: 'Bozcaada', coords: { lat: 39.8222, lng: 26.0444 }, details: 'Bozcaada is a picturesque island known for its charming villages, vineyards, and pristine beaches.' }, // Yeni eklendi
         { name: 'Assos', coords: { lat: 39.4894, lng: 26.3344 }, details: 'Assos is a historical town with ancient ruins, including the Temple of Athena, offering stunning views of the Aegean Sea.' }, // Yeni eklendi
         { name: 'Kaz Mountains', coords: { lat: 39.6769, lng: 26.8265 }, details: 'Kaz Mountains, also known as Mount Ida, is a mountain range in northwestern Turkey, famous for its natural beauty and diverse flora.' }, // Yeni eklendi
-      ], // Yeni eklendi
-    }, // Yeni eklendi
+      ],
+    },
     {
       name: 'Balıkesir Tour',
       description: 'Explore the stunning coastline, pristine beaches, and historical sites of Balıkesir, a province on the Aegean coast of Turkey.',

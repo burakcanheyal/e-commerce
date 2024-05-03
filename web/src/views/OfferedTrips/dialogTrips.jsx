@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useJsApiLoader, GoogleMap, Marker, InfoWindow, DirectionsRenderer } from '@react-google-maps/api';
+import { Typography, TextField, Button, Grid, Rating, Box } from '@mui/material';
 
 const DialogTrips = ({ places }) => {
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: 'AIzaSyBCOK5PNJk7qVS9ajhD1-0ZmS-hOApa2Vk', // API anahtarınızı buraya ekleyin
+    googleMapsApiKey: 'AIzaSyBCOK5PNJk7qVS9ajhD1-0ZmS-hOApa2Vk',
     libraries: ['places'],
   });
 
   const [map, setMap] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [directions, setDirections] = useState(null);
+
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [username, setUsername] = useState('Burak Can');
+  const defaultFeedback = "That is a great route!";
+  const defaultRating = 5;
+  const [newFeedback, setNewFeedback] = useState('');
+  const [newRating, setNewRating] = useState(defaultRating);
 
   useEffect(() => {
     if (isLoaded) {
@@ -53,16 +61,51 @@ const DialogTrips = ({ places }) => {
     );
   };
 
+  const handleFeedbackSubmit = () => {
+    const newFeedbackObj = { user: username, feedback: newFeedback, rating: newRating };
+    setFeedbacks([newFeedbackObj, ...feedbacks]);
+    setNewFeedback('');
+    setNewRating(defaultRating);
+  };
+
   if (loadError) return <div>Error: It cannot loaded</div>;
   if (!isLoaded) return <div>Loading...</div>;
 
   return (
-    <div style={{ position: 'relative', flexDirection: 'column', alignItems: 'center', height: '100vh', width: '100vw' }}>
-      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'row' }}>
+      <div style={{ flex: 1 }}>
+        <Typography variant="h4" align="center" gutterBottom>User Feedbacks</Typography>
+        <Box sx={{ maxHeight: '400px', overflowY: 'auto', padding: '0 10px' }}>
+          <Typography variant="body1" gutterBottom>{username}: {defaultFeedback}</Typography>
+          <Rating value={defaultRating} readOnly />
+          {feedbacks.map((feedback, index) => (
+            <div key={index} style={{ marginBottom: '10px' }}>
+              <Typography variant="body1" gutterBottom>{feedback.user}: {feedback.feedback}</Typography>
+              <Rating value={feedback.rating} readOnly />
+            </div>
+          ))}
+        </Box>
+        <TextField
+          label="Your Feedback"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={newFeedback}
+          onChange={(e) => setNewFeedback(e.target.value)}
+        />
+        <Rating
+          name="new-feedback-rating"
+          value={newRating}
+          precision={1}
+          onChange={(event, newValue) => setNewRating(newValue)}
+        />
+        <Button variant="contained" onClick={handleFeedbackSubmit}>Submit Feedback</Button>
+      </div>
+      <div style={{ flex: 2 }}>
         <GoogleMap
           center={places[0].coords}
           zoom={12}
-          mapContainerStyle={{ width: '70%', height: '100%' }}
+          mapContainerStyle={{ marginLeft:'10px', width: '100%', height: '100vh' }}
           options={{
             zoomControl: true,
             mapTypeControl: true,

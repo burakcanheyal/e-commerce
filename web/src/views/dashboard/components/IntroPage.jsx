@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Typography, Button } from '@mui/material';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -11,10 +11,20 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { NavLink } from 'react-router-dom';
 
 const IntroPage = () => {
+  const searchMapRef = useRef(null); // Ref for the SearchMap component
+
   useEffect(() => {
     const accessToken = localStorage.getItem('AccessToken');
     console.log('AccessToken:', accessToken);
   }, []);
+
+  const handleAddTripClick = () => {
+    window.scrollTo({
+      top: 700,
+      left: 0,
+      behavior: 'smooth'
+    });
+  };
 
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -25,7 +35,7 @@ const IntroPage = () => {
           organize, and map your custom itineraries for road trips, powered by our trip planner AI. You can create a trip or see the offered trips based on your survey.
         </Typography>
         <div style={{ marginLeft: '55px', marginTop: '30px', display: 'flex', gap: '50px' }}>
-          <Button variant="contained" startIcon={<AddIcon/>} >
+          <Button variant="contained" startIcon={<AddIcon/>} onClick={handleAddTripClick}>
             Add Trip
           </Button>
           <Button variant="contained" startIcon={<RemoveRedEyeIcon/>}
@@ -52,6 +62,8 @@ const IntroPage = () => {
             <img src={travelimg4} alt="Travel Photo 4"  width={500} height={500} />
           </div>
         </Carousel>
+      </div>
+      <div ref={searchMapRef}>
       </div>
     </div>
   );
