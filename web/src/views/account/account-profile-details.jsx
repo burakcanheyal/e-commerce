@@ -8,8 +8,12 @@ import {
   CardHeader,
   Divider,
   TextField,
-  Grid
+  Grid,
+  IconButton,
+  InputAdornment, Typography,
 } from '@mui/material';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import axios from 'axios';
 
 const AccountProfileDetails = () => {
@@ -22,7 +26,8 @@ const AccountProfileDetails = () => {
     email: '',
     password: ''
   });
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleChange = useCallback(
     (event) => {
@@ -55,14 +60,24 @@ const AccountProfileDetails = () => {
             password: values.password
           })
         });
-        const data = await response.json();
-        console.log(data);
+        if (!response.ok) {
+          const errorData = await response.json();
+          setErrors(errorData);
+        } else {
+          const data = await response.json();
+          console.log(data);
+        }
       } catch (error) {
         console.error('Profil bilgileri güncellenirken hata oluştu:', error);
       }
     },
     [values]
   );
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword);
+  };
+
   useEffect(() => {
     const fetchProfileDetails = async () => {
       try {
@@ -93,15 +108,14 @@ const AccountProfileDetails = () => {
   return (
     <form autoComplete="off" noValidate onSubmit={handleSubmit}>
       <Card>
-        <CardHeader title="Detaylar" />
-        <CardContent sx={{ pt: 0 }}>
-          <Box sx={{ m: -0.5 }}>
-            <Grid container spacing={2}>
-              <Grid xs={12} md={6}>
+        <CardHeader title="Profile Details" />
+        <CardContent sx={{ pt: 2 }}>
+          <Box sx={{ m: 1.0 }}>
+            <Grid container spacing={3}>
+              <Grid xs={12} md={4}>
                 <TextField
                   fullWidth
-                  helperText="Kullanıcı adınızı belirtin"
-                  label="Kullanıcı Adı"
+                  label="Username"
                   name="username"
                   onChange={handleChange}
                   required
@@ -111,7 +125,7 @@ const AccountProfileDetails = () => {
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Ad"
+                  label="Name"
                   name="name"
                   onChange={handleChange}
                   required
@@ -121,7 +135,7 @@ const AccountProfileDetails = () => {
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Soyad"
+                  label="Surname"
                   name="surname"
                   onChange={handleChange}
                   required
@@ -131,7 +145,7 @@ const AccountProfileDetails = () => {
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Doğum Tarihi"
+                  label="Birth Date"
                   name="birthdate"
                   onChange={handleChange}
                   required
@@ -141,7 +155,7 @@ const AccountProfileDetails = () => {
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Telefon Numarası"
+                  label="Phone Number"
                   name="phone"
                   onChange={handleChange}
                   type="string"
@@ -151,7 +165,7 @@ const AccountProfileDetails = () => {
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Email Adresi"
+                  label="E-mail Address"
                   name="email"
                   onChange={handleChange}
                   required
@@ -161,19 +175,37 @@ const AccountProfileDetails = () => {
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Şifre"
+                  label="Password"
                   name="password"
                   onChange={handleChange}
                   required
+                  type={showPassword ? 'text' : 'password'}
                   value={values.password}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={togglePasswordVisibility} edge="end">
+                          {showPassword ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
                 />
               </Grid>
             </Grid>
+            {Object.keys(errors).length > 0 && (
+              <Box mt={2}>
+                <Typography color="error">
+                  {Object.values(errors).join(', ')}
+                </Typography>
+              </Box>
+            )}
           </Box>
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button type="submit" variant="contained">Detayları Kaydet</Button>
+          <Button type="submit" variant="contained">Update Details</Button>
+
         </CardActions>
       </Card>
     </form>

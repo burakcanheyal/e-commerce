@@ -16,7 +16,7 @@ const OfferedTrips = Loadable(lazy(() => import('../views/OfferedTrips/offeredtr
 const Survey = Loadable(lazy(() => import('../views/survey/surveypage.jsx')));
 const Wallet = Loadable(lazy(() => import('../views/wallet/walletdetails.jsx')));
 const Admin = Loadable(lazy(() => import('../views/authentication/Admin.jsx')));
-const UpdatePassword = Loadable(lazy(() => import('../views/dashboard/components/routespage.jsx')));
+const UpdatePassword = Loadable(lazy(() => import('../views/dashboard/components/updatepassword.jsx')));
 const Recommendation = Loadable(lazy(() => import('../views/recommendation/airecom.jsx')));
 const Router = [
   {

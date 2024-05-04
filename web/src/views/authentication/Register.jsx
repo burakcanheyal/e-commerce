@@ -28,8 +28,8 @@ const Register2 = () => (
                     item
                     xs={12}
                     sm={12}
-                    lg={4}
-                    xl={3}
+                    lg={6}
+                    xl={9}
                     display="flex"
                     justifyContent="center"
                     alignItems="center"
