@@ -11,31 +11,59 @@ import {
   Grid,
 } from '@mui/material';
 import CurrencyLiraIcon from '@mui/icons-material/CurrencyLira';
+import axios from 'axios';
 
 const Wallet = () => {
   const [updateBalance, setUpdateBalance] = useState('');
   const [cartItems, setCartItems] = useState([]);
   const [purchaseHistory, setPurchaseHistory] = useState([]);
 
-  const handleUpdateBalance = () => {
-    // Backend tarafında yapılacak olan balance güncelleme işlemi burada gerçekleştirilecek
-    // Örnek olarak: axios.put('http://localhost:8001/updateBalance', { balance: updateBalance });
-    console.log('Update Balance:', updateBalance);
-    setUpdateBalance('');
+  const handleUpdateBalance = async () => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const floatBalance = parseFloat(updateBalance); // Parse the updateBalance to float
+      const response = await fetch('http://localhost:8001/wallet/', {
+        method: 'PUT',
+        headers: {
+          'Authentication': `${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ balance: floatBalance }) // Send floatBalance instead of updateBalance
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update balance');
+      }
+
+      console.log('Balance updated:', floatBalance);
+      setUpdateBalance('');
+    } catch (error) {
+      console.error('Error updating balance:', error);
+    }
   };
 
   const handleAddToCart = (item) => {
     setCartItems([...cartItems, item]);
   };
 
-  const handleCompletePurchase = () => {
-    // Backend tarafında yapılacak olan satın alma işlemi burada gerçekleştirilecek
-    // Örnek olarak: axios.post('http://localhost:8001/completePurchase', { cartItems });
-    console.log('Complete Purchase:', cartItems);
-    setPurchaseHistory([...purchaseHistory, ...cartItems]);
-    setCartItems([]);
+  const handleCompletePurchase = async () => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      await axios.get(
+        'http://localhost:8001/wallet/complete',
+        {
+          headers: {
+            'Authentication': accessToken
+          }
+        }
+      );
+      console.log('Purchase completed:', cartItems);
+      setPurchaseHistory([...purchaseHistory, ...cartItems]);
+      setCartItems([]);
+    } catch (error) {
+      console.error('Error completing purchase:', error);
+    }
   };
-
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={4}>

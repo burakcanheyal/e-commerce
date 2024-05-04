@@ -1,65 +1,88 @@
-import React, { useState } from 'react';
-import { Typography, Button, RadioGroup, Radio, FormControlLabel, FormGroup, FormControl, FormLabel, Grid } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Typography, Button, RadioGroup, Radio, FormControlLabel, FormGroup, Grid } from '@mui/material';
+import axios from 'axios';
 
 const Surveypage = () => {
-  const [answers, setAnswers] = useState(Array(10).fill(''));
+  const [answers, setAnswers] = useState({});
+  const [surveyQuestions, setSurveyQuestions] = useState([]);
 
-  const handleAnswerChange = (index, answer) => {
-    const newAnswers = [...answers];
-    newAnswers[index] = answer;
-    setAnswers(newAnswers);
+  useEffect(() => {
+    const fetchSurveyQuestions = async () => {
+      try {
+        const accessToken = localStorage.getItem('AccessToken');
+        const response = await axios.get('http://localhost:8001/trips/', {
+          headers: {
+            'Authentication': `${accessToken}`
+          }
+        });
+        setSurveyQuestions(response.data);
+        // Initialize answers with 'yes' for each question
+        const initialAnswers = {};
+        response.data.forEach(question => {
+          initialAnswers[question.description] = 'yes';
+        });
+        setAnswers(initialAnswers);
+      } catch (error) {
+        console.error('Error fetching survey questions:', error);
+      }
+    };
+
+    fetchSurveyQuestions();
+  }, []);
+
+  const handleAnswerChange = (description, value) => {
+    setAnswers({ ...answers, [description]: value });
   };
-
-  // questions
-  const surveyQuestions = [
-    "What is your favorite travel destination?",
-    "What type of accommodation do you prefer when traveling?",
-    "What is your preferred mode of transportation during travel?",
-    "What is your favorite outdoor activity while traveling?",
-    "What is the most important factor for you when choosing a travel destination?",
-    "Do you prefer solo travel or traveling with companions?",
-    "What is your favorite cuisine to try when traveling?",
-    "What is the most memorable travel experience you've had?",
-    "How do you plan your travel itinerary?",
-    "What is your dream travel destination?",
-  ];
 
   const renderSurveyQuestions = () => {
     return surveyQuestions.map((question, index) => (
-        <Grid item key={index} xs={12}>
-          <FormControl component="fieldset">
-            <FormLabel component="legend">{`${index + 1}. ${question}`}</FormLabel>
-            <RadioGroup
-                value={answers[index]}
-                onChange={(e) => handleAnswerChange(index, e.target.value)}
-            >
-              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio />} label="No" />
-              <FormControlLabel value="maybe" control={<Radio />} label="Maybe" />
-            </RadioGroup>
-          </FormControl>
-        </Grid>
+      <Grid item key={question.id} xs={12}>
+        <Typography variant="body1" gutterBottom>
+          {`${question.id}. ${question.description}`}
+        </Typography>
+        <RadioGroup
+          value={answers[question.description]}
+          onChange={(e) => handleAnswerChange(question.description, e.target.value)}
+        >
+          <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+          <FormControlLabel value="no" control={<Radio />} label="No" />
+          <FormControlLabel value="maybe" control={<Radio />} label="Maybe" />
+        </RadioGroup>
+      </Grid>
     ));
   };
 
-  const submitSurvey = () => {
-    console.log(answers);
+  const submitSurvey = async () => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const postData = surveyQuestions.map((question, index) => ({
+        id: 0,
+        question_id: index + 1,
+        points: answers[question.description] === 'yes' ? 2 : answers[question.description] === 'maybe' ? 1 : 0
+      }));
+      await axios.post('http://localhost:8001/trips/', postData, {
+        headers: {
+          'Authentication': `${accessToken}`
+        }
+      });
+      console.log('Survey submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+    }
   };
 
   return (
-      <div>
-        <Typography variant="h4" gutterBottom>
-          Travel Survey
-        </Typography>
-        <FormGroup>
-          <Grid container spacing={2}>
-            {renderSurveyQuestions()}
-          </Grid>
-        </FormGroup>
-        <div>
-        </div>
-        <Button variant="contained" onClick={submitSurvey}>Submit</Button>
-      </div>
+    <div>
+      <Typography variant="h4" gutterBottom>
+        Travel Survey
+      </Typography>
+      <FormGroup>
+        <Grid container spacing={2}>
+          {renderSurveyQuestions()}
+        </Grid>
+      </FormGroup>
+      <Button variant="contained" onClick={submitSurvey}>Submit</Button>
+    </div>
   );
 };
 
