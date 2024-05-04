@@ -188,15 +188,10 @@ func (u *UserService) UpdateUserPassword(id int32, userDto dto.UserUpdatePasswor
 		return err
 	}
 
-	encryptedPassword, err := hash.EncryptPassword(userDto.NewPassword)
-	if err != nil {
-		zap.Logger.Error(err)
-		return err
-	}
 	entityUser := entity.User{
 		Id:            user.Id,
 		Username:      user.Username,
-		Password:      encryptedPassword,
+		Password:      userDto.NewPassword,
 		Email:         user.Email,
 		Name:          user.Name,
 		Surname:       user.Surname,
@@ -243,7 +238,6 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 		Email:         userDto.Email,
 		Name:          userDto.Name,
 		Surname:       userDto.Surname,
-		Phone:         user.Phone,
 		Status:        enum.UserPassiveStatus,
 		Code:          code,
 		CodeExpiredAt: &expiredTime,
@@ -297,8 +291,8 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 	err = smtp.SendMail(toEmail, *code)
 	if err != nil {
 		return err
-	}*/
-
+	}
+	*/
 	return nil
 }
 

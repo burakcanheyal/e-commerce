@@ -51,6 +51,9 @@ func Setup() {
 	panelRepository := repository.NewSubmissionRepository(db)
 	walletOperationRepository := repository.NewWalletOperationRepository(db)
 	applicationLogRepository := app_log.NewApplicationLogRepository(db)
+	pointRepository := repository.NewPointRepository(db)
+	tripRepository := repository.NewTripRepository(db)
+	questionRepository := repository.NewQuestionRepository(db)
 
 	appLogService := app_log.NewApplicationLogService(applicationLogRepository)
 	userService := service.NewUserService(userRepository, roleRepository, walletRepository, appLogService)
@@ -60,6 +63,7 @@ func Setup() {
 	walletService := service.NewWalletService(userRepository, walletRepository, productRepository,
 		orderRepository, walletOperationRepository, roleRepository, appLogService)
 	keyService := service.NewRolService(userRepository, roleRepository, panelRepository, appLogService)
+	questionService := service.NewQuestionService(userRepository, questionRepository, pointRepository, productRepository, tripRepository)
 
 	authenticationMiddleware := middleware.NewMiddleware(authenticationService, userService)
 
@@ -69,6 +73,7 @@ func Setup() {
 	orderServerHandler := handler.NewOrderServerHandler(orderService)
 	walletServerHandler := handler.NewWalletServerHandler(walletService)
 	keyServerHandler := handler.NewSubmissionServerHandler(keyService)
+	tripServerHandler := handler.NewTripServerHandler(questionService)
 
 	webServer := server.NewWebServer(
 		productServerHandler,
@@ -78,6 +83,7 @@ func Setup() {
 		walletServerHandler,
 		keyServerHandler,
 		authenticationMiddleware,
+		tripServerHandler,
 	)
 
 	webServer.SetupRoot()

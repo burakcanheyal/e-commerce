@@ -17,6 +17,7 @@ type WebServer struct {
 	walletServerHandler  handler2.WalletServerHandler
 	keyServerHandler     handler2.SubmissionServerHandler
 	middleware           middleware.Middleware
+	tripServerHandler    handler2.TripServerHandler
 }
 
 func NewWebServer(
@@ -27,6 +28,7 @@ func NewWebServer(
 	walletServerHandler handler2.WalletServerHandler,
 	keyServerHandler handler2.SubmissionServerHandler,
 	middleware middleware.Middleware,
+	tripServerHandler handler2.TripServerHandler,
 ) WebServer {
 	s := WebServer{
 		productServerHandler,
@@ -36,6 +38,7 @@ func NewWebServer(
 		walletServerHandler,
 		keyServerHandler,
 		middleware,
+		tripServerHandler,
 	}
 	return s
 }
@@ -83,6 +86,11 @@ func (s *WebServer) SetupRoot() {
 	wallet.PUT("/", s.walletServerHandler.Update)
 	wallet.GET("/complete", s.walletServerHandler.CompletePurchase)
 	wallet.GET("/", s.walletServerHandler.GetAllBuyTransactions)
+
+	trip := router.Group("/trips", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
+	trip.GET("/", s.tripServerHandler.GetQuestions)
+	trip.POST("/", s.tripServerHandler.AnswerQuestion)
+	trip.GET("/recommendation/", s.tripServerHandler.GetAIRecommendation)
 
 	panel := router.Group("/panel", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleAdmin}))
 	panel.POST("/", s.keyServerHandler.ResponseToChangeUserRole)

@@ -50,3 +50,6 @@ func SuccessInCreatingPdf() ApplicationError {
 func NewHttpError(err error) ApplicationError {
 	return ApplicationError{Result: "Hata", Message: err.Error()}
 }
+func AnswerQuestion() ApplicationError {
+	return ApplicationError{Result: "Hata", Message: "Cevaplar Alınamadı"}
+}
