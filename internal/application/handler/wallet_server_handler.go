@@ -96,16 +96,16 @@ func (w *WalletServerHandler) GetAllBuyTransactions(context *gin.Context) {
 		return
 	}
 
-	items, total, err := w.walletService.GetAllTransactions(userDto.Id, enum.WalletBuyType)
+	items, _, err := w.walletService.GetAllTransactions(userDto.Id, enum.WalletBuyType)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, NewHttpError(err))
 		return
 	}
-
 	zap.Logger.Info("Tüm alım işlemlerini gösterme isteği başarılı")
-	context.JSON(http.StatusOK, gin.H{"Toplam sipariş sayısı ": total, "Siparişler: ": items})
+	context.JSON(http.StatusOK, items)
 }
 
+/*
 func (w *WalletServerHandler) GetAllSellTransactions(context *gin.Context) {
 	user, exist := context.Keys["user"].(dto.TokenUserDto)
 	if exist != true {
@@ -125,3 +125,4 @@ func (w *WalletServerHandler) GetAllSellTransactions(context *gin.Context) {
 	zap.Logger.Info("Tüm satış işlemlerini gösterme isteği başarılı")
 	context.Data(http.StatusOK, "application/octet-stream", pdf)
 }
+*/

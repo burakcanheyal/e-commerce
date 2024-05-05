@@ -62,7 +62,7 @@ func Setup() {
 	orderService := service.NewOrderService(orderRepository, productRepository, userRepository, appLogService)
 	authenticationService := service.NewAuthentication(userRepository, config.Secret, config.Secret2, appLogService)
 	walletService := service.NewWalletService(userRepository, walletRepository, productRepository,
-		orderRepository, walletOperationRepository, roleRepository, appLogService)
+		orderRepository, walletOperationRepository, roleRepository, appLogService, tripRepository)
 	keyService := service.NewRolService(userRepository, roleRepository, panelRepository, appLogService)
 	questionService := service.NewQuestionService(userRepository, questionRepository, pointRepository, productRepository, tripRepository)
 	adminService := service.NewAdminService(userRepository, roleRepository, walletRepository, appLogService, tripRepository)

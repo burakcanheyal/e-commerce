@@ -3,14 +3,13 @@ package dto
 import "time"
 
 type TransactionDto struct {
-	OperationNumber string
-	Balance         float32
-	OrderId         int32
-	ProductName     string
-	OrderQuantity   int32
-	SellerName      string
-	OperationDate   time.Time
+	OperationNumber string         `json:"operation_number"`
+	Balance         float32        `json:"balance"`
+	OrderId         string         `json:"order_id"`
+	OrderQuantity   int32          `json:"order_quantity"`
+	OperationDate   time.Time      `json:"operation_date"`
+	Product         ProductTripDto `json:"product"`
 }
-type Transaction struct {
-	Transactions []TransactionDto
+type TransactionDtoArray struct {
+	Transactions []TransactionDto `json:"transactions"`
 }

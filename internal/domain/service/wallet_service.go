@@ -7,11 +7,10 @@ import (
 	"attempt4/internal/domain/enum"
 	"attempt4/platform/app_log"
 	"attempt4/platform/postgres/repository"
-	"attempt4/platform/wkhtmltopdf"
 	"attempt4/platform/zap"
 	"fmt"
-	"github.com/hoisie/mustache"
-	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -23,6 +22,7 @@ type WalletService struct {
 	walletOperationRepository repository.WalletOperationRepository
 	roleRepository            repository.RoleRepository
 	appLogService             app_log.ApplicationLogService
+	tripRepository            repository.TripRepository
 }
 
 func NewWalletService(
@@ -32,7 +32,8 @@ func NewWalletService(
 	orderRepository repository.OrderRepository,
 	walletOperationRepository repository.WalletOperationRepository,
 	roleRepository repository.RoleRepository,
-	appLogService app_log.ApplicationLogService) WalletService {
+	appLogService app_log.ApplicationLogService,
+	tripRepository repository.TripRepository) WalletService {
 
 	w := WalletService{
 		userRepository,
@@ -42,6 +43,7 @@ func NewWalletService(
 		walletOperationRepository,
 		roleRepository,
 		appLogService,
+		tripRepository,
 	}
 	return w
 }
@@ -153,53 +155,54 @@ func (w *WalletService) Purchase(id int32) error {
 			return internal.ProductNotFound
 		}
 
-		sellerWallet, err := w.walletRepository.GetByUserId(product.UserId)
-		if err != nil {
-			w.orderRepository.Rollback(startOrderRepository)
-			w.walletRepository.Rollback(startWalletRepository)
-			w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
-			zap.Logger.Error(err)
-			return err
-		}
-		if sellerWallet.Id == 0 {
-			w.orderRepository.Rollback(startOrderRepository)
-			w.walletRepository.Rollback(startWalletRepository)
-			w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.WalletNotFound.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
-			zap.Logger.Error(internal.WalletNotFound)
-			return internal.WalletNotFound
-		}
+		/*
+			sellerWallet, err := w.walletRepository.GetByUserId(product.UserId)
+			if err != nil {
+				w.orderRepository.Rollback(startOrderRepository)
+				w.walletRepository.Rollback(startWalletRepository)
+				w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
+				zap.Logger.Error(err)
+				return err
+			}
+			if sellerWallet.Id == 0 {
+				w.orderRepository.Rollback(startOrderRepository)
+				w.walletRepository.Rollback(startWalletRepository)
+				w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.WalletNotFound.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
+				zap.Logger.Error(internal.WalletNotFound)
+				return internal.WalletNotFound
+			}
 
-		balance := sellerWallet.Balance + orders[i].Price
-		sellerWallet.Balance = balance
+			balance := sellerWallet.Balance + orders[i].Price
+			sellerWallet.Balance = balance
 
-		currentTime := time.Now()
+			currentTime := time.Now()
 
-		walletOperation := entity.WalletOperation{
-			OperationNumber: RandomString(8),
-			Type:            enum.WalletSellType,
-			Balance:         orders[i].Price,
-			UserId:          &product.UserId,
-			OrderId:         &orders[i].Id,
-			ProductId:       &product.Id,
-			OperationDate:   currentTime,
-		}
+			walletOperation := entity.WalletOperation{
+				OperationNumber: RandomString(8),
+				Type:            enum.WalletSellType,
+				Balance:         orders[i].Price,
+				UserId:          &product.UserId,
+				OrderId:         &orders[i].Id,
+				ProductId:       &product.Id,
+				OperationDate:   currentTime,
+			}
 
-		walletOperation, err = w.walletOperationRepository.Create(walletOperation)
-		if err != nil {
-			w.orderRepository.Rollback(startOrderRepository)
-			w.walletRepository.Rollback(startWalletRepository)
-			w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
-			zap.Logger.Error(err)
-			return err
-		}
-		if walletOperation.Id == 0 {
-			w.orderRepository.Rollback(startOrderRepository)
-			w.walletRepository.Rollback(startWalletRepository)
-			w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.FailInPurchase.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
-			zap.Logger.Error(internal.FailInPurchase)
-			return internal.FailInPurchase
-		}
-
+			walletOperation, err = w.walletOperationRepository.Create(walletOperation)
+			if err != nil {
+				w.orderRepository.Rollback(startOrderRepository)
+				w.walletRepository.Rollback(startWalletRepository)
+				w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
+				zap.Logger.Error(err)
+				return err
+			}
+			if walletOperation.Id == 0 {
+				w.orderRepository.Rollback(startOrderRepository)
+				w.walletRepository.Rollback(startWalletRepository)
+				w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.FailInPurchase.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
+				zap.Logger.Error(internal.FailInPurchase)
+				return internal.FailInPurchase
+			}
+		*/
 		orders[i].Status = enum.OrderCompleted
 		err = w.orderRepository.Update(orders[i])
 		if err != nil {
@@ -242,13 +245,17 @@ func (w *WalletService) Purchase(id int32) error {
 
 	currentTime := time.Now()
 
+	var idStringsOrder []string
+	for _, order := range orders {
+		idStringsOrder = append(idStringsOrder, strconv.FormatInt(int64(order.Id), 10))
+	}
+	idListStringOrder := strings.Join(idStringsOrder, "-")
 	walletOperation := entity.WalletOperation{
 		OperationNumber: RandomString(8),
 		Type:            enum.WalletBuyType,
 		Balance:         price,
-		UserId:          &id,
-		OrderId:         nil,
-		ProductId:       nil,
+		UserId:          id,
+		OrderId:         idListStringOrder,
 		OperationDate:   currentTime,
 	}
 
@@ -273,9 +280,9 @@ func (w *WalletService) Purchase(id int32) error {
 	return nil
 }
 
-func (w *WalletService) GetAllTransactions(id int32, transactionType int8) ([]dto.TransactionDto, int64, error) {
-	transactions, total, err := w.walletOperationRepository.GetAllTransactionsWithJoinTable(id, transactionType)
-	var list []dto.TransactionDto
+func (w *WalletService) GetAllTransactions(id int32, transactionType int8) (dto.TransactionDtoArray, int64, error) {
+	transactions, total, err := w.walletOperationRepository.GetAllTransactions(id, transactionType)
+	var list dto.TransactionDtoArray
 	if err != nil {
 		w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
 		zap.Logger.Error(err)
@@ -287,32 +294,83 @@ func (w *WalletService) GetAllTransactions(id int32, transactionType int8) ([]dt
 		return list, total, internal.TransactionNotFound
 	}
 
-	for i, _ := range transactions {
+	for _, transaction := range transactions {
 		var l dto.TransactionDto
-		if transactions[i].OrderId == nil {
-			l.OrderId = 0
+		var productTripDto dto.ProductTripDto
+		var quantity int32
+		var tripDto []dto.TripDto
+		if transaction.OrderId == "" {
+			l.OrderId = ""
 			l.OrderQuantity = 0
-		} else {
-			l.OrderId = *transactions[i].OrderId
-			l.OrderQuantity = transactions[i].Order.Quantity
 		}
+		orderStringSlice := strings.Split(transaction.OrderId, "-")
+		for _, orderIndex := range orderStringSlice {
+			quantity = 0
+			orderID, err := strconv.Atoi(orderIndex)
+			if err != nil {
+				fmt.Println("Error converting ID string to int:", err)
+				return list, 0, err
+			}
+			order, err := w.orderRepository.GetById(int32(orderID))
+			if order.Id == 0 {
+				return list, 0, err
+			}
+			if err != nil {
+				return list, 0, err
+			}
 
-		if transactions[i].ProductId == nil {
-			l.ProductName = ""
-		} else {
-			l.ProductName = transactions[i].Product.Name
-			l.SellerName = transactions[i].Product.User.Name
+			product, err := w.productRepository.GetById(order.ProductId)
+			if product.Id == 0 {
+				return list, 0, err
+			}
+			if err != nil {
+				return list, 0, err
+			}
+
+			tripStringSlice := strings.Split(product.Trip, "-")
+			for _, tripIndex := range tripStringSlice {
+				tripID, err := strconv.Atoi(tripIndex)
+				if err != nil {
+					return list, 0, err
+				}
+				trip, err := w.tripRepository.GetById(int32(tripID))
+				if err != nil {
+					return list, 0, err
+				}
+				if trip.Id == 0 {
+					return list, 0, err
+				}
+				tripDto = append(tripDto, dto.TripDto{
+					Id:          trip.Id,
+					Description: trip.Description,
+					Name:        trip.Name,
+					Status:      trip.Status,
+					Lat:         trip.Lat,
+					Lng:         trip.Lng,
+				})
+				quantity += 1
+			}
+			productTripDto = dto.ProductTripDto{
+				Name:     product.Name,
+				Quantity: product.Quantity,
+				Price:    product.Price,
+				Trip:     tripDto,
+			}
 		}
-
-		l.OperationNumber = transactions[i].OperationNumber
-		l.Balance = transactions[i].Balance
-		l.OperationDate = transactions[i].OperationDate
-
-		list = append(list, l)
+		l = dto.TransactionDto{
+			OperationNumber: transaction.OperationNumber,
+			Balance:         transaction.Balance,
+			OrderId:         transaction.OrderId,
+			OrderQuantity:   quantity,
+			OperationDate:   transaction.OperationDate,
+			Product:         productTripDto,
+		}
+		list.Transactions = append(list.Transactions, l)
 	}
 	return list, total, nil
 }
 
+/*
 func (w *WalletService) ShowStatistics(id int32) ([]byte, error) {
 	items, _, err := w.GetAllTransactions(id, enum.WalletSellType)
 	if err != nil {
@@ -364,3 +422,4 @@ func (w *WalletService) ShowStatistics(id int32) ([]byte, error) {
 
 	return pdf, nil
 }
+*/
