@@ -10,15 +10,16 @@ import (
 )
 
 type WebServer struct {
-	productServerHandler handler2.ProductServerHandler
-	profileServerHandler handler2.ProfileServerHandler
-	orderServerHandler   handler2.OrderServerHandler
-	authentication       handler2.AuthenticationServerHandler
-	walletServerHandler  handler2.WalletServerHandler
-	keyServerHandler     handler2.SubmissionServerHandler
-	middleware           middleware.Middleware
-	tripServerHandler    handler2.TripServerHandler
-	adminPanelHandler    handler2.AdminPanelHandler
+	productServerHandler  handler2.ProductServerHandler
+	profileServerHandler  handler2.ProfileServerHandler
+	orderServerHandler    handler2.OrderServerHandler
+	authentication        handler2.AuthenticationServerHandler
+	walletServerHandler   handler2.WalletServerHandler
+	keyServerHandler      handler2.SubmissionServerHandler
+	middleware            middleware.Middleware
+	tripServerHandler     handler2.TripServerHandler
+	adminPanelHandler     handler2.AdminPanelHandler
+	feedbackServerHandler handler2.FeedbackServerHandler
 }
 
 func NewWebServer(
@@ -31,6 +32,7 @@ func NewWebServer(
 	middleware middleware.Middleware,
 	tripServerHandler handler2.TripServerHandler,
 	adminPanelHandler handler2.AdminPanelHandler,
+	feedbackServerHandler handler2.FeedbackServerHandler,
 ) WebServer {
 	s := WebServer{
 		productServerHandler,
@@ -42,6 +44,7 @@ func NewWebServer(
 		middleware,
 		tripServerHandler,
 		adminPanelHandler,
+		feedbackServerHandler,
 	}
 	return s
 }
@@ -95,6 +98,11 @@ func (s *WebServer) SetupRoot() {
 	trip.GET("/", s.tripServerHandler.GetQuestions)
 	trip.POST("/", s.tripServerHandler.AnswerQuestion)
 	trip.GET("/recommendation/", s.tripServerHandler.GetAIRecommendation)
+
+	feedback := router.Group("/feedback", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
+	feedback.POST("/", s.feedbackServerHandler.GetFeedback)
+	feedback.DELETE("/", s.feedbackServerHandler.DeleteFeedback)
+	feedback.POST("/add/", s.feedbackServerHandler.CreateFeedback)
 
 	panel := router.Group("/panel", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleAdmin}))
 	panel.POST("/", s.keyServerHandler.ResponseToChangeUserRole)

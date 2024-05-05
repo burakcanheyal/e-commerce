@@ -54,6 +54,7 @@ func Setup() {
 	pointRepository := repository.NewPointRepository(db)
 	tripRepository := repository.NewTripRepository(db)
 	questionRepository := repository.NewQuestionRepository(db)
+	feedbackRepository := repository.NewFeedbackRepository(db)
 
 	appLogService := app_log.NewApplicationLogService(applicationLogRepository)
 	userService := service.NewUserService(userRepository, roleRepository, walletRepository, appLogService)
@@ -65,6 +66,7 @@ func Setup() {
 	keyService := service.NewRolService(userRepository, roleRepository, panelRepository, appLogService)
 	questionService := service.NewQuestionService(userRepository, questionRepository, pointRepository, productRepository, tripRepository)
 	adminService := service.NewAdminService(userRepository, roleRepository, walletRepository, appLogService, tripRepository)
+	feedbackService := service.NewFeedbackService(userRepository, tripRepository, feedbackRepository)
 
 	authenticationMiddleware := middleware.NewMiddleware(authenticationService, userService)
 
@@ -76,6 +78,7 @@ func Setup() {
 	keyServerHandler := handler.NewSubmissionServerHandler(keyService)
 	tripServerHandler := handler.NewTripServerHandler(questionService)
 	adminPanelHandler := handler.NewAdminPanelHandler(adminService)
+	feedbackServerHandler := handler.NewFeedbackServerHandler(feedbackService)
 
 	webServer := server.NewWebServer(
 		productServerHandler,
@@ -87,6 +90,7 @@ func Setup() {
 		authenticationMiddleware,
 		tripServerHandler,
 		adminPanelHandler,
+		feedbackServerHandler,
 	)
 
 	webServer.SetupRoot()
