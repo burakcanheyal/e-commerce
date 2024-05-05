@@ -23,6 +23,7 @@ func InitializeDatabase(dsn string) (*gorm.DB, error) {
 		&entity.Trip{},
 		&entity.Question{},
 		&entity.TopicPoints{},
+		&entity.Feedback{},
 	)
 	if err != nil {
 		return nil, err
@@ -34,6 +35,7 @@ func InitializeDatabase(dsn string) (*gorm.DB, error) {
 	seed.WalletSeed(db)
 	seed.TripSeed(db)
 	seed.QuestionSeed(db)
+	seed.FeedbackSeed(db)
 
 	return db, nil
 }

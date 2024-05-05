@@ -68,3 +68,13 @@ func (p *UserRepository) Update(user entity.User) error {
 	}
 	return nil
 }
+func (p *UserRepository) GetAllByUser() ([]entity.User, int64, error) {
+	var userList []entity.User
+	var total int64
+	listQuery := p.db.Find(&userList)
+
+	if err := listQuery.Count(&total).Find(&userList).Error; err != nil {
+		return userList, 0, err
+	}
+	return userList, total, nil
+}
