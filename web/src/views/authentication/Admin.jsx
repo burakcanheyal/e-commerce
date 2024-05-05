@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Drawer, List, ListItem, ListItemText, Typography, Divider, Box, Paper, TextField, Button, Table, TableContainer, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
+import { Drawer, List, ListItem, ListItemText, Typography, Divider, Box, Paper, TextField, Button, Table, TableContainer, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 const drawerWidth = 240;
 
@@ -16,6 +16,9 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
   },
+  redBackground: {
+    backgroundColor: 'red',
+  },
 }));
 
 const Admin = () => {
@@ -23,7 +26,22 @@ const Admin = () => {
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [messages, setMessages] = useState([]);
   const [response, setResponse] = useState('');
+  const [trips, setTrips] = useState([]);
   const [users, setUsers] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newTrip, setNewTrip] = useState({
+    Id: 0,
+    Description: '',
+    Name: '',
+    Status: 0,
+    Lat: 0,
+    Lng: 0,
+    NaturePoint: 0,
+    HistoricalPoint: 0,
+    AdventurePoint: 0,
+    CulturalPoint: 0,
+    RelaxPoint: 0
+  });
 
   useEffect(() => {
     const handleMessage = (newMessage) => {
@@ -35,34 +53,126 @@ const Admin = () => {
 
   const handleMenuClick = (menu) => {
     setSelectedMenu(menu === selectedMenu ? null : menu);
-    if (menu === 'User Management') {
+    if (menu === 'Trip Management') {
+      fetchTrips();
+    } else if (menu === 'User Management') {
       fetchUsers();
     }
   };
 
-  const handleNewResponse = () => {
-    if (response.trim() !== '') {
-      setMessages([...messages, response]);
-      setResponse('');
-    }
-  };
-
-  const fetchUsers = async () => {
+  const fetchTrips = async () => {
     try {
       const accessToken = localStorage.getItem('AccessToken');
-      const response = await fetch('http://localhost:8001/profil/', {
+      const response = await fetch('http://localhost:8001/panel/trip/', {
         headers: {
           'Authentication': `${accessToken}`
         }
       });
       if (response.ok) {
         const data = await response.json();
-        setUsers(data.users);
+        setTrips(data);
+      } else {
+        console.error('Error fetching trips:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching trips:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await fetch('http://localhost:8001/panel/user/', {
+        headers: {
+          'Authentication': `${accessToken}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
       } else {
         console.error('Error fetching users:', response.statusText);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
+    }
+  };
+
+  const handleDeleteTrip = async (id) => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await fetch('http://localhost:8001/panel/trip/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authentication': accessToken
+        },
+        body: JSON.stringify({ id: id })
+      });
+      if (response.ok) {
+        fetchTrips(); // Turları yeniden getir, silinen turu güncelleyelim
+      } else {
+        console.error('Error deleting trip:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting trip:', error);
+    }
+  };
+
+
+  const handleDeleteUser = async (id) => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await fetch('http://localhost:8001/panel/user/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authentication': accessToken
+        },
+        body: JSON.stringify({ id: id })
+      });
+      if (response.ok) {
+        fetchUsers(); // Kullanıcıları yeniden getir, silinen kullanıcıyı güncelleyelim
+      } else {
+        console.error('Error deleting user:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
+  const handleCreateTrip = async () => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await fetch('http://localhost:8001/panel/trip/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authentication': accessToken
+        },
+        body: JSON.stringify(newTrip)
+      });
+      if (response.ok) {
+        setOpenDialog(false);
+        setNewTrip({
+          Id: 0,
+          Description: '',
+          Name: '',
+          Status: 0,
+          Lat: 0,
+          Lng: 0,
+          NaturePoint: 0,
+          HistoricalPoint: 0,
+          AdventurePoint: 0,
+          CulturalPoint: 0,
+          RelaxPoint: 0
+        });
+        fetchTrips(); // Yeni tur eklendikten sonra turları yeniden getir
+      } else {
+        console.error('Error creating trip:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error creating trip:', error);
     }
   };
 
@@ -97,25 +207,88 @@ const Admin = () => {
                     <TableCell>ID</TableCell>
                     <TableCell>Username</TableCell>
                     <TableCell>Email</TableCell>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Surname</TableCell>
+                    <TableCell>Phone</TableCell>
+                    <TableCell className={classes.redBackground}>Status</TableCell> {/* Status sütunu için kırmızı arka plan */}
+                    <TableCell>Birth Date</TableCell>
+                    <TableCell>Action</TableCell>
                   </TableRow>
                 </TableHead>
-                {users && users.length > 0 ? (
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.id}</TableCell>
-                        <TableCell>{user.username}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                ) : (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell colSpan={3}>No users found</TableCell>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.Id} className={user.Status === 9 ? classes.redBackground : null}> {/* Arka planı kırmızı yap */}
+                      <TableCell>{user.Id}</TableCell>
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.surname}</TableCell>
+                      <TableCell>{user.phone}</TableCell>
+                      <TableCell>{user.Status}</TableCell>
+                      <TableCell>{user.birth_date}</TableCell>
+                      <TableCell>
+                        <Button variant="contained" color="error" onClick={() => handleDeleteUser(user.Id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  </TableBody>
-                )}
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        )}
+        {selectedMenu && selectedMenu === 'Trip Management' && (
+          <Paper elevation={3} style={{ marginTop: '20px', padding: '20px' }}>
+            <Typography variant="h5">Trip Management</Typography>
+            <Button variant="contained" color="primary" onClick={() => setOpenDialog(true)}>
+              Create Trip
+            </Button>
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+              <DialogTitle>Create New Trip</DialogTitle>
+              <DialogContent>
+                <TextField
+                  label="Description"
+                  value={newTrip.Description}
+                  onChange={(e) => setNewTrip({ ...newTrip, Description: e.target.value })}
+                />
+                {/* Add other textfields similarly for other fields */}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+                <Button onClick={handleCreateTrip}>Create</Button>
+              </DialogActions>
+            </Dialog>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Description</TableCell>
+                    <TableCell>Latitude</TableCell>
+                    <TableCell>Longitude</TableCell>
+                    <TableCell className={classes.redBackground}>Status</TableCell> {/* Status sütunu için kırmızı arka plan */}
+                    <TableCell>Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {trips.map((trip) => (
+                    <TableRow key={trip.id} className={trip.status === 9 ? classes.redBackground : null}> {/* Arka planı kırmızı yap */}
+                      <TableCell>{trip.id}</TableCell>
+                      <TableCell>{trip.name}</TableCell>
+                      <TableCell>{trip.description}</TableCell>
+                      <TableCell>{trip.lat}</TableCell>
+                      <TableCell>{trip.lng}</TableCell>
+                      <TableCell>{trip.status}</TableCell>
+                      <TableCell>
+                        <Button variant="contained" color="error" onClick={() => handleDeleteTrip(trip.id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
               </Table>
             </TableContainer>
           </Paper>

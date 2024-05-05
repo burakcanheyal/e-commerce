@@ -188,10 +188,16 @@ func (u *UserService) UpdateUserPassword(id int32, userDto dto.UserUpdatePasswor
 		return err
 	}
 
+	userNewPasswordEncryptrd, err := hash.EncryptPassword(userDto.NewPassword)
+	if err != nil {
+		zap.Logger.Error(err)
+		return err
+	}
+
 	entityUser := entity.User{
 		Id:            user.Id,
 		Username:      user.Username,
-		Password:      userDto.NewPassword,
+		Password:      userNewPasswordEncryptrd,
 		Email:         user.Email,
 		Name:          user.Name,
 		Surname:       user.Surname,

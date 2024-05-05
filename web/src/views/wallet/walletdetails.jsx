@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -17,28 +17,62 @@ const Wallet = () => {
   const [updateBalance, setUpdateBalance] = useState('');
   const [cartItems, setCartItems] = useState([]);
   const [purchaseHistory, setPurchaseHistory] = useState([]);
+  const [balance, setBalance] = useState(0);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const accessToken = localStorage.getItem('AccessToken');
+        const response = await axios.get('http://localhost:8001/wallet/', {
+          headers: {
+            'Authentication': accessToken
+          }
+        });
+        if (response.data && response.data.balance) {
+          setBalance(response.data.balance);
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+      }
+    };
+
+    fetchBalance();
+  }, []);
 
   const handleUpdateBalance = async () => {
     try {
       const accessToken = localStorage.getItem('AccessToken');
-      const floatBalance = parseFloat(updateBalance); // Parse the updateBalance to float
+      const floatBalance = parseFloat(updateBalance);
       const response = await fetch('http://localhost:8001/wallet/', {
         method: 'PUT',
         headers: {
           'Authentication': `${accessToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ balance: floatBalance }) // Send floatBalance instead of updateBalance
+        body: JSON.stringify({ balance: floatBalance })
       });
 
       if (!response.ok) {
         throw new Error('Failed to update balance');
       }
-
       console.log('Balance updated:', floatBalance);
       setUpdateBalance('');
+      // Update the balance after successful update
     } catch (error) {
       console.error('Error updating balance:', error);
+    }
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await axios.get('http://localhost:8001/wallet/', {
+        headers: {
+          'Authentication': accessToken
+        }
+      });
+      if (response.data && response.data.balance) {
+        setBalance(response.data.balance);
+      }
+    } catch (error) {
+      console.error('Error fetching balance:', error);
     }
   };
 
@@ -64,6 +98,7 @@ const Wallet = () => {
       console.error('Error completing purchase:', error);
     }
   };
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={4}>
@@ -73,7 +108,7 @@ const Wallet = () => {
               <CurrencyLiraIcon fontSize="large" /> Balance
             </Typography>
             <Typography variant="h4" gutterBottom>
-              0.00 TL
+              {balance.toFixed(2)} TL
             </Typography>
             <TextField
               fullWidth

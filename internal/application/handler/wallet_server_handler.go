@@ -33,9 +33,10 @@ func (w *WalletServerHandler) Get(context *gin.Context) {
 		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
 	}
+	temp := dto.WalletDto{Balance: balance}
 
 	zap.Logger.Info("Cüzdan bakiye güncelleme isteği başarılı")
-	context.JSON(http.StatusOK, balance)
+	context.JSON(http.StatusOK, temp)
 }
 func (w *WalletServerHandler) Update(context *gin.Context) {
 	wallet := dto.WalletDto{}
