@@ -6,6 +6,8 @@ import HowToRegIcon from '@mui/icons-material/HowToReg';
 import Person2Icon from '@mui/icons-material/Person2';
 import WalletIcon from '@mui/icons-material/Wallet';
 import AssistantIcon from '@mui/icons-material/Assistant';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+
 const MenuItems = [
   {
     navlabel: true,
@@ -67,7 +69,12 @@ const MenuItems = [
     navlabel: true,
     subheader: 'Extra',
   },
-
+  {
+    id: uniqueId(),
+    title: 'About Us',
+    icon:  InfoOutlinedIcon,
+    href: '/about',
+  },
   {
     id: uniqueId(),
     title: 'User Profile',

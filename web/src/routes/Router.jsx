@@ -18,6 +18,9 @@ const Wallet = Loadable(lazy(() => import('../views/wallet/walletdetails.jsx')))
 const Admin = Loadable(lazy(() => import('../views/authentication/Admin.jsx')));
 const UpdatePassword = Loadable(lazy(() => import('../views/dashboard/components/updatepassword.jsx')));
 const Recommendation = Loadable(lazy(() => import('../views/recommendation/airecom.jsx')));
+const About = Loadable(lazy(() => import('../views/about/about.jsx')));
+
+
 const Router = [
   {
     path: '/',
@@ -31,6 +34,7 @@ const Router = [
       { path: '/survey', exact:true, element: <Survey/>},
       { path: '/wallet', exact:true, element: <Wallet/>},
       { path: '/updatepassword', exact:true, element: <UpdatePassword/>},
+      { path: '/about', exact:true, element: <About/>},
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
