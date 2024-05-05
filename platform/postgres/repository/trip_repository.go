@@ -32,7 +32,7 @@ func (r *TripRepository) Delete(question entity.Trip) error {
 
 func (r *TripRepository) GetById(id int32) (entity.Trip, error) {
 	var key entity.Trip
-	if err := r.db.Model(&key).Where("status != ", enum.TripPassive).Where("id=?", id).Scan(&key).Error; err != nil {
+	if err := r.db.Model(&key).Where("status != ?", enum.TripPassive).Where("id=?", id).Scan(&key).Error; err != nil {
 		return key, internal.DBNotFound
 	}
 	return key, nil

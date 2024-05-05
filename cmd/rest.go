@@ -64,6 +64,7 @@ func Setup() {
 		orderRepository, walletOperationRepository, roleRepository, appLogService)
 	keyService := service.NewRolService(userRepository, roleRepository, panelRepository, appLogService)
 	questionService := service.NewQuestionService(userRepository, questionRepository, pointRepository, productRepository, tripRepository)
+	adminService := service.NewAdminService(userRepository, roleRepository, walletRepository, appLogService, tripRepository)
 
 	authenticationMiddleware := middleware.NewMiddleware(authenticationService, userService)
 
@@ -74,6 +75,7 @@ func Setup() {
 	walletServerHandler := handler.NewWalletServerHandler(walletService)
 	keyServerHandler := handler.NewSubmissionServerHandler(keyService)
 	tripServerHandler := handler.NewTripServerHandler(questionService)
+	adminPanelHandler := handler.NewAdminPanelHandler(adminService)
 
 	webServer := server.NewWebServer(
 		productServerHandler,
@@ -84,6 +86,7 @@ func Setup() {
 		keyServerHandler,
 		authenticationMiddleware,
 		tripServerHandler,
+		adminPanelHandler,
 	)
 
 	webServer.SetupRoot()

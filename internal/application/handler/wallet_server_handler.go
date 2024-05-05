@@ -20,6 +20,23 @@ func NewWalletServerHandler(walletService service.WalletService) WalletServerHan
 	return w
 }
 
+func (w *WalletServerHandler) Get(context *gin.Context) {
+	userDto, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		zap.Logger.Error(internal.FailInTokenParse)
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
+
+	balance, err := w.walletService.GetBalance(userDto.Id)
+	if err != nil {
+		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
+		return
+	}
+
+	zap.Logger.Info("Cüzdan bakiye güncelleme isteği başarılı")
+	context.JSON(http.StatusOK, balance)
+}
 func (w *WalletServerHandler) Update(context *gin.Context) {
 	wallet := dto.WalletDto{}
 	if err := context.BindJSON(&wallet); err != nil {

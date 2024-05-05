@@ -18,6 +18,7 @@ type WebServer struct {
 	keyServerHandler     handler2.SubmissionServerHandler
 	middleware           middleware.Middleware
 	tripServerHandler    handler2.TripServerHandler
+	adminPanelHandler    handler2.AdminPanelHandler
 }
 
 func NewWebServer(
@@ -29,6 +30,7 @@ func NewWebServer(
 	keyServerHandler handler2.SubmissionServerHandler,
 	middleware middleware.Middleware,
 	tripServerHandler handler2.TripServerHandler,
+	adminPanelHandler handler2.AdminPanelHandler,
 ) WebServer {
 	s := WebServer{
 		productServerHandler,
@@ -39,6 +41,7 @@ func NewWebServer(
 		keyServerHandler,
 		middleware,
 		tripServerHandler,
+		adminPanelHandler,
 	}
 	return s
 }
@@ -85,7 +88,8 @@ func (s *WebServer) SetupRoot() {
 	wallet := router.Group("/wallet", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
 	wallet.PUT("/", s.walletServerHandler.Update)
 	wallet.GET("/complete", s.walletServerHandler.CompletePurchase)
-	wallet.GET("/", s.walletServerHandler.GetAllBuyTransactions)
+	wallet.GET("/", s.walletServerHandler.Get)
+	wallet.GET("/completedOrders", s.walletServerHandler.GetAllBuyTransactions)
 
 	trip := router.Group("/trips", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
 	trip.GET("/", s.tripServerHandler.GetQuestions)
@@ -94,6 +98,11 @@ func (s *WebServer) SetupRoot() {
 
 	panel := router.Group("/panel", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleAdmin}))
 	panel.POST("/", s.keyServerHandler.ResponseToChangeUserRole)
+	panel.GET("/user/", s.adminPanelHandler.GetUser)
+	panel.GET("/trip/", s.adminPanelHandler.GetTrip)
+	panel.DELETE("/user/", s.adminPanelHandler.DeleteUser)
+	panel.DELETE("/trip/", s.adminPanelHandler.DeleteTrip)
+	panel.POST("/trip/", s.adminPanelHandler.CreateTrip)
 
 	router.Run("0.0.0.0:8001")
 }

@@ -45,6 +45,22 @@ func NewWalletService(
 	}
 	return w
 }
+func (w *WalletService) GetBalance(id int32) (float32, error) {
+	wallet, err := w.walletRepository.GetByUserId(id)
+	if err != nil {
+		w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: err.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
+		zap.Logger.Error(err)
+		return 0, err
+	}
+	if wallet.Id == 0 {
+		w.appLogService.AddLog(app_log.ApplicationLogDto{UserId: id, LogType: "Error", Content: internal.WalletNotFound.Error(), RelatedTable: "Wallet", CreatedAt: time.Now()})
+		zap.Logger.Error(internal.WalletNotFound)
+		return 0, internal.WalletNotFound
+	}
+
+	return wallet.Balance, nil
+
+}
 
 func (w *WalletService) UpdateBalance(walletDto dto.WalletDto, id int32) error {
 	wallet, err := w.walletRepository.GetByUserId(id)
