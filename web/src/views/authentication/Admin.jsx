@@ -110,7 +110,7 @@ const Admin = () => {
         body: JSON.stringify({ id: id })
       });
       if (response.ok) {
-        fetchTrips(); // Turları yeniden getir, silinen turu güncelleyelim
+        fetchTrips();
       } else {
         console.error('Error deleting trip:', response.statusText);
       }
@@ -132,7 +132,7 @@ const Admin = () => {
         body: JSON.stringify({ id: id })
       });
       if (response.ok) {
-        fetchUsers(); // Kullanıcıları yeniden getir, silinen kullanıcıyı güncelleyelim
+        fetchUsers();
       } else {
         console.error('Error deleting user:', response.statusText);
       }
@@ -167,7 +167,7 @@ const Admin = () => {
           CulturalPoint: 0,
           RelaxPoint: 0
         });
-        fetchTrips(); // Yeni tur eklendikten sonra turları yeniden getir
+        fetchTrips();
       } else {
         console.error('Error creating trip:', response.statusText);
       }
@@ -187,7 +187,7 @@ const Admin = () => {
         anchor="left"
       >
         <List>
-          {['User Management', 'Live Response', 'Trip Management'].map((text) => (
+          {['User Management', 'Trip Management'].map((text) => (
             <ListItem button key={text} onClick={() => handleMenuClick(text)}>
               <ListItemText primary={text} />
             </ListItem>
@@ -244,15 +244,47 @@ const Admin = () => {
             <Button variant="contained" color="primary" onClick={() => setOpenDialog(true)}>
               Create Trip
             </Button>
-            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="lg">
               <DialogTitle>Create New Trip</DialogTitle>
               <DialogContent>
+                <TextField
+                  label="ID"
+                  type="number"
+                  value={newTrip.Id}
+                  onChange={(e) => setNewTrip({ ...newTrip, Id: parseInt(e.target.value) })}
+                  style={{ marginTop: '10px' }}
+                  fullWidth
+                />
+                <TextField
+                  label="Name"
+                  value={newTrip.Name}
+                  onChange={(e) => setNewTrip({ ...newTrip, Name: e.target.value })}
+                  style={{ marginTop: '10px' }}
+                  fullWidth
+                />
                 <TextField
                   label="Description"
                   value={newTrip.Description}
                   onChange={(e) => setNewTrip({ ...newTrip, Description: e.target.value })}
+                  style={{ marginTop: '10px' }}
+                  fullWidth
                 />
-                {/* Add other textfields similarly for other fields */}
+                <TextField
+                  label="Latitude"
+                  type="number"
+                  value={newTrip.Lat}
+                  onChange={(e) => setNewTrip({ ...newTrip, Lat: parseFloat(e.target.value) })}
+                  style={{ marginTop: '10px' }}
+                  fullWidth
+                />
+                <TextField
+                  label="Longitude"
+                  type="number"
+                  value={newTrip.Lng}
+                  onChange={(e) => setNewTrip({ ...newTrip, Lng: parseFloat(e.target.value) })}
+                  style={{ marginTop: '10px' }}
+                  fullWidth
+                />
               </DialogContent>
               <DialogActions>
                 <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
@@ -291,28 +323,6 @@ const Admin = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-          </Paper>
-        )}
-        {selectedMenu && selectedMenu === 'Live Response' && (
-          <Paper elevation={3} style={{ marginTop: '20px', padding: '20px' }}>
-            <Typography variant="h5">Live Response</Typography>
-            <div>
-              {messages.map((message, index) => (
-                <div key={index}>
-                  <p>{message}</p>
-                </div>
-              ))}
-            </div>
-            <TextField
-              label="Response"
-              multiline
-              rows={4}
-              value={response}
-              onChange={(e) => setResponse(e.target.value)}
-            />
-            <Button variant="contained" onClick={handleNewResponse}>
-              Send Response
-            </Button>
           </Paper>
         )}
       </Box>

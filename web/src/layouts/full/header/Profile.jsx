@@ -9,7 +9,7 @@ import {
   IconButton,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText, Typography,
 } from '@mui/material';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import EnhancedEncryptionOutlinedIcon from '@mui/icons-material/EnhancedEncryptionOutlined';
@@ -92,7 +92,7 @@ const Profile = () => {
           <ListItemIcon>
             <AccountCircleOutlinedIcon />
           </ListItemIcon>
-          <ListItemText>My Profile ({username})</ListItemText>
+          <ListItemText>My Profile</ListItemText>
         </MenuItem>
         <MenuItem component={Link} to="/updatepassword">
           <ListItemIcon>
@@ -100,6 +100,7 @@ const Profile = () => {
           </ListItemIcon>
           <ListItemText>Update Password</ListItemText>
         </MenuItem>
+        <Typography style={{marginTop:'4px',textAlign:'center',fontWeight:'bold'}}>{username}</Typography>
         <Box mt={1} py={1} px={2}>
           <Button
             to="/auth/login"

@@ -15,10 +15,10 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper
+  Paper, IconButton,
 } from '@mui/material';
 import CurrencyLiraIcon from '@mui/icons-material/CurrencyLira';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import RemoveCircleOutlineOutlinedIcon from '@mui/icons-material/RemoveCircleOutlineOutlined';
 import axios from 'axios';
 
 const Wallet = () => {
@@ -231,7 +231,7 @@ const Wallet = () => {
               value={updateBalance}
               onChange={(e) => setUpdateBalance(e.target.value)}
             />
-            <Button variant="contained" onClick={handleUpdateBalance}>
+            <Button style={{marginTop:'15px'}} variant="contained" onClick={handleUpdateBalance}>
               Update Balance
             </Button>
           </CardContent>
@@ -260,9 +260,9 @@ const Wallet = () => {
                         <TableCell>{order.quantity}</TableCell>
                         <TableCell>{order.price}</TableCell>
                         <TableCell>
-                          <Button variant="contained" color="error" onClick={() => handleDeleteOrder(order.order_id)}>
-                            Delete
-                          </Button>
+                          <IconButton color="error"  onClick={() => handleDeleteOrder(order.order_id)}>
+                            <RemoveCircleOutlineOutlinedIcon />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -274,7 +274,7 @@ const Wallet = () => {
                 Shopping cart is empty
               </Typography>
             )}
-            <Button variant="contained" onClick={handleCompletePurchase}>
+            <Button style={{marginTop:'17px'}}  variant="contained" onClick={handleCompletePurchase}>
               Complete Purchase
             </Button>
           </CardContent>

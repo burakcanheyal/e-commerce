@@ -11,10 +11,11 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    TextField
+    TextField, InputAdornment, IconButton,
 } from '@mui/material';
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
-import { Link } from 'react-router-dom';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
 const AuthLogin = ({ title, subtitle, subtext, setUserData }) => {
     const [formData, setFormData] = useState({
@@ -28,6 +29,7 @@ const AuthLogin = ({ title, subtitle, subtext, setUserData }) => {
         code: ''
     });
     const [activationMessage, setActivationMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleInputChange = (e) => {
         const { id, value } = e.target;
@@ -109,6 +111,9 @@ const AuthLogin = ({ title, subtitle, subtext, setUserData }) => {
             console.error('Error:', error);
         }
     };
+    const togglePasswordVisibility = () => {
+        setShowPassword((prevShowPassword) => !prevShowPassword);
+    };
 
     return (
       <>
@@ -130,7 +135,15 @@ const AuthLogin = ({ title, subtitle, subtext, setUserData }) => {
                   <Box mt="25px">
                       <Typography variant="subtitle1"
                                   fontWeight={600} component="label" htmlFor='password' mb="5px" >Password</Typography>
-                      <CustomTextField id="password" type="password" variant="outlined" fullWidth value={formData.password} onChange={handleInputChange} />
+                      <CustomTextField id="password" type={showPassword ? 'text' : 'password'} variant="outlined" fullWidth InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton onClick={togglePasswordVisibility} edge="end">
+                                    {showPassword ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+                                </IconButton>
+                            </InputAdornment>
+                          )
+                      }} value={formData.password} onChange={handleInputChange} />
                   </Box>
                   <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
                       <FormGroup>
@@ -139,17 +152,6 @@ const AuthLogin = ({ title, subtitle, subtext, setUserData }) => {
                             label="Remember this Device"
                           />
                       </FormGroup>
-                      <Typography
-                        component={Link}
-                        to="/"
-                        fontWeight="500"
-                        sx={{
-                            textDecoration: 'none',
-                            color: 'primary.main',
-                        }}
-                      >
-                          Forgot Password ?
-                      </Typography>
                   </Stack>
               </Stack>
               <Box>
@@ -163,7 +165,7 @@ const AuthLogin = ({ title, subtitle, subtext, setUserData }) => {
                       Sign In
                   </Button>
                   <br/><br/>
-                  <Button color="primary" onClick={() => setOpenDialog(true)}>
+                  <Button color="primary" variant="contained" onClick={() => setOpenDialog(true)}>
                       Activate Account
                   </Button>
               </Box>

@@ -19,11 +19,7 @@ const IntroPage = () => {
   }, []);
 
   const handleAddTripClick = () => {
-    window.scrollTo({
-      top: 700,
-      left: 0,
-      behavior: 'smooth'
-    });
+    window.location.href = "/survey";
   };
 
   return (
@@ -32,7 +28,7 @@ const IntroPage = () => {
         <Typography variant="h1" style={{ marginLeft:'-10px', marginTop: '-10px' }}>Discover effortless travel planning with us
         </Typography>
         <Typography variant="h3" style={{ marginLeft:'-10px', marginTop: '30px', textAlign: 'left' }}>Build,
-          organize, and map your custom itineraries for road trips, powered by our trip planner AI. You can create a trip or see the offered trips based on your survey.
+          organize, and map your custom itineraries for road trips, powered by our trip planner AI. You can answer our survey questions to get an AI recommended trip or see the offered trips.
         </Typography>
         <div style={{ marginLeft: '55px', marginTop: '30px', display: 'flex', gap: '50px' }}>
           <Button variant="contained" startIcon={<AddIcon/>} onClick={handleAddTripClick}>

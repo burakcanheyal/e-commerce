@@ -7,10 +7,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
-  Popover, List, ListItem, ListItemText, Badge,
 } from '@mui/material';
-import { Select, MenuItem } from '@mui/material';
 import DashboardCard from '../../components/shared/DashboardCard';
 import izmirImage from '../../assets/images/izmir.jpg';
 import antalyaImage from '../../assets/images/antalya.jpg';
@@ -22,17 +19,13 @@ import balikesirImage from '../../assets/images/balikesir.jpg';
 import samsunImage from '../../assets/images/samsun.jpg';
 import eskisehirImage from '../../assets/images/eskisehir.jpg';
 import DialogTrips from './dialogTrips.jsx';
-import ClearIcon from '@mui/icons-material/Clear';
-import ShopIcon from '@mui/icons-material/Shop';
+
 
 const OfferedTrips = () => {
   const [trip, setTrip] = useState('1');
   const [openDialog, setOpenDialog] = useState(false);
-  const [cartItems, setCartItems] = useState([]);
 
-  const handleChange = (event) => {
-    setTrip(event.target.value);
-  };
+
 
   const handleDialogOpen = (tripIndex) => {
     setOpenDialog(true);
@@ -44,20 +37,14 @@ const OfferedTrips = () => {
   };
 
   const handleAddToCart = async (trip) => {
-    // Ürünün product_id değerini alalım
     const productId = trip.product_id;
-
-    // AccessToken'ı localStorage'dan alalım
     const accessToken = localStorage.getItem('AccessToken');
-
-    // POST isteği için gerekli bilgileri hazırlayalım
     const requestData = {
       product_id: productId,
       quantity: 1
     };
 
     try {
-      // POST isteği için gerekli ayarları yapalım
       const requestOptions = {
         method: 'POST',
         headers: {
@@ -66,39 +53,17 @@ const OfferedTrips = () => {
         },
         body: JSON.stringify(requestData)
       };
-
-      // POST isteği gönderelim
       const response = await fetch('http://localhost:8001/order/', requestOptions);
-
-      // İsteğin başarılı olup olmadığını kontrol edelim
       if (!response.ok) {
         throw new Error('HTTP error ' + response.status);
       }
-
-      // Başarılı ise kullanıcıya bilgi verelim
       alert('Product added to cart successfully!');
     } catch (error) {
-      // Hata durumunda kullanıcıya bilgi verelim
       console.error('Error adding product to cart:', error.message);
       alert('An error occurred while adding product to cart. Please try again later.');
     }
   };
 
-  const handleClearCart = () => {
-    setCartItems([]);
-  };
-
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const handlePopoverOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
   const tripPackages = [
     {
       product_id: 1,
@@ -230,54 +195,7 @@ const OfferedTrips = () => {
   return (
     <div>
 
-      <Popover
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handlePopoverClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        PaperProps={{
-          sx: {
-            border: '1px solid black',
-            borderRadius: '5px'
-          },
-        }}
-      >
-        <List>
-          {cartItems.map((item, index) => (
-            <ListItem key={index}>
-              <ListItemText primary={item.name} />
-            </ListItem>
-          ))}
-          <ListItem>
-            <Button startIcon={<ClearIcon />} onClick={() => { handleClearCart(); handlePopoverClose(); }}>Clear Cart</Button>
-            <Button startIcon={<ShopIcon />} color="primary">Buy</Button>
-          </ListItem>
-        </List>
-      </Popover>
       <DashboardCard>
-        <Select
-          defaultValue={8}
-          size="small"
-          onChange={handleChange}
-        >
-          <MenuItem value={1}>Beach</MenuItem>
-          <MenuItem value={2}>Adventure</MenuItem>
-          <MenuItem value={3}>Camping</MenuItem>
-          <MenuItem value={4}>Road Trips</MenuItem>
-          <MenuItem value={5}>Backpacking</MenuItem>
-          <MenuItem value={6}>Cultural</MenuItem>
-          <MenuItem value={7}>Relaxing</MenuItem>
-          <MenuItem value={8}>All Tours</MenuItem>
-        </Select>
-        <br />
-        <br />
         <div>
           <Grid container spacing={5}>
             {tripPackages.map((trip, index) => (
@@ -307,9 +225,9 @@ const TripPackage = ({ trip, onDialogOpen, onAddToCart }) => {
       <img src={trip.image} alt={trip.name} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
       <div style={{ padding: '10px' }}>
         <Typography variant="h6" style={{ marginBottom: '10px' }}>{trip.name}</Typography>
-        <Typography variant="body2" style={{ marginBottom: '10px' }}>{trip.description}</Typography>
+        <Typography variant="body1" style={{ marginBottom: '10px' }}>{trip.description}</Typography>
         <Button variant="contained" color="primary" onClick={onDialogOpen} style={{ marginRight: '10px' }}>Details</Button>
-        <Button variant="contained" color="secondary" onClick={onAddToCart}>Add to Cart</Button>
+        <Button variant="contained" color="secondary" onClick={onAddToCart} >Add to Cart</Button>
       </div>
     </div>
   );

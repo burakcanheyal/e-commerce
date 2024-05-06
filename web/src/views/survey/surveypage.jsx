@@ -5,6 +5,7 @@ import axios from 'axios';
 const Surveypage = () => {
   const [answers, setAnswers] = useState({});
   const [surveyQuestions, setSurveyQuestions] = useState([]);
+  const [submissionMessage, setSubmissionMessage] = useState('');
 
   useEffect(() => {
     const fetchSurveyQuestions = async () => {
@@ -65,9 +66,10 @@ const Surveypage = () => {
           'Authentication': `${accessToken}`
         }
       });
-      console.log('Survey submitted successfully!');
+      setSubmissionMessage('Survey submitted successfully!');
     } catch (error) {
       console.error('Error submitting survey:', error);
+      setSubmissionMessage('Error submitting survey. Please try again later.');
     }
   };
 
@@ -82,6 +84,11 @@ const Surveypage = () => {
         </Grid>
       </FormGroup>
       <Button variant="contained" onClick={submitSurvey}>Submit</Button>
+      {submissionMessage && (
+        <Typography variant="body1" gutterBottom>
+          {submissionMessage}
+        </Typography>
+      )}
     </div>
   );
 };

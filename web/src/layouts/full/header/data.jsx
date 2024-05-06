@@ -154,6 +154,10 @@ const pageLinks = [
     title: 'Offered Trips'
   },
   {
+    href: '/survey',
+    title: 'SurveyPage'
+  },
+  {
     href: '/auth/register',
     title: 'Register Now'
   },

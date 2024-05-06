@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Grid } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Box, Typography, Button, Grid, InputAdornment, IconButton } from '@mui/material';
 import axios from 'axios';
-
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import { Stack } from '@mui/system';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
 const AuthRegister = ({ title, subtitle, subtext }) => {
     const [formData, setFormData] = useState({
@@ -16,6 +16,11 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
         phone: '',
         birthDate: ''
     });
+    const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const togglePasswordVisibility = () => {
+        setShowPassword((prevShowPassword) => !prevShowPassword);
+    };
 
     const handleInputChange = (e) => {
         const { id, value } = e.target;
@@ -28,8 +33,15 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
             const response = await axios.post('http://localhost:8001/user/add', formData);
             console.log('Registration successful:', response.data);
             // Add any further actions upon successful registration
+            // Yönlendirme işlemi
+            window.location.href = "/auth/login";
         } catch (error) {
             console.error('Error during registration:', error);
+            if (error.response && error.response.data && error.response.data.message) {
+                setError(error.response.data.message);
+            } else {
+                setError('An error occurred during registration.');
+            }
         }
     };
 
@@ -52,7 +64,15 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
                               <CustomTextField id="userName" variant="outlined" fullWidth onChange={handleInputChange} value={formData.userName} />
 
                               <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor='password' mb="5px">Password</Typography>
-                              <CustomTextField id="password" variant="outlined" fullWidth type="password" onChange={handleInputChange} value={formData.password} />
+                              <CustomTextField id="password" variant="outlined" fullWidth type={showPassword ? 'text' : 'password'} InputProps={{
+                                  endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={togglePasswordVisibility} edge="end">
+                                            {showPassword ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                  )
+                              }} onChange={handleInputChange} value={formData.password} />
 
                               <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor='email' mb="5px">Email Address</Typography>
                               <CustomTextField id="email" variant="outlined" fullWidth onChange={handleInputChange} value={formData.email} />
@@ -74,6 +94,11 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
                           </Stack>
                       </Grid>
                   </Grid>
+                  {error && (
+                    <Typography variant="body1" color="error" gutterBottom>
+                        {error}
+                    </Typography>
+                  )}
                   <Button color="primary" variant="contained" size="large" fullWidth type="submit">
                       Sign Up
                   </Button>

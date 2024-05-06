@@ -7,6 +7,7 @@ import Person2Icon from '@mui/icons-material/Person2';
 import WalletIcon from '@mui/icons-material/Wallet';
 import AssistantIcon from '@mui/icons-material/Assistant';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import PollOutlinedIcon from '@mui/icons-material/PollOutlined';
 
 const MenuItems = [
   {
@@ -29,25 +30,28 @@ const MenuItems = [
   },
   {
     id: uniqueId(),
+    title: 'Survey',
+    icon:PollOutlinedIcon,
+    href: '/survey',
+  },
+  {
+    id: uniqueId(),
     title: 'AI Recommendation',
     href: '/airecom',
     icon: AssistantIcon,
   },
-  {
-    id: uniqueId(),
-    title: 'Update Password',
-    href: '/updatepassword',
-  },
-  {
-    id: uniqueId(),
-    title: 'Survey',
-    href: '/survey',
-  },
+
   {
     id: uniqueId(),
     title: 'Wallet',
     href: '/wallet',
     icon: WalletIcon,
+  },
+  {
+    id: uniqueId(),
+    title: 'User Profile',
+    icon: Person2Icon,
+    href: '/sample-page',
   },
   {
     navlabel: true,
@@ -71,16 +75,11 @@ const MenuItems = [
   },
   {
     id: uniqueId(),
-    title: 'About Us',
+    title: 'Contact Us',
     icon:  InfoOutlinedIcon,
     href: '/about',
   },
-  {
-    id: uniqueId(),
-    title: 'User Profile',
-    icon: Person2Icon,
-    href: '/sample-page',
-  },
+
 ];
 
 export default MenuItems;

@@ -51,6 +51,7 @@ const AccountProfile = () => {
         >
           <Avatar
             sx={{
+              margin:8,
               height: 80,
               width: 80,
               mb: 2,
@@ -80,14 +81,6 @@ const AccountProfile = () => {
         </Box>
       </CardContent>
       <Divider />
-      <CardActions>
-        <Button
-          fullWidth
-          variant="text"
-        >
-          Upload picture
-        </Button>
-      </CardActions>
     </Card>
   );
 };
