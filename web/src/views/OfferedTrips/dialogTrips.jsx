@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useJsApiLoader, GoogleMap, Marker, InfoWindow, DirectionsRenderer } from '@react-google-maps/api';
 import { Typography, TextField, Button, Box, Rating, List, ListItem, ListItemText } from '@mui/material';
 import axios from 'axios';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'; // Import delete icon
 
-const DialogTrips = ({ places }) => {
+const DialogTrips = ({ places, product_id }) => {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: 'AIzaSyBCOK5PNJk7qVS9ajhD1-0ZmS-hOApa2Vk',
     libraries: ['places'],
@@ -13,37 +14,34 @@ const DialogTrips = ({ places }) => {
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [directions, setDirections] = useState(null);
 
-  const [feedbacks, setFeedbacks] = useState([
-    { user: 'Burak Can', feedback: 'That is a great route!', rating: 5 },
-    { user: 'Çağrı', feedback: 'Offered locations are incredible!', rating: 5 }
-  ]);
-
+  const [feedbacks, setFeedbacks] = useState([]);
   const [newFeedback, setNewFeedback] = useState('');
   const [newRating, setNewRating] = useState(5);
   const [username, setUsername] = useState('');
-
-  useEffect(() => {
-    const fetchProfileDetails = async () => {
-      try {
-        const accessToken = localStorage.getItem('AccessToken');
-        const response = await axios.get('http://localhost:8001/profil/', {
-          headers: {
-            'Authentication': `${accessToken}`
-          }
-        });
-        setUsername(response.data.username);
-      } catch (error) {
-        console.error('Error fetching username:', error);
-      }
-    };
-    fetchProfileDetails();
-  }, []);
 
   useEffect(() => {
     if (isLoaded) {
       handleCalculateRoute();
     }
   }, [isLoaded]);
+
+  useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const accessToken = localStorage.getItem('AccessToken');
+        const response = await axios.post('http://localhost:8001/feedback/', { id: product_id }, {
+          headers: {
+            'Authentication': `${accessToken}`,
+          },
+        });
+        setFeedbacks(response.data);
+      } catch (error) {
+        console.error('Error fetching feedbacks:', error);
+      }
+    };
+    console.log(product_id)
+    fetchFeedbacks();
+  }, []);
 
   const renderDirections = () => {
     if (directions) {
@@ -81,13 +79,65 @@ const DialogTrips = ({ places }) => {
     );
   };
 
-  const handleFeedbackSubmit = () => {
-    const newFeedbackObj = { user: username, feedback: newFeedback, rating: newRating };
-    setFeedbacks([newFeedbackObj, ...feedbacks]);
+  const handleNewFeedbackSubmit = async () => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await axios.post('http://localhost:8001/feedback/add/', {
+        Id: 0,
+        Description: newFeedback,
+        Star: newRating,
+        Product_id: product_id,
+        User_id: 1,
+        Status: 0,
+        UserName: username,
+      }, {
+        headers: {
+          'Authentication': `${accessToken}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+    }
+    const fetchFeedbacks = async () => {
+      try {
+        const accessToken = localStorage.getItem('AccessToken');
+        const response = await axios.post('http://localhost:8001/feedback/', { id: product_id }, {
+          headers: {
+            'Authentication': `${accessToken}`,
+          },
+        });
+        setFeedbacks(response.data);
+      } catch (error) {
+        console.error('Error fetching feedbacks:', error);
+      }
+      setNewFeedback('');
+      setNewRating(5);
+    };
+
+    console.log(product_id)
+    fetchFeedbacks();
+    setFeedbacks([response.data, ...feedbacks]);
     setNewFeedback('');
     setNewRating(5);
   };
-
+  const handleDeleteFeedback = async (id) => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      await axios.delete('http://localhost:8001/feedback/', {
+        headers: {
+          'Authentication': `${accessToken}`,
+        },
+        data: {
+          id: id
+        }
+      });
+      // Filter out the deleted feedback
+      const updatedFeedbacks = feedbacks.filter(feedback => feedback.id !== id);
+      setFeedbacks(updatedFeedbacks);
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+    }
+  };
   if (loadError) return <div>Error: It cannot loaded</div>;
   if (!isLoaded) return <div>Loading...</div>;
 
@@ -99,8 +149,11 @@ const DialogTrips = ({ places }) => {
           <Box sx={{ maxHeight: '50%', overflowY: 'auto', padding: '0 10px' }}>
             {feedbacks.map((feedback, index) => (
               <div key={index} style={{ marginBottom: '10px' }}>
-                <Typography variant="body1" gutterBottom>{feedback.user}: {feedback.feedback}</Typography>
-                <Rating value={feedback.rating} readOnly />
+                <Typography variant="body1" gutterBottom>{feedback.user_name}: {feedback.description}</Typography>
+                <Rating value={feedback.star} readOnly />
+                <Button onClick={() => handleDeleteFeedback(feedback.id)}>
+                  <DeleteOutlineOutlinedIcon />
+                </Button>
               </div>
             ))}
           </Box>
@@ -118,7 +171,8 @@ const DialogTrips = ({ places }) => {
             precision={1}
             onChange={(event, newValue) => setNewRating(newValue)}
           />
-          <Button variant="contained" onClick={handleFeedbackSubmit}>Submit Feedback</Button>
+
+          <Button variant="contained" onClick={handleNewFeedbackSubmit}>Submit Feedback</Button>
         </div>
         <div style={{ marginTop: 'auto' }}>
           <Box sx={{ maxHeight: '50%', overflowY: 'auto' }}>

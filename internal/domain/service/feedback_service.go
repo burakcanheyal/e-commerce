@@ -6,6 +6,7 @@ import (
 	"attempt4/internal/domain/enum"
 	"attempt4/platform/postgres/repository"
 	"errors"
+	"log"
 	"time"
 )
 
@@ -13,16 +14,19 @@ type FeedbackService struct {
 	userRepository     repository.UserRepository
 	tripRepository     repository.TripRepository
 	feedbackRepository repository.FeedbackRepository
+	roleRepository     repository.RoleRepository
 }
 
 func NewFeedbackService(
 	userRepository repository.UserRepository,
 	tripRepository repository.TripRepository,
-	feedbackRepository repository.FeedbackRepository) FeedbackService {
+	feedbackRepository repository.FeedbackRepository,
+	roleRepository repository.RoleRepository) FeedbackService {
 	u := FeedbackService{
 		userRepository,
 		tripRepository,
 		feedbackRepository,
+		roleRepository,
 	}
 	return u
 }
@@ -49,7 +53,7 @@ func (f *FeedbackService) GetFeedback(productID int32) ([]dto.FeedbackDto, error
 			Id:          feedbackT.Id,
 			Description: feedbackT.Description,
 			Star:        feedbackT.Star,
-			TripId:      feedbackT.TripId,
+			ProductId:   feedbackT.ProductId,
 			UserId:      feedbackT.UserId,
 			Status:      feedbackT.Status,
 			UserName:    username.Username,
@@ -62,7 +66,7 @@ func (f *FeedbackService) CreateFeedback(feedback dto.FeedbackDto) error {
 		Id:          0,
 		Description: feedback.Description,
 		Star:        feedback.Star,
-		TripId:      feedback.TripId,
+		ProductId:   feedback.ProductId,
 		UserId:      feedback.UserId,
 		Status:      enum.TripActive,
 		CreatedAt:   time.Now(),
@@ -79,10 +83,36 @@ func (f *FeedbackService) CreateFeedback(feedback dto.FeedbackDto) error {
 
 	return nil
 }
-func (f *FeedbackService) Deleteback(id int32) error {
-	err := f.feedbackRepository.Delete(id)
+func (f *FeedbackService) Deleteback(id int32, userId int32) error {
+	feedback, err := f.feedbackRepository.GetById(id)
+	if feedback.Id == 0 {
+		return errors.New("Feedback cannot be found")
+	}
 	if err != nil {
 		return err
 	}
+
+	role, err := f.roleRepository.GetByUserId(userId)
+	if role.Id == 0 {
+		return errors.New("Role cannot be found")
+	}
+	if err != nil {
+		return err
+	}
+
+	log.Println(id)
+	log.Println(feedback.UserId)
+	log.Println(userId)
+
+	if userId != feedback.UserId {
+		if role.Rol != enum.RoleAdmin {
+			return errors.New("Bu kaydı silmeye yetkili değilsiniz.")
+		}
+	}
+	err = f.feedbackRepository.Delete(id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

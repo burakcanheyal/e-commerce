@@ -66,7 +66,7 @@ func Setup() {
 	keyService := service.NewRolService(userRepository, roleRepository, panelRepository, appLogService)
 	questionService := service.NewQuestionService(userRepository, questionRepository, pointRepository, productRepository, tripRepository)
 	adminService := service.NewAdminService(userRepository, roleRepository, walletRepository, appLogService, tripRepository)
-	feedbackService := service.NewFeedbackService(userRepository, tripRepository, feedbackRepository)
+	feedbackService := service.NewFeedbackService(userRepository, tripRepository, feedbackRepository, roleRepository)
 
 	authenticationMiddleware := middleware.NewMiddleware(authenticationService, userService)
 

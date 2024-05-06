@@ -15,8 +15,8 @@ func UserSeed(db *gorm.DB) {
 	userName := [2]string{"Burak can", "Fatih"}
 	userSurname := [2]string{"Heyal", "Meral"}
 	userPhone := [2]string{"+905316519484", "+905316519424"}
-	firstUserBirthDate := time.Date(2000, time.Month(9), 18, 0, 0, 0, 0, time.UTC)
-	secondUserBirthDate := time.Date(1999, time.Month(5), 24, 0, 0, 0, 0, time.UTC)
+	firstUserBirthDate := "11.09.2000"
+	secondUserBirthDate := "05.07.1999"
 	users := []entity.User{
 		{0,
 			userUsername[0],
@@ -28,7 +28,7 @@ func UserSeed(db *gorm.DB) {
 			enum.UserActiveStatus,
 			nil,
 			nil,
-			&firstUserBirthDate,
+			firstUserBirthDate,
 			time.Now(), nil, nil},
 
 		{0,
@@ -41,7 +41,7 @@ func UserSeed(db *gorm.DB) {
 			enum.UserActiveStatus,
 			nil,
 			nil,
-			&secondUserBirthDate,
+			secondUserBirthDate,
 			time.Now(), nil, nil},
 	}
 

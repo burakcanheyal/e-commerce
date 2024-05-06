@@ -80,7 +80,7 @@ func (s *WebServer) SetupRoot() {
 	order.PUT("/", s.orderServerHandler.Update)
 	order.DELETE("/", s.orderServerHandler.Delete)
 
-	product := router.Group("/product", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleManager}))
+	product := router.Group("/product", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
 	product.GET("/:name", s.productServerHandler.GetByName)
 	product.GET("/", s.productServerHandler.GetAllProducts)
 	product.POST("/", s.productServerHandler.Create)
@@ -101,8 +101,8 @@ func (s *WebServer) SetupRoot() {
 
 	feedback := router.Group("/feedback", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleUser, enum.RoleManager, enum.RoleAdmin}))
 	feedback.POST("/", s.feedbackServerHandler.GetFeedback)
-	feedback.DELETE("/", s.feedbackServerHandler.DeleteFeedback)
 	feedback.POST("/add/", s.feedbackServerHandler.CreateFeedback)
+	feedback.DELETE("/", s.feedbackServerHandler.DeleteFeedback)
 
 	panel := router.Group("/panel", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleAdmin}))
 	panel.POST("/", s.keyServerHandler.ResponseToChangeUserRole)

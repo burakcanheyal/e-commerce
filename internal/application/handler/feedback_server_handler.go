@@ -35,6 +35,12 @@ func (f *FeedbackServerHandler) GetFeedback(context *gin.Context) {
 	context.JSON(http.StatusOK, feedback)
 }
 func (f *FeedbackServerHandler) DeleteFeedback(context *gin.Context) {
+	userDto, exist := context.Keys["user"].(dto.TokenUserDto)
+	if exist != true {
+		zap.Logger.Error(internal.UserNotFound)
+		context.JSON(401, internal.UserNotFound)
+		return
+	}
 	code := dto.IdDto{}
 	if err := context.BindJSON(&code); err != nil {
 		zap.Logger.Error(internal.FailInTokenParse)
@@ -42,9 +48,9 @@ func (f *FeedbackServerHandler) DeleteFeedback(context *gin.Context) {
 		return
 	}
 
-	err := f.feedbackService.Deleteback(code.Id)
+	err := f.feedbackService.Deleteback(code.Id, userDto.Id)
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 

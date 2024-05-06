@@ -126,7 +126,7 @@ func (a *AdminService) GetAllUsers() ([]dto.UserDto, error) {
 			Surname:   userT.Surname,
 			Phone:     userT.Phone,
 			Status:    userT.Status,
-			BirthDate: *userT.BirthDate,
+			BirthDate: userT.BirthDate,
 		}
 		userDto = append(userDto, userDtoTemp)
 	}

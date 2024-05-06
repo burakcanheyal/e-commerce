@@ -69,6 +69,11 @@ func (t *TripServerHandler) GetAIRecommendation(context *gin.Context) {
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, AnswerQuestion())
 	}
+	if trips.Name == "" {
+		zap.Logger.Error(internal.UserNotFound)
+		context.JSON(http.StatusBadRequest, internal.UserNotFound)
+		return
+	}
 	zap.Logger.Info("AI Recommendation başarılı")
 	context.JSON(http.StatusOK, trips)
 }

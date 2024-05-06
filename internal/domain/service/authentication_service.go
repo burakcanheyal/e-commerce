@@ -103,7 +103,7 @@ func (a *Authentication) GetUserByTokenString(tokenString string) (dto.UserDto, 
 		Name:      user.Name,
 		Surname:   user.Surname,
 		Status:    user.Status,
-		BirthDate: *user.BirthDate,
+		BirthDate: user.BirthDate,
 	}
 
 	return userDto, nil

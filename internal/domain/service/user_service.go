@@ -124,7 +124,7 @@ func (u *UserService) GetUserById(id int32) (dto.UserDto, error) {
 		Surname:   user.Surname,
 		Phone:     user.Phone,
 		Status:    user.Status,
-		BirthDate: *user.BirthDate,
+		BirthDate: user.BirthDate,
 	}
 
 	return userDto, nil
@@ -155,7 +155,7 @@ func (u *UserService) UpdateUser(id int32, userDto dto.UserDto) error {
 		Code:          user.Code,
 		Phone:         user.Phone,
 		CodeExpiredAt: user.CodeExpiredAt,
-		BirthDate:     &userDto.BirthDate,
+		BirthDate:     userDto.BirthDate,
 		UpdatedAt:     &updatedTime,
 	}
 
@@ -241,13 +241,14 @@ func (u *UserService) CreateUser(userDto dto.UserDto) error {
 	user = entity.User{
 		Username:      userDto.Username,
 		Password:      encryptedPassword,
+		Phone:         userDto.Phone,
 		Email:         userDto.Email,
 		Name:          userDto.Name,
 		Surname:       userDto.Surname,
 		Status:        enum.UserPassiveStatus,
 		Code:          code,
 		CodeExpiredAt: &expiredTime,
-		BirthDate:     &userDto.BirthDate,
+		BirthDate:     userDto.BirthDate,
 		CreatedAt:     time.Now(),
 		UpdatedAt:     nil,
 		DeletedAt:     nil,
