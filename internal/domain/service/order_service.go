@@ -235,8 +235,8 @@ func (o *OrderService) UpdateOrder(orderDto dto.OrderDto, id int32) error {
 	return nil
 }
 
-func (o *OrderService) GetAllOrders(id int32, filter dto.Filter, pagination dto.Pagination) ([]dto.ProductDto, int64, error) {
-	var productDto []dto.ProductDto
+func (o *OrderService) GetAllOrders(id int32, filter dto.Filter, pagination dto.Pagination) ([]dto.ProductOrderDto, int64, error) {
+	var productDto []dto.ProductOrderDto
 	var order []entity.Order
 	var totalNumber int64
 
@@ -266,7 +266,8 @@ func (o *OrderService) GetAllOrders(id int32, filter dto.Filter, pagination dto.
 			zap.Logger.Error(err)
 			return productDto, totalNumber, err
 		}
-		productDto = append(productDto, dto.ProductDto{
+		productDto = append(productDto, dto.ProductOrderDto{
+			OrderId:  order[i].Id,
 			Name:     product.Name,
 			Quantity: 1,
 			Price:    product.Price,

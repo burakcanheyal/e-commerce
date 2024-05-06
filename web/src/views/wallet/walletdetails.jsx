@@ -18,6 +18,7 @@ import {
   Paper
 } from '@mui/material';
 import CurrencyLiraIcon from '@mui/icons-material/CurrencyLira';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import axios from 'axios';
 
 const Wallet = () => {
@@ -99,6 +100,7 @@ const Wallet = () => {
       if (response.data && response.data.length > 0) {
         const orderData = {
           'Siparişler:': response.data.map((order) => ({
+            order_id: order.order_id,
             name: order.name,
             quantity: order.quantity,
             price: order.price
@@ -166,7 +168,51 @@ const Wallet = () => {
       console.error('Error getting completed orders:', error);
     }
   };
-
+  const handleDeleteOrder= async (id) => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await fetch('http://localhost:8001/order/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authentication': accessToken
+        },
+        body: JSON.stringify({ id: id })
+      });
+      if (response.ok) {
+        fetchTrips(); // Turları yeniden getir, silinen turu güncelleyelim
+      } else {
+        console.error('Error deleting trip:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting trip:', error);
+    }
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await axios.get('http://localhost:8001/order/', {
+        headers: {
+          'Authentication': accessToken
+        }
+      });
+      if (response.data && response.data.length > 0) {
+        const orderData = {
+          'Siparişler:': response.data.map((order) => ({
+            order_id: order.order_id,
+            name: order.name,
+            quantity: order.quantity,
+            price: order.price
+          }))
+        };
+        setOrderData(orderData);
+      } else {
+        setOrderData(null);
+        console.log('Shopping cart list is empty');
+      }
+      console.log('Order data:', response.data);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={4}>
@@ -200,6 +246,7 @@ const Wallet = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
+                      <TableCell>ID</TableCell>
                       <TableCell>Name</TableCell>
                       <TableCell>Quantity</TableCell>
                       <TableCell>Price</TableCell>
@@ -208,9 +255,15 @@ const Wallet = () => {
                   <TableBody>
                     {orderData['Siparişler:'].map((order, index) => (
                       <TableRow key={index}>
+                        <TableCell>{order.order_id}</TableCell>
                         <TableCell>{order.name}</TableCell>
                         <TableCell>{order.quantity}</TableCell>
                         <TableCell>{order.price}</TableCell>
+                        <TableCell>
+                          <Button variant="contained" color="error" onClick={() => handleDeleteOrder(order.order_id)}>
+                            Delete
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

@@ -125,7 +125,7 @@ func (o *OrderServerHandler) Delete(context *gin.Context) {
 		return
 	}
 
-	zap.Logger.Info("Siarpiş silme başarılı")
+	zap.Logger.Info("Sipariş silme başarılı")
 	context.JSON(http.StatusOK, SuccessInDelete())
 }
 
