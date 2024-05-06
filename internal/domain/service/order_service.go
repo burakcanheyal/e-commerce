@@ -268,7 +268,7 @@ func (o *OrderService) GetAllOrders(id int32, filter dto.Filter, pagination dto.
 		}
 		productDto = append(productDto, dto.ProductDto{
 			Name:     product.Name,
-			Quantity: product.Quantity,
+			Quantity: 1,
 			Price:    product.Price,
 		})
 	}

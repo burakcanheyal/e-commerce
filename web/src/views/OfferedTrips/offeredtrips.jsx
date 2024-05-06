@@ -22,7 +22,6 @@ import balikesirImage from '../../assets/images/balikesir.jpg';
 import samsunImage from '../../assets/images/samsun.jpg';
 import eskisehirImage from '../../assets/images/eskisehir.jpg';
 import DialogTrips from './dialogTrips.jsx';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ClearIcon from '@mui/icons-material/Clear';
 import ShopIcon from '@mui/icons-material/Shop';
 
@@ -44,9 +43,44 @@ const OfferedTrips = () => {
     setOpenDialog(false);
   };
 
-  const handleAddToCart = (trip) => {
-    if (!cartItems.find(item => item.name === trip.name)) {
-      setCartItems([...cartItems, trip]);
+  const handleAddToCart = async (trip) => {
+    // Ürünün product_id değerini alalım
+    const productId = trip.product_id;
+
+    // AccessToken'ı localStorage'dan alalım
+    const accessToken = localStorage.getItem('AccessToken');
+
+    // POST isteği için gerekli bilgileri hazırlayalım
+    const requestData = {
+      product_id: productId,
+      quantity: 1
+    };
+
+    try {
+      // POST isteği için gerekli ayarları yapalım
+      const requestOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authentication': accessToken
+        },
+        body: JSON.stringify(requestData)
+      };
+
+      // POST isteği gönderelim
+      const response = await fetch('http://localhost:8001/order/', requestOptions);
+
+      // İsteğin başarılı olup olmadığını kontrol edelim
+      if (!response.ok) {
+        throw new Error('HTTP error ' + response.status);
+      }
+
+      // Başarılı ise kullanıcıya bilgi verelim
+      alert('Product added to cart successfully!');
+    } catch (error) {
+      // Hata durumunda kullanıcıya bilgi verelim
+      console.error('Error adding product to cart:', error.message);
+      alert('An error occurred while adding product to cart. Please try again later.');
     }
   };
 
@@ -67,6 +101,7 @@ const OfferedTrips = () => {
   const open = Boolean(anchorEl);
   const tripPackages = [
     {
+      product_id: 1,
       name: 'İzmir Tour',
       description: 'Explore the historical sites, coastal areas, and culinary stops in Izmir, the pearl of the Aegean.',
       image: izmirImage,
@@ -80,6 +115,7 @@ const OfferedTrips = () => {
       ],
     },
     {
+      product_id: 2,
       name: 'Antalya Tour',
       description: 'Enjoy the sun and sea in Antalya, visit historical sites, and dine with magnificent views.',
       image: antalyaImage,
@@ -93,6 +129,7 @@ const OfferedTrips = () => {
       ],
     },
     {
+      product_id: 3,
       name: 'Cappadocia Tour',
       description: 'Take a balloon tour in Cappadocia, famous for its fairy chimneys and unique geography, explore underground cities, and try local delicacies.',
       image: kapadokyaImage,
@@ -106,6 +143,7 @@ const OfferedTrips = () => {
       ],
     },
     {
+      product_id: 4,
       name: 'İstanbul Tour',
       description: 'Discover the vibrant culture, rich history, and stunning landmarks of Istanbul, the crossroads of Europe and Asia.',
       image: istanbulImage,
@@ -119,6 +157,7 @@ const OfferedTrips = () => {
       ],
     },
     {
+      product_id: 5,
       name: 'Ankara Tour',
       description: 'Experience the political, cultural, and historical heart of Turkey with a tour of Ankara, its capital city.', // Yeni eklendi
       image: ankaraImage,
@@ -132,6 +171,7 @@ const OfferedTrips = () => {
       ],
     },
     {
+      product_id: 6,
       name: 'Çanakkale Tour',
       description: 'Discover the historical sites and natural beauty of Çanakkale, a city rich in culture and significance.', // Yeni eklendi
       image: canakkaleImage,
@@ -145,6 +185,7 @@ const OfferedTrips = () => {
       ],
     },
     {
+      product_id: 7,
       name: 'Balıkesir Tour',
       description: 'Explore the stunning coastline, pristine beaches, and historical sites of Balıkesir, a province on the Aegean coast of Turkey.',
       image: balikesirImage,
@@ -158,6 +199,7 @@ const OfferedTrips = () => {
       ],
     },
     {
+      product_id: 8,
       name: 'Samsun Tour',
       description: 'Discover the Black Sea coast and rich history of Samsun, a vibrant city in northern Turkey.',
       image: samsunImage,
@@ -171,6 +213,7 @@ const OfferedTrips = () => {
       ],
     },
     {
+      product_id: 9,
       name: 'Eskişehir Tour',
       description: 'Experience Eskişehir, a city in northwestern Turkey, known for its Ottoman-era architecture, vibrant arts scene, and thermal hot springs.',
       image: eskisehirImage,
@@ -183,13 +226,10 @@ const OfferedTrips = () => {
     },
   ];
 
+
   return (
     <div>
-      <IconButton style={{ position: 'relative', top: '-15px', left: '-50px' }} onClick={handlePopoverOpen}>
-        <Badge badgeContent={cartItems.length} color="secondary">
-          <ShoppingCartIcon />
-        </Badge>
-      </IconButton>
+
       <Popover
         open={open}
         anchorEl={anchorEl}
@@ -205,7 +245,7 @@ const OfferedTrips = () => {
         PaperProps={{
           sx: {
             border: '1px solid black',
-            borderRadius:'5px'
+            borderRadius: '5px'
           },
         }}
       >
@@ -263,16 +303,16 @@ const OfferedTrips = () => {
 
 const TripPackage = ({ trip, onDialogOpen, onAddToCart }) => {
   return (
-    <div style={{ border: '1px solid #ccc', padding: '25px', borderRadius: '5px', position: 'relative' }}>
-      <img src={trip.image} alt={trip.name} style={{ width: '100%', borderRadius: '5px 5px 0 0', marginBottom: '10px' }} />
-      <Typography variant="h2" align="center" style={{ marginBottom: '10px' }}>{trip.name}</Typography>
-      <Typography variant="body1" style={{ marginBottom: '10px' }}>{trip.description}</Typography>
-
-      <Button variant="contained" color="primary" onClick={onDialogOpen} style={{ position: 'relative', bottom: '5px', right: '10px' }}>Search</Button>
-      <Button variant="contained" color="secondary" onClick={onAddToCart} style={{ position: 'relative', bottom: '5px', left: '150px' }}>Add</Button>
+    <div>
+      <img src={trip.image} alt={trip.name} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+      <div style={{ padding: '10px' }}>
+        <Typography variant="h6" style={{ marginBottom: '10px' }}>{trip.name}</Typography>
+        <Typography variant="body2" style={{ marginBottom: '10px' }}>{trip.description}</Typography>
+        <Button variant="contained" color="primary" onClick={onDialogOpen} style={{ marginRight: '10px' }}>Details</Button>
+        <Button variant="contained" color="secondary" onClick={onAddToCart}>Add to Cart</Button>
+      </div>
     </div>
   );
 };
-
 
 export default OfferedTrips;
