@@ -150,7 +150,7 @@ func (o *OrderServerHandler) GetAllOrders(context *gin.Context) {
 		return
 	}
 
-	orderDto, totalNumber, err := o.orderService.GetAllOrders(id.Id, filter, pagination)
+	orderDto, _, err := o.orderService.GetAllOrders(id.Id, filter, pagination)
 	if err != nil {
 		zap.Logger.Error(internal.FailInTokenParse)
 		context.JSON(http.StatusNotFound, NonExistItem())
@@ -158,5 +158,5 @@ func (o *OrderServerHandler) GetAllOrders(context *gin.Context) {
 	}
 
 	zap.Logger.Info("Tüm siparişleri görüntüleme başarılı")
-	context.JSON(http.StatusOK, gin.H{"Toplam Sipariş sayısı": totalNumber, "Siparişler: ": orderDto})
+	context.JSON(http.StatusOK, orderDto)
 }

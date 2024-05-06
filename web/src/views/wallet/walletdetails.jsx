@@ -46,7 +46,7 @@ const Wallet = () => {
     };
 
     fetchBalance();
-    handleGetOrders();
+    handleGetOrders(); // Sayfa yüklendiğinde sepet içeriğini al
     // Bileşen yüklendiğinde otomatik olarak tamamlanmış siparişleri alma
     handleGetCompletedOrders();
   }, []);
@@ -96,15 +96,22 @@ const Wallet = () => {
           'Authentication': accessToken
         }
       });
-      if (response.data) {
-        setOrderData(response.data);
+      if (response.data && response.data.length > 0) {
+        const orderData = {
+          'Siparişler:': response.data.map((order) => ({
+            name: order.name,
+            quantity: order.quantity,
+            price: order.price
+          }))
+        };
+        setOrderData(orderData);
       } else {
         setOrderData(null);
         console.log('Shopping cart list is empty');
       }
       console.log('Order data:', response.data);
     } catch (error) {
-      console.error('Error completing purchase:', error);
+      console.error('Error fetching orders:', error);
     }
   };
 
@@ -118,12 +125,29 @@ const Wallet = () => {
       });
       console.log('Complete purchase response:', response.data);
       if (response.data) {
-        setOrderData(response.data);
+        handleGetCompletedOrders();
       }
     } catch (error) {
       console.error('Error completing purchase:', error);
     }
+    setOrderData(null);
+    const fetchBalance = async () => {
+      try {
+        const accessToken = localStorage.getItem('AccessToken');
+        const response = await axios.get('http://localhost:8001/wallet/', {
+          headers: {
+            'Authentication': accessToken
+          }
+        });
+        if (response.data && response.data.balance) {
+          setBalance(response.data.balance);
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+      }
+    };
 
+    fetchBalance();
   };
 
   const handleGetCompletedOrders = async () => {
@@ -134,8 +158,8 @@ const Wallet = () => {
           'Authentication': accessToken
         }
       });
-      if (response.data) {
-        setCompletedOrders(response.data['Siparişler: ']);
+      if (response.data && response.data.transactions) {
+        setCompletedOrders(response.data.transactions);
       }
       console.log('Completed orders data:', response.data);
     } catch (error) {
@@ -182,7 +206,7 @@ const Wallet = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {orderData['Siparişler: '].map((order, index) => (
+                    {orderData['Siparişler:'].map((order, index) => (
                       <TableRow key={index}>
                         <TableCell>{order.name}</TableCell>
                         <TableCell>{order.quantity}</TableCell>
@@ -223,15 +247,19 @@ const Wallet = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {completedOrders.map((order, index) => (
+                  {completedOrders.map((transaction, index) => (
                     <TableRow key={index}>
-                      <TableCell>{order.OperationNumber}</TableCell>
-                      <TableCell>{order.Balance}</TableCell>
-                      <TableCell>{order.OrderId}</TableCell>
-                      <TableCell>{order.ProductName}</TableCell>
-                      <TableCell>{order.OrderQuantity}</TableCell>
-                      <TableCell>{order.SellerName}</TableCell>
-                      <TableCell>{order.OperationDate}</TableCell>
+                      <TableCell>{transaction.operation_number}</TableCell>
+                      <TableCell>{transaction.balance}</TableCell>
+                      <TableCell>{transaction.order_id}</TableCell>
+                      <TableCell>{transaction.product.name}</TableCell>
+                      <TableCell>{transaction.order_quantity}</TableCell>
+                      <TableCell>{transaction.product.trip.map((trip, idx) => (
+                        <React.Fragment key={idx}>
+                          <p>{trip.name}</p>
+                        </React.Fragment>
+                      ))}</TableCell>
+                      <TableCell>{new Date(transaction.operation_date).toLocaleString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
