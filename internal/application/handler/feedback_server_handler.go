@@ -27,7 +27,7 @@ func (f *FeedbackServerHandler) GetFeedback(context *gin.Context) {
 
 	feedback, err := f.feedbackService.GetFeedback(code.Id)
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 
@@ -50,7 +50,7 @@ func (f *FeedbackServerHandler) DeleteFeedback(context *gin.Context) {
 
 	err := f.feedbackService.Deleteback(code.Id, userDto.Id)
 	if err != nil {
-		context.JSON(http.StatusServiceUnavailable, err.Error())
+		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
 	}
 
@@ -73,7 +73,7 @@ func (f *FeedbackServerHandler) CreateFeedback(context *gin.Context) {
 	feedback.UserId = userDto.Id
 	err := f.feedbackService.CreateFeedback(feedback)
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 
@@ -84,7 +84,7 @@ func (f *FeedbackServerHandler) GetAllFeedbacks(context *gin.Context) {
 
 	feedback, err := f.feedbackService.GetAllFeedbacks()
 	if err != nil {
-		context.JSON(http.StatusNotFound, err.Error())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 

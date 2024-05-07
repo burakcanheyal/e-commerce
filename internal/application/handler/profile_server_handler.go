@@ -102,7 +102,7 @@ func (p *ProfileServerHandler) GetUser(context *gin.Context) {
 
 	user, err := p.UserService.GetUserById(userDto.Id)
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 

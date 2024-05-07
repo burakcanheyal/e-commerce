@@ -20,7 +20,7 @@ func NewAdminPanelHandler(adminService service.AdminService) AdminPanelHandler {
 func (a *AdminPanelHandler) GetUser(context *gin.Context) {
 	user, err := a.adminService.GetAllUsers()
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 
@@ -30,7 +30,7 @@ func (a *AdminPanelHandler) GetUser(context *gin.Context) {
 func (a *AdminPanelHandler) GetTrip(context *gin.Context) {
 	user, err := a.adminService.GetAllTrips()
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 

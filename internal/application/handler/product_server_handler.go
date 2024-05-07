@@ -42,7 +42,7 @@ func (p *ProductServerHandler) Create(context *gin.Context) {
 
 	product, err = p.productService.CreateProduct(product, user.Id)
 	if err != nil {
-		context.JSON(http.StatusServiceUnavailable, ItemNotAdded())
+		context.JSON(http.StatusServiceUnavailable, NewHttpError(err))
 		return
 	}
 
@@ -148,7 +148,7 @@ func (p *ProductServerHandler) GetAllProducts(context *gin.Context) {
 
 	products, totalNumber, err := p.productService.GetAllProducts(filter, pagination, user.Id)
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 

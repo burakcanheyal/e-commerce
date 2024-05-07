@@ -28,7 +28,7 @@ func (t *TripServerHandler) GetQuestions(context *gin.Context) {
 
 	questions, err := t.questionService.GetQuestions()
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 
@@ -51,7 +51,7 @@ func (t *TripServerHandler) AnswerQuestion(context *gin.Context) {
 	}
 	err := t.questionService.CalculatePoints(user.Id, questions)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, AnswerQuestion())
+		context.JSON(http.StatusInternalServerError, NewHttpError(err))
 		return
 	}
 	zap.Logger.Info("Soruları cevaplama başarılı")
@@ -67,7 +67,7 @@ func (t *TripServerHandler) GetAIRecommendation(context *gin.Context) {
 
 	trips, err := t.questionService.GetAIRecommendation(user.Id)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, AnswerQuestion())
+		context.JSON(http.StatusInternalServerError, NewHttpError(err))
 	}
 	if trips.Name == "" {
 		zap.Logger.Error(internal.UserNotFound)

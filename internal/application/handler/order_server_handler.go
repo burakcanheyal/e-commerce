@@ -65,7 +65,7 @@ func (o *OrderServerHandler) GetById(context *gin.Context) {
 
 	order, err := o.orderService.GetOrderById(orderIdInt32, user.Id)
 	if err != nil {
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 
@@ -153,7 +153,7 @@ func (o *OrderServerHandler) GetAllOrders(context *gin.Context) {
 	orderDto, _, err := o.orderService.GetAllOrders(id.Id, filter, pagination)
 	if err != nil {
 		zap.Logger.Error(internal.FailInTokenParse)
-		context.JSON(http.StatusNotFound, NonExistItem())
+		context.JSON(http.StatusNotFound, NewHttpError(err))
 		return
 	}
 
