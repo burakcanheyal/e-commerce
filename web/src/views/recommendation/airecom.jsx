@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useJsApiLoader, GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import axios from 'axios';
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 
 const RecommendationPage = () => {
@@ -85,7 +85,6 @@ const RecommendationPage = () => {
           <Box sx={{ height: 220, flexGrow: 1, maxWidth: 400 }}>
             {recommendationData ? (
               <>
-                <button onClick={handleAddToCart} style={{ marginBottom: '10px' }}>Add to Cart</button>
                 <RichTreeView items={recommendationData.trip.map((place, index) => ({
                   id: `${place.name}-${index}`,
                   label: place.name,
@@ -94,6 +93,7 @@ const RecommendationPage = () => {
                     { id: `${place.name}-${index}-coords`, label: `Latitude: ${place.lat}, Longitude: ${place.lng}` }
                   ]
                 }))} />
+                <Button onClick={handleAddToCart} color="primary" variant="contained" style={{ marginTop: '20px' }}>Add to Cart</Button>
               </>
             ) : (
               <Typography variant="body1">You should first submit the survey questions to be able to see the AI

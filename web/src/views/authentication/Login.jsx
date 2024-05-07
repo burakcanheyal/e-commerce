@@ -1,4 +1,4 @@
-// Login2.jsx
+
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Grid, Box, Card, Stack, Typography, Button } from '@mui/material';
@@ -10,7 +10,6 @@ const Login2 = () => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    // Check if user data is stored in localStorage
     const userData = localStorage.getItem('userData');
     if (userData) {
       setUserData(JSON.parse(userData));
@@ -18,7 +17,7 @@ const Login2 = () => {
   }, []);
 
   if (userData) {
-    // If user data exists, navigate to the dashboard
+
     return <Navigate to="/dashboard" />;
   }
 

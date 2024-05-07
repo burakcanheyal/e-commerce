@@ -66,6 +66,7 @@ const AccountProfileDetails = () => {
         } else {
           const data = await response.json();
           console.log(data);
+          alert(data.message);
         }
       } catch (error) {
         console.error('Profil bilgileri güncellenirken hata oluştu:', error);

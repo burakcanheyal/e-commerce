@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Button, RadioGroup, Radio, FormControlLabel, FormGroup, Grid } from '@mui/material';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Surveypage = () => {
   const [answers, setAnswers] = useState({});
@@ -83,7 +84,8 @@ const Surveypage = () => {
           {renderSurveyQuestions()}
         </Grid>
       </FormGroup>
-      <Button variant="contained" onClick={submitSurvey}>Submit</Button>
+      <Button variant="contained" component={Link}
+              to="/airecom" onClick={submitSurvey}>Submit</Button>
       {submissionMessage && (
         <Typography variant="body1" gutterBottom>
           {submissionMessage}
