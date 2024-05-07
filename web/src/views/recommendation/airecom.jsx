@@ -30,6 +30,7 @@ const RecommendationPage = () => {
         if (data && data.trip.length > 0) {
           const firstPlace = data.trip[0];
           const selectedLocation = {
+            product_id: firstPlace.product_id,
             name: firstPlace.name,
             location: { lat: parseFloat(firstPlace.lat), lng: parseFloat(firstPlace.lng) }
           };
@@ -48,7 +49,32 @@ const RecommendationPage = () => {
 
     fetchData();
   }, [map]);
+  const handleAddToCart = async () => {
+    const accessToken = localStorage.getItem('AccessToken');
+    const requestData = {
+      product_id: recommendationData.product_id,
+      quantity: 1
+    };
 
+    try {
+      const requestOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authentication': accessToken
+        },
+        body: JSON.stringify(requestData)
+      };
+      const response = await fetch('http://localhost:8001/order/', requestOptions);
+      if (!response.ok) {
+        throw new Error('HTTP error ' + response.status);
+      }
+      alert('Product added to cart successfully!');
+    } catch (error) {
+      console.error('Error adding product to cart:', error.message);
+      alert('An error occurred while adding product to cart. Please try again later.');
+    }
+  };
   if (loadError) return <div>Error: It cannot loaded</div>;
   if (!isLoaded) return <div>Loading...</div>;
 
@@ -58,21 +84,31 @@ const RecommendationPage = () => {
         <div style={{ flex: 1 }}>
           <Box sx={{ height: 220, flexGrow: 1, maxWidth: 400 }}>
             {recommendationData ? (
-              <RichTreeView items={recommendationData.trip.map((place, index) => ({
-                id: `${place.name}-${index}`,
-                label: place.name,
-                children: [
-                  { id: `${place.name}-${index}-desc`, label: `Description: ${place.description}` },
-                  { id: `${place.name}-${index}-coords`, label: `Latitude: ${place.lat}, Longitude: ${place.lng}` }
-                ]
-              }))} />
+              <>
+                <button onClick={handleAddToCart} style={{ marginBottom: '10px' }}>Add to Cart</button>
+                <RichTreeView items={recommendationData.trip.map((place, index) => ({
+                  id: `${place.name}-${index}`,
+                  label: place.name,
+                  children: [
+                    { id: `${place.name}-${index}-desc`, label: `Description: ${place.description}` },
+                    { id: `${place.name}-${index}-coords`, label: `Latitude: ${place.lat}, Longitude: ${place.lng}` }
+                  ]
+                }))} />
+              </>
             ) : (
-              <Typography variant="body1">You should first submit the survey questions to be able to see the AI recommendation routes.</Typography>
+              <Typography variant="body1">You should first submit the survey questions to be able to see the AI
+                recommendation routes.</Typography>
             )}
           </Box>
         </div>
         <div style={{ flex: 2 }}>
-          <div style={{ position: 'relative', flexDirection: 'column', alignItems: 'center', height: '100vh', width: '100%' }}>
+          <div style={{
+            position: 'relative',
+            flexDirection: 'column',
+            alignItems: 'center',
+            height: '100vh',
+            width: '100%'
+          }}>
             <GoogleMap
               center={selectedCity ? selectedCity.location : { lat: 41.0082, lng: 28.9784 }}
               zoom={9}
@@ -90,7 +126,10 @@ const RecommendationPage = () => {
                   key={index}
                   position={{ lat: parseFloat(place.lat), lng: parseFloat(place.lng) }}
                   onClick={() => {
-                    setSelectedCity({ name: place.name, location: { lat: parseFloat(place.lat), lng: parseFloat(place.lng) }});
+                    setSelectedCity({
+                      name: place.name,
+                      location: { lat: parseFloat(place.lat), lng: parseFloat(place.lng) }
+                    });
                   }}
                 />
               ))}
@@ -100,7 +139,6 @@ const RecommendationPage = () => {
                 </InfoWindow>
               )}
             </GoogleMap>
-
           </div>
         </div>
       </div>

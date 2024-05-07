@@ -295,7 +295,7 @@ const Wallet = () => {
                     <TableCell>Order ID</TableCell>
                     <TableCell>Product Name</TableCell>
                     <TableCell>Order Quantity</TableCell>
-                    <TableCell>Seller Name</TableCell>
+                    <TableCell>Trips' Name</TableCell>
                     <TableCell>Operation Date</TableCell>
                   </TableRow>
                 </TableHead>

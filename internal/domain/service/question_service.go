@@ -141,7 +141,7 @@ func (q *QuestionService) GetAIRecommendation(id int32) (dto.ProductTripDto, err
 	product := entity.Product{
 		Id:        0,
 		Name:      name,
-		Quantity:  1,
+		Quantity:  10,
 		Price:     1000,
 		Status:    enum.ProductAvailable,
 		UserId:    id,
@@ -182,6 +182,7 @@ func (q *QuestionService) GetAIRecommendation(id int32) (dto.ProductTripDto, err
 		}
 		result.Trip = append(result.Trip, tempTripDto)
 	}
+	result.ProductId = pro.Id
 	result.Name = pro.Name
 	result.Price = pro.Price
 	result.Quantity = pro.Quantity

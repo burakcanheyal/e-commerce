@@ -5,8 +5,8 @@ import (
 	"attempt4/internal/domain/entity"
 	"attempt4/internal/domain/enum"
 	"attempt4/platform/postgres/repository"
+	"attempt4/platform/regexp"
 	"errors"
-	"log"
 	"time"
 )
 
@@ -62,9 +62,10 @@ func (f *FeedbackService) GetFeedback(productID int32) ([]dto.FeedbackDto, error
 	return feedback, nil
 }
 func (f *FeedbackService) CreateFeedback(feedback dto.FeedbackDto) error {
+	controlledDescription := regexp.InspectFeedback(feedback.Description)
 	feedbackE := entity.Feedback{
 		Id:          0,
-		Description: feedback.Description,
+		Description: controlledDescription,
 		Star:        feedback.Star,
 		ProductId:   feedback.ProductId,
 		UserId:      feedback.UserId,
@@ -99,10 +100,6 @@ func (f *FeedbackService) Deleteback(id int32, userId int32) error {
 	if err != nil {
 		return err
 	}
-
-	log.Println(id)
-	log.Println(feedback.UserId)
-	log.Println(userId)
 
 	if userId != feedback.UserId {
 		if role.Rol != enum.RoleAdmin {
