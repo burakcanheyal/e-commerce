@@ -32,7 +32,14 @@ func (r *RoleRepository) Delete(role entity.Role) error {
 
 func (r *RoleRepository) GetById(id int32) (entity.Role, error) {
 	var key entity.Role
-	if err := r.db.Model(&key).Where("status != ", enum.RoleDeleted).Where("key_id=?", id).Scan(&key).Error; err != nil {
+	if err := r.db.Model(&key).Where("status != ", enum.RoleDeleted).Where("user_id=?", id).Scan(&key).Error; err != nil {
+		return key, internal.DBNotFound
+	}
+	return key, nil
+}
+func (r *RoleRepository) GetByIdFeedbackService(id int32) (entity.Role, error) {
+	var key entity.Role
+	if err := r.db.Model(&key).Where("user_id=?", id).Scan(&key).Error; err != nil {
 		return key, internal.DBNotFound
 	}
 	return key, nil

@@ -32,16 +32,16 @@ func NewFeedbackService(
 }
 func (f *FeedbackService) GetFeedback(productID int32) ([]dto.FeedbackDto, error) {
 	var feedback []dto.FeedbackDto
-	feedbacks, total, error := f.feedbackRepository.GetByProductId(productID)
+	feedbacks, total, err := f.feedbackRepository.GetByProductId(productID)
 	if total == 0 {
 		return feedback, errors.New("error getting feedback")
 	}
-	if error != nil {
+	if err != nil {
 		return feedback, errors.New("error getting feedback")
 	}
 
 	for _, feedbackT := range feedbacks {
-		username, err := f.userRepository.GetById(feedbackT.UserId)
+		username, err := f.userRepository.GetByIdFeedbackService(feedbackT.UserId)
 		if username.Id == 0 {
 			return feedback, errors.New("error getting user")
 		}
@@ -92,7 +92,7 @@ func (f *FeedbackService) Deleteback(id int32, userId int32) error {
 		return err
 	}
 
-	role, err := f.roleRepository.GetByUserId(userId)
+	role, err := f.roleRepository.GetByIdFeedbackService(userId)
 	if role.Id == 0 {
 		return errors.New("Role cannot be found")
 	}
@@ -115,4 +115,35 @@ func (f *FeedbackService) Deleteback(id int32, userId int32) error {
 	}
 
 	return nil
+}
+func (f *FeedbackService) GetAllFeedbacks() ([]dto.FeedbackDto, error) {
+	var feedback []dto.FeedbackDto
+	feedbacks, total, err := f.feedbackRepository.GetAllFeedbacks()
+	if total == 0 {
+		return feedback, errors.New("error getting feedback")
+	}
+	if err != nil {
+		return feedback, errors.New("error getting feedback")
+	}
+
+	for _, feedbackT := range feedbacks {
+		username, err := f.userRepository.GetByIdFeedbackService(feedbackT.UserId)
+		if username.Id == 0 {
+			return feedback, errors.New("error getting user")
+		}
+		if err != nil {
+			return feedback, err
+		}
+
+		feedback = append(feedback, dto.FeedbackDto{
+			Id:          feedbackT.Id,
+			Description: feedbackT.Description,
+			Star:        feedbackT.Star,
+			ProductId:   feedbackT.ProductId,
+			UserId:      feedbackT.UserId,
+			Status:      feedbackT.Status,
+			UserName:    username.Username,
+		})
+	}
+	return feedback, nil
 }

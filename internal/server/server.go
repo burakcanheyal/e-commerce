@@ -103,6 +103,8 @@ func (s *WebServer) SetupRoot() {
 	feedback.POST("/", s.feedbackServerHandler.GetFeedback)
 	feedback.POST("/add/", s.feedbackServerHandler.CreateFeedback)
 	feedback.DELETE("/", s.feedbackServerHandler.DeleteFeedback)
+	allfeedback := router.Group("/feedback/all", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleAdmin}))
+	allfeedback.GET("/", s.feedbackServerHandler.GetAllFeedbacks)
 
 	panel := router.Group("/panel", s.middleware.Auth(), s.middleware.Permission([]int{enum.RoleAdmin}))
 	panel.POST("/", s.keyServerHandler.ResponseToChangeUserRole)

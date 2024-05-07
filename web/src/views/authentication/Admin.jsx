@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Drawer, List, ListItem, ListItemText, Typography, Divider, Box, Paper, TextField, Button, Table, TableContainer, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import axios from 'axios';
 
 const drawerWidth = 240;
 
@@ -25,9 +26,9 @@ const Admin = () => {
   const classes = useStyles();
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [response, setResponse] = useState('');
   const [trips, setTrips] = useState([]);
   const [users, setUsers] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [newTrip, setNewTrip] = useState({
     Id: 0,
@@ -57,8 +58,11 @@ const Admin = () => {
       fetchTrips();
     } else if (menu === 'User Management') {
       fetchUsers();
+    } else if (menu === 'Feedback Management') {
+      fetchFeedbacks();
     }
   };
+
 
   const fetchTrips = async () => {
     try {
@@ -175,6 +179,55 @@ const Admin = () => {
       console.error('Error creating trip:', error);
     }
   };
+  const fetchFeedbacks = async () => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await fetch('http://localhost:8001/feedback/all/', {
+        headers: {
+          'Authentication': accessToken
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFeedbacks(data);
+      } else {
+        console.error('Error fetching feedbacks:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching feedbacks:', error);
+    }
+  };
+  const handleDeleteFeedback = async (id) => {
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      await axios.delete('http://localhost:8001/feedback/', {
+        headers: {
+          'Authentication': `${accessToken}`,
+        },
+        data: {
+          id: id
+        }
+      });
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+    }
+    try {
+      const accessToken = localStorage.getItem('AccessToken');
+      const response = await fetch('http://localhost:8001/feedback/all/', {
+        headers: {
+          'Authentication': accessToken
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFeedbacks(data);
+      } else {
+        console.error('Error fetching feedbacks:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching feedbacks:', error);
+    }
+  };
 
   return (
     <Box display="flex">
@@ -187,7 +240,7 @@ const Admin = () => {
         anchor="left"
       >
         <List>
-          {['User Management', 'Trip Management'].map((text) => (
+          {['User Management', 'Trip Management', 'Feedback Management'].map((text) => (
             <ListItem button key={text} onClick={() => handleMenuClick(text)}>
               <ListItemText primary={text} />
             </ListItem>
@@ -315,6 +368,44 @@ const Admin = () => {
                       <TableCell>{trip.status}</TableCell>
                       <TableCell>
                         <Button variant="contained" color="error" onClick={() => handleDeleteTrip(trip.id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        )}
+        {selectedMenu && selectedMenu === 'Feedback Management' && (
+          <Paper elevation={3} style={{ marginTop: '20px', padding: '20px' }}>
+            <Typography variant="h5">Feedback Management</Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Description</TableCell>
+                    <TableCell>Star</TableCell>
+                    <TableCell>Product ID</TableCell>
+                    <TableCell>User ID</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>User Name</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {feedbacks.map((feedback) => (
+                    <TableRow key={feedback.id}>
+                      <TableCell>{feedback.id}</TableCell>
+                      <TableCell>{feedback.description}</TableCell>
+                      <TableCell>{feedback.star}</TableCell>
+                      <TableCell>{feedback.product_id}</TableCell>
+                      <TableCell>{feedback.user_id}</TableCell>
+                      <TableCell>{feedback.status}</TableCell>
+                      <TableCell>{feedback.user_name}</TableCell>
+                      <TableCell>
+                        <Button variant="contained" color="error" onClick={() => handleDeleteFeedback(feedback.id)}>
                           Delete
                         </Button>
                       </TableCell>

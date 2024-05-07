@@ -61,3 +61,13 @@ func (f *FeedbackRepository) GetById(id int32) (entity.Feedback, error) {
 	}
 	return productList, nil
 }
+func (f *FeedbackRepository) GetAllFeedbacks() ([]entity.Feedback, int64, error) {
+	var productList []entity.Feedback
+	var total int64
+	listQuery := f.db.Find(&productList).Where("status != ?", enum.ProductDeleted)
+
+	if err := listQuery.Count(&total).Find(&productList).Error; err != nil {
+		return productList, 0, err
+	}
+	return productList, total, nil
+}

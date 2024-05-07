@@ -50,7 +50,7 @@ func (f *FeedbackServerHandler) DeleteFeedback(context *gin.Context) {
 
 	err := f.feedbackService.Deleteback(code.Id, userDto.Id)
 	if err != nil {
-		context.JSON(http.StatusNotFound, err.Error())
+		context.JSON(http.StatusServiceUnavailable, err.Error())
 		return
 	}
 
@@ -79,4 +79,15 @@ func (f *FeedbackServerHandler) CreateFeedback(context *gin.Context) {
 
 	zap.Logger.Info("Feedback yaratma başarılı")
 	context.JSON(http.StatusOK, SuccessInCreate())
+}
+func (f *FeedbackServerHandler) GetAllFeedbacks(context *gin.Context) {
+
+	feedback, err := f.feedbackService.GetAllFeedbacks()
+	if err != nil {
+		context.JSON(http.StatusNotFound, err.Error())
+		return
+	}
+
+	zap.Logger.Info("Feedbackleri görüntüleme başarılı")
+	context.JSON(http.StatusOK, feedback)
 }

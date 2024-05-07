@@ -42,6 +42,13 @@ func (p *UserRepository) GetById(id int32) (entity.User, error) {
 	}
 	return user, nil
 }
+func (p *UserRepository) GetByIdFeedbackService(id int32) (entity.User, error) {
+	var user entity.User
+	if err := p.db.Model(&user).Where("id=?", id).Scan(&user).Error; err != nil {
+		return user, internal.DBNotFound
+	}
+	return user, nil
+}
 
 func (p *UserRepository) GetByName(username string) (entity.User, error) {
 	var user entity.User
