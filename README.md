@@ -1,3 +1,4 @@
+
 # E-Commerce Platform
 
 A full-featured, scalable e-commerce web application designed to provide a seamless shopping experience for users and comprehensive management capabilities for administrators.
@@ -73,54 +74,92 @@ The admin panel allows authorized users to manage product catalogs, categories, 
 ```bash
 git clone https://github.com/burakcanheyal/e-commerce.git
 cd e-commerce
+```
 
 2. **Install backend dependencies**
 
 ```bash
 cd backend
 npm install
+```
 
 3. **Install frontend dependencies**
+
+```bash
 cd ../frontend
 npm install
+```
 
-Environment Variables
-Create a .env file in the backend directory with the following variables:
+---
+
+## Environment Variables
+
+Create a `.env` file in the `backend` directory with the following variables:
+
+```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
 NODE_ENV=development
+```
 
-Running the Application
-Backend
+- `PORT`: Port on which the backend server will run.
+- `MONGO_URI`: Connection string for MongoDB.
+- `JWT_SECRET`: Secret key used for signing JWT tokens.
+- `NODE_ENV`: Environment mode (`development` or `production`).
+
+---
+
+## Running the Application
+
+### Backend
+
 Navigate to the backend directory and start the server:
+
+```bash
 cd backend
 npm run dev
-The backend API will be available at: http://localhost:5000
-Frontend
+```
+
+The backend API will be available at: `http://localhost:5000`
+
+### Frontend
+
 Navigate to the frontend directory and start the React app:
+
+```bash
 cd ../frontend
 npm start
-The frontend will be accessible at: http://localhost:3000
+```
 
-API Documentation
-Below is an overview of the primary REST API endpoints. Detailed API documentation can be found in the docs folder or by using API tools like Postman.
-| HTTP Method | Endpoint              | Description                                               | Access               |
-| ----------- | --------------------- | --------------------------------------------------------- | -------------------- |
-| GET         | `/api/products`       | Retrieve list of all products with filters and pagination | Public               |
-| GET         | `/api/products/:id`   | Retrieve detailed information about a specific product    | Public               |
-| POST        | `/api/users/register` | Register a new user                                       | Public               |
-| POST        | `/api/users/login`    | Authenticate user and return JWT token                    | Public               |
-| GET         | `/api/users/profile`  | Retrieve logged-in user profile                           | Private (User)       |
-| PUT         | `/api/users/profile`  | Update logged-in user profile                             | Private (User)       |
-| POST        | `/api/orders`         | Create a new order                                        | Private (User)       |
-| GET         | `/api/orders/:id`     | Get details of a specific order                           | Private (User/Admin) |
-| GET         | `/api/orders`         | List all orders (Admin only)                              | Private (Admin)      |
-| POST        | `/api/products`       | Add new product (Admin only)                              | Private (Admin)      |
-| PUT         | `/api/products/:id`   | Update existing product (Admin only)                      | Private (Admin)      |
-| DELETE      | `/api/products/:id`   | Delete a product (Admin only)                             | Private (Admin)      |
+The frontend will be accessible at: `http://localhost:3000`
 
-Folder Structure
+---
+
+## API Documentation
+
+Below is an overview of the primary REST API endpoints. Detailed API documentation can be found in the `docs` folder or by using API tools like Postman.
+
+| HTTP Method | Endpoint                 | Description                                | Access         |
+|-------------|--------------------------|--------------------------------------------|----------------|
+| GET         | `/api/products`           | Retrieve list of all products with filters and pagination | Public         |
+| GET         | `/api/products/:id`       | Retrieve detailed information about a specific product | Public         |
+| POST        | `/api/users/register`     | Register a new user                        | Public         |
+| POST        | `/api/users/login`        | Authenticate user and return JWT token    | Public         |
+| GET         | `/api/users/profile`      | Retrieve logged-in user profile            | Private (User) |
+| PUT         | `/api/users/profile`      | Update logged-in user profile              | Private (User) |
+| POST        | `/api/orders`             | Create a new order                         | Private (User) |
+| GET         | `/api/orders/:id`         | Get details of a specific order            | Private (User/Admin) |
+| GET         | `/api/orders`             | List all orders (Admin only)               | Private (Admin)|
+| POST        | `/api/products`           | Add new product (Admin only)               | Private (Admin)|
+| PUT         | `/api/products/:id`       | Update existing product (Admin only)       | Private (Admin)|
+| DELETE      | `/api/products/:id`       | Delete a product (Admin only)               | Private (Admin)|
+
+---
+
+## Folder Structure
+
+```
 e-commerce/
 │
 ├── backend/                 # Backend source code (Node.js + Express)
@@ -150,25 +189,38 @@ e-commerce/
 ├── docs/                    # Documentation and API specs
 ├── README.md                # This file
 └── .gitignore
-Contributing
+```
+
+---
+
+## Contributing
+
 Contributions are welcome! To contribute:
 
-Fork the repository
-
-Create a new feature branch (git checkout -b feature/your-feature)
-
-Commit your changes (git commit -m "Add some feature")
-
-Push to the branch (git push origin feature/your-feature)
-
-Open a Pull Request describing your changes
+1. Fork the repository  
+2. Create a new feature branch (`git checkout -b feature/your-feature`)  
+3. Commit your changes (`git commit -m "Add some feature"`)  
+4. Push to the branch (`git push origin feature/your-feature`)  
+5. Open a Pull Request describing your changes  
 
 Please ensure your code adheres to the existing style conventions and includes appropriate tests.
 
-Contact
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Contact
+
 If you have questions, suggestions, or want to collaborate, feel free to reach out:
 
-Burak Can Heyal
-Email: burakcanheyal@gmail.com
-GitHub: https://github.com/burakcanheyal
+**Burak Can Heyal**  
+Email: burakcanheyal@gmail.com  
+GitHub: [https://github.com/burakcanheyal](https://github.com/burakcanheyal)  
+
+---
+
 Thank you for checking out this project! 🚀
